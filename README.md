@@ -1,13 +1,35 @@
 # Proof-of-Reality (PoR) Protocol
-> **Decentralized AI consensus for verifying real-world truth.**
 
-Proof-of-Reality (PoR) is an institutional-grade, multi-agent AI protocol built on the **Mantle Network**. It solves the "Oracle Problem" for Real-World Assets (RWA) by using a decentralized network of specialized AI agents to independently investigate, cross-examine, and cryptographically verify off-chain data before minting it on-chain as a **Truth Certificate NFT**.
+Proof-of-Reality (PoR) is a decentralized AI consensus protocol that verifies real-world assets using multi-agent intelligence before anchoring truth on-chain as verifiable certificates on Mantle.
+
+> **An AI court system for real-world truth.**
+
+---
+
+## 🚨 The Problem
+
+The tokenization of Real-World Assets (RWAs) is scaling rapidly, but the verification layer is fundamentally broken:
+- **RWAs fail because truth is unverifiable:** Physical assets rely on trust, not math.
+- **Oracles are centralized:** Current oracles rely on single-source data feeds.
+- **AI lacks consensus:** AI agents today don’t agree—they guess independently in isolation.
+- **No structured disagreement:** No system exists for structured AI debate and mathematical consensus.
+
+---
+
+## ⚡ The Aletheia Consensus Engine
+
+PoR solves the verification problem through an intelligent, decentralized court.
+
+- **Multi-agent verification:** 7 specialized AI agents analyze the asset concurrently.
+- **Structured AI debate:** Agents challenge each other when anomalies arise.
+- **Weighted consensus:** Final truth is derived via confidence and reputation scoring.
+- **On-chain truth finality:** Consensus is minted immutably as a Mantle NFT certificate.
 
 ---
 
 ## 🏛️ System Architecture
 
-The PoR architecture is a complex state machine driven by **LangGraph** on the backend and **Solidity** on-chain. It is designed to act as a mission-critical intelligence pipeline.
+Each asset is processed by a distributed AI intelligence network that independently verifies reality from multiple dimensions before converging into a single consensus state.
 
 ```mermaid
 graph TD
@@ -42,51 +64,64 @@ graph TD
 
 ---
 
-## 🧠 The 7-Node Intelligence Squad
+## 🧠 The AI Agent Squad
 
-The protocol does not rely on a single LLM prompt. It utilizes a LangGraph `StateGraph` where **7 distinct AI Agents** operate concurrently. Each agent is equipped with specific **LangChain Tools (APIs)** to retrieve real-world data.
+👉 **Each agent has independent memory + tool access + confidence scoring.**
 
-| Node / Agent | Domain | Function & Tooling |
-|--------------|--------|--------------------|
-| **Atlas** | Geo-Spatial | Uses `fetch_satellite_metadata` to analyze physical boundaries, zoning maps, and structural integrity. |
-| **Ledger** | Legal/Title | Uses `query_county_registry` to verify deeds, ownership history, and check for active liens. |
-| **Oracle** | Financial | Uses `analyze_market_comps` to pull comparable sales and project market valuation/yield. |
-| **Prism** | Fraud Detection | Uses `scan_fraud_signals` to analyze metadata on uploaded documents for cryptographic forgery. |
-| **Pulse** | Social/Market | Uses `get_social_sentiment` to analyze neighborhood momentum and economic velocity. |
-| **Tempest**| Climate Risk | Uses `check_climate_risk` to model environmental hazards (flood, wildfire) for the asset. |
-| **Sentinel**| Compliance | Uses `verify_kyc_aml` to check OFAC sanctions, entity structures, and jurisdictional compliance. |
-
----
-
-## ⚖️ The Consensus Mechanism & Technicality
-
-The core innovation of PoR is the **Debate Chamber (Aletheia Engine)**. 
-
-### How Consensus is Reached:
-1. **Parallel Execution:** All 7 agents execute their tools and generate structured Pydantic reports containing a confidence score (0-100) and findings.
-2. **The Synthesis:** The Master Node (Aletheia) ingests all 7 reports.
-3. **The Debate Loop:** If Aletheia detects a contradiction (e.g., *Ledger* says the deed is clear, but *Prism* detects a 60% probability of document forgery), the graph routes conditionally into a **Cross-Examination Phase**. Agents are forced to re-evaluate their findings based on the anomaly.
-4. **Cryptographic Hashing:** Once a mathematical consensus is reached, Aletheia generates a final confidence score, a fraud probability metric, and an estimated valuation. It then hashes the entire 7-agent debate log and findings into an immutable **Evidence Hash (SHA-256)**.
+| Agent | Domain | Function |
+|-------|--------|----------|
+| **Atlas** | Geo-Spatial | Analyzes physical boundaries and structural integrity. |
+| **Ledger** | Legal/Title | Verifies deeds, ownership history, and active liens. |
+| **Oracle** | Financial | Pulls comparable sales and projects market valuation. |
+| **Prism** | Fraud | Scans document metadata for cryptographic forgery. |
+| **Pulse** | Social | Analyzes neighborhood momentum and economic velocity. |
+| **Tempest**| Climate | Models environmental hazards (flood, wildfire) for the asset. |
+| **Sentinel**| Compliance | Checks OFAC sanctions and jurisdictional compliance. |
 
 ---
 
-## 🔗 On-Chain Finality (Mantle Network)
+## ⚖️ The Debate-to-Truth Engine
 
-Once the AI engine reaches consensus, the truth must be permanently recorded. 
+The core innovation of PoR is how it processes conflicting intelligence.
 
-The `TruthCertificateNFT.sol` smart contract (deployed on Mantle) is invoked:
-- **Minting:** The user signs a transaction passing the `assetId`, `consensusScore`, and the `evidenceHash`.
-- **Truth Decay (ERC-8004 Inspired):** Truth is not static. A building can burn down; markets crash. The contract implements a `decayTimer`. As time passes without a protocol re-verification, the on-chain `consensusScore` degrades, enforcing continuous oracle reliance.
+- **Step 1: Parallel Reasoning.** All agents execute tools and generate confidence-weighted findings concurrently.
+- **Step 2: Contradiction Detection.** The Master Node detects anomalies (e.g., Ledger confirms a deed, but Prism flags document forgery).
+- **Step 3: Cross-Examination Loop.** Agents are forced to re-evaluate their findings based on detected contradictions.
+- **Step 4: Weighted Consensus.** A mathematical truth score is calculated based on agent confidence and historical reputation.
+- **Step 5: Cryptographic Finalization.** The debate log is compressed into an immutable **Evidence Hash (SHA-256)** for on-chain anchoring.
 
 ---
 
-## 🌍 PoR as Infrastructure (B2B / Composability)
+## 🔗 The On-Chain Layer (Mantle Network)
 
-Proof-of-Reality is not just a consumer application; it is designed as **Base-Layer Infrastructure** for the Real-World Asset (RWA) ecosystem. Other Web3 projects can build on top of the PoR smart contracts:
+Once the AI engine reaches consensus, the truth is permanently recorded. 
 
-1. **DeFi Lending Protocols:** A decentralized bank (like Aave) can query the `TruthCertificateNFT` contract. If a user tries to collateralize a house, the protocol automatically checks the PoR `consensusScore`. If the score has decayed or fraud is detected, the loan is denied.
-2. **RWA Tokenization:** Platforms like Ondo or Centrifuge can use PoR as an automated auditor before fractionalizing an asset into ERC-20 tokens.
-3. **Decentralized Insurance:** Parametric insurance protocols can use the *Tempest* and *Atlas* node outputs to automatically underwrite or trigger payouts for property damage.
+The `TruthCertificateNFT.sol` smart contract is invoked to store:
+1. The `assetId`
+2. The `consensusScore`
+3. The cryptographic `evidenceHash`
+
+---
+
+> [!IMPORTANT]  
+> ## ⏳ Highlight: Dynamic Truth Decay
+> 
+> **Truth is not static. Reality changes.** 
+> 
+> A building can burn down; markets can crash. PoR implements a `decayTimer` mechanism:
+> - The on-chain consensus score **decays over time**.
+> - This decay triggers automated **re-verification**.
+> - It enforces **continuous trust updates**, ensuring that a Truth Certificate is always an accurate reflection of the current reality.
+
+---
+
+## 🌍 Protocol Base-Layer Infrastructure (B2B)
+
+Proof-of-Reality is designed as **Base-Layer Infrastructure** for the Real-World Asset (RWA) ecosystem. Other Web3 projects can compose on top of PoR:
+
+1. **DeFi Lending:** Decentralized banks can query the PoR `consensusScore` before approving real-estate collateralized loans. If fraud is detected or the score has decayed, the loan is denied.
+2. **RWA Tokenization:** Tokenization platforms can use PoR as an automated auditor before fractionalizing a physical asset.
+3. **Decentralized Insurance:** Parametric protocols can use *Tempest* and *Atlas* outputs to automatically trigger payouts for property damage.
 
 ```mermaid
 sequenceDiagram
