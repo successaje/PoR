@@ -3,13 +3,13 @@ export type AgentName = "Atlas" | "Ledger" | "Prism" | "Oracle" | "Pulse" | "Tem
 export type AgentLog = {
   id: string;
   agent: AgentName;
-  actionType: "INVESTIGATING" | "DEBATING" | "COMPLETED" | "ANOMALY";
+  actionType: "INVESTIGATING" | "DEBATING" | "COMPLETED" | "ANOMALY" | "SCANNING" | "CONSENSUS";
   message: string;
   confidence: number;
   timestamp: number;
 };
 
-export type VerificationState = "IDLE" | "SCANNING" | "DEBATING" | "CONSENSUS" | "FINALIZED";
+export type VerificationState = "PENDING" | "AGENTS_ACTIVATING" | "DATA_COLLECTION" | "INDEPENDENT_ANALYSIS" | "DEBATE_PHASE" | "CONSENSUS_FORMING" | "FINALIZED" | "MINTED_ON_CHAIN" | "ARCHIVED";
 
 export const AGENTS: Record<AgentName, { role: string; color: string }> = {
   Atlas: { role: "Geo-spatial Intelligence", color: "text-blue-400" },

@@ -13,6 +13,10 @@ class AssetVerificationState(TypedDict):
     geo_report: str
     financial_report: str
     legal_report: str
+    fraud_report: str
+    sentiment_report: str
+    climate_report: str
+    compliance_report: str
     
     # Debate variables
     debate_history: Annotated[List[BaseMessage], add_messages]

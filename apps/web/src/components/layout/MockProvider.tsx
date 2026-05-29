@@ -21,7 +21,7 @@ export function MockProvider({ children }: { children: ReactNode }) {
   const [globalLogs, setGlobalLogs] = useState<AgentLog[]>([]);
   const [activeVerification, setActiveVerification] = useState<MockContextProps["activeVerification"]>({
     id: null,
-    state: "IDLE",
+    state: "PENDING",
     confidence: 0,
     fraudRisk: 0,
     valueEstimate: "",
@@ -31,12 +31,21 @@ export function MockProvider({ children }: { children: ReactNode }) {
   const startVerification = (assetId: string) => {
     setActiveVerification({
       id: assetId,
-      state: "SCANNING",
+      state: "AGENTS_ACTIVATING",
       confidence: 10,
       fraudRisk: 0,
       valueEstimate: "",
     });
     setGlobalLogs([]);
+
+    // Small simulated delay for boot sequence
+    setTimeout(() => {
+      setActiveVerification(p => ({ ...p, state: "DATA_COLLECTION" }));
+      connectToStream(assetId);
+    }, 2000);
+  };
+
+  const connectToStream = (assetId: string) => {
 
     const eventSource = new EventSource(`http://localhost:8000/stream/${assetId}`);
 
@@ -69,14 +78,14 @@ export function MockProvider({ children }: { children: ReactNode }) {
         if (data.type === "status") {
            setActiveVerification(p => ({ 
              ...p, 
-             state: data.message.includes("Debate") ? "DEBATING" : "SCANNING",
+             state: data.message.includes("Debate") ? "DEBATE_PHASE" : "DATA_COLLECTION",
              confidence: data.confidence || p.confidence
            }));
         }
       }
 
       if (data.type === "consensus") {
-        setActiveVerification(p => ({ ...p, state: "CONSENSUS", confidence: data.confidence || p.confidence }));
+        setActiveVerification(p => ({ ...p, state: "CONSENSUS_FORMING", confidence: data.confidence || p.confidence }));
       }
 
       if (data.type === "final_result") {

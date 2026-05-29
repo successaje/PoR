@@ -1,6 +1,10 @@
 from langgraph.graph import StateGraph, START, END
 from state import AssetVerificationState
-from nodes import analyze_geo, analyze_financial, analyze_legal, synthesize_consensus, run_debate_round
+from nodes import (
+    analyze_geo, analyze_financial, analyze_legal, 
+    analyze_fraud, analyze_sentiment, analyze_climate, analyze_compliance,
+    synthesize_consensus, run_debate_round
+)
 import asyncio
 import json
 
@@ -18,6 +22,10 @@ def build_graph():
     workflow.add_node("geo_agent", analyze_geo)
     workflow.add_node("financial_agent", analyze_financial)
     workflow.add_node("legal_agent", analyze_legal)
+    workflow.add_node("fraud_agent", analyze_fraud)
+    workflow.add_node("sentiment_agent", analyze_sentiment)
+    workflow.add_node("climate_agent", analyze_climate)
+    workflow.add_node("compliance_agent", analyze_compliance)
     workflow.add_node("consensus", synthesize_consensus)
     workflow.add_node("debate_chamber", run_debate_round)
 
@@ -26,11 +34,19 @@ def build_graph():
     workflow.add_edge(START, "geo_agent")
     workflow.add_edge(START, "financial_agent")
     workflow.add_edge(START, "legal_agent")
+    workflow.add_edge(START, "fraud_agent")
+    workflow.add_edge(START, "sentiment_agent")
+    workflow.add_edge(START, "climate_agent")
+    workflow.add_edge(START, "compliance_agent")
 
     # All parallel nodes feed into consensus
     workflow.add_edge("geo_agent", "consensus")
     workflow.add_edge("financial_agent", "consensus")
     workflow.add_edge("legal_agent", "consensus")
+    workflow.add_edge("fraud_agent", "consensus")
+    workflow.add_edge("sentiment_agent", "consensus")
+    workflow.add_edge("climate_agent", "consensus")
+    workflow.add_edge("compliance_agent", "consensus")
 
     # Consensus conditionally routes to Debate or END
     workflow.add_conditional_edges(
@@ -82,6 +98,14 @@ async def run_debate(asset_data: dict, emit_func):
                     await emit_func({"type": "finding", "agent": "Oracle", "message": state_update.get("financial_report")[:100] + "..."})
                 elif node_name == "legal_agent":
                     await emit_func({"type": "finding", "agent": "Ledger", "message": state_update.get("legal_report")[:100] + "..."})
+                elif node_name == "fraud_agent":
+                    await emit_func({"type": "finding", "agent": "Prism", "message": state_update.get("fraud_report")[:100] + "..."})
+                elif node_name == "sentiment_agent":
+                    await emit_func({"type": "finding", "agent": "Pulse", "message": state_update.get("sentiment_report")[:100] + "..."})
+                elif node_name == "climate_agent":
+                    await emit_func({"type": "finding", "agent": "Tempest", "message": state_update.get("climate_report")[:100] + "..."})
+                elif node_name == "compliance_agent":
+                    await emit_func({"type": "finding", "agent": "Sentinel", "message": state_update.get("compliance_report")[:100] + "..."})
                 elif node_name == "consensus":
                     if state_update.get("anomalies_detected"):
                         await emit_func({"type": "status", "message": "Anomalies detected. Routing to Aletheia Debate Chamber.", "confidence": 60})

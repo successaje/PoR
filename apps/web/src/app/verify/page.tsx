@@ -1,74 +1,369 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useMock } from "@/components/layout/MockProvider";
 import { AGENTS } from "@/lib/mockEngine";
-import { useAccount, useWriteContract } from 'wagmi';
+import { useAccount, useWriteContract, useWaitForTransactionReceipt } from 'wagmi';
 import { truthCertificateABI } from '@/lib/abi';
 
 export default function VerifyPage() {
   const { address } = useAccount();
-  const { writeContract, isPending, isSuccess, data: hash } = useWriteContract();
+  const { writeContract, data: hash, isPending: isWritePending } = useWriteContract();
+  const { isLoading: isConfirming, isSuccess: isConfirmed } = useWaitForTransactionReceipt({ hash });
+  
   const { activeVerification, startVerification, globalLogs } = useMock();
   const [assetId, setAssetId] = useState("");
+  const [coords, setCoords] = useState("");
   
-  const isSubmitting = activeVerification.state !== "IDLE" && activeVerification.state !== "FINALIZED";
+  // Local mock upload state
+  const [isUploading, setIsUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
+
+  const isSubmitting = isUploading || (activeVerification.state !== "PENDING" && activeVerification.state !== "FINALIZED" && activeVerification.state !== "MINTED_ON_CHAIN");
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!assetId) return;
-    startVerification(assetId);
+    
+    // Simulate File Uploads
+    setIsUploading(true);
+    setUploadProgress(0);
+    
+    const interval = setInterval(() => {
+      setUploadProgress(p => {
+        if (p >= 100) {
+          clearInterval(interval);
+          setIsUploading(false);
+          startVerification(assetId);
+          return 100;
+        }
+        return p + 25;
+      });
+    }, 400);
+  };
+
+  // Determine current UI State for the right panel
+  const renderRightPanel = () => {
+    if (activeVerification.state === "PENDING") {
+      return (
+        <div className="m-auto flex flex-col items-center justify-center text-white/20">
+           <div className="w-16 h-16 border border-white/10 flex items-center justify-center mb-6">
+             <div className="w-2 h-2 bg-white/10"></div>
+           </div>
+          <div className="font-mono tracking-[0.2em] uppercase text-[10px]">Awaiting Target Input</div>
+        </div>
+      );
+    }
+
+    if (activeVerification.state === "AGENTS_ACTIVATING") {
+      return (
+        <div className="m-auto flex flex-col items-center justify-center">
+          <motion.div 
+            animate={{ rotate: 360 }}
+            transition={{ repeat: Infinity, duration: 4, ease: "linear" }}
+            className="w-32 h-32 border border-dashed border-white/20 rounded-full flex items-center justify-center mb-8"
+          >
+            <div className="w-16 h-16 border border-white/40 rounded-full flex items-center justify-center">
+               <div className="w-2 h-2 bg-white rounded-full animate-ping"></div>
+            </div>
+          </motion.div>
+          <div className="font-mono tracking-[0.2em] uppercase text-[10px] text-white/60 animate-pulse">
+            Booting Aletheia Consensus Engine...
+          </div>
+        </div>
+      );
+    }
+
+    if (activeVerification.state === "CONSENSUS_FORMING") {
+      return (
+        <div className="m-auto flex flex-col items-center justify-center w-full h-full relative">
+          <h4 className="absolute top-10 left-10 font-mono text-[10px] text-white/30 tracking-[0.2em] uppercase">Radial Convergence</h4>
+          
+          <div className="relative w-64 h-64 flex items-center justify-center">
+            {/* Center Core */}
+            <motion.div 
+              initial={{ scale: 0 }}
+              animate={{ scale: [1, 1.2, 1] }}
+              transition={{ repeat: Infinity, duration: 2 }}
+              className="w-16 h-16 bg-white/10 border border-white/30 rounded-full z-10 flex items-center justify-center backdrop-blur-md"
+            >
+              <span className="font-mono text-[10px] text-white/80">{activeVerification.confidence.toFixed(0)}%</span>
+            </motion.div>
+            
+            {/* Orbiting Agents */}
+            {Object.keys(AGENTS).map((agent, i) => {
+              const angle = (i / 7) * Math.PI * 2;
+              const radius = 100;
+              const x = Math.cos(angle) * radius;
+              const y = Math.sin(angle) * radius;
+              
+              return (
+                <motion.div
+                  key={agent}
+                  initial={{ x: x * 2, y: y * 2, opacity: 0 }}
+                  animate={{ x, y, opacity: 1 }}
+                  transition={{ type: "spring", stiffness: 50, damping: 10, delay: i * 0.1 }}
+                  className="absolute w-8 h-8 border border-white/20 rounded-full flex items-center justify-center"
+                >
+                  <span className="font-mono text-[6px] text-white/40 uppercase">{agent.substring(0,3)}</span>
+                  {/* Laser line to center */}
+                  <svg className="absolute w-full h-full overflow-visible -z-10" style={{ left: '50%', top: '50%' }}>
+                    <motion.line 
+                       x1="0" y1="0" 
+                       x2={-x} y2={-y} 
+                       stroke="rgba(255,255,255,0.1)" 
+                       strokeWidth="1"
+                       initial={{ pathLength: 0 }}
+                       animate={{ pathLength: 1 }}
+                       transition={{ duration: 1, delay: 1 }}
+                    />
+                  </svg>
+                </motion.div>
+              );
+            })}
+          </div>
+          <div className="mt-12 font-mono tracking-[0.2em] uppercase text-[10px] text-white/60">
+            Synthesizing Cryptographic Evidence...
+          </div>
+        </div>
+      );
+    }
+
+    if (activeVerification.state === "FINALIZED" || isConfirmed) {
+      return (
+        <div className="m-auto w-full max-w-2xl">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 1, ease: "easeOut" }}
+            className="p-8 bg-white/[0.02] border border-white/10"
+          >
+            <div className="flex items-center gap-4 text-white/90 mb-8 font-sans font-medium tracking-[0.2em] uppercase text-[11px] border-b border-white/[0.04] pb-4">
+              <div className="w-2 h-2 bg-emerald-500/80"></div>
+              {isConfirmed ? "Truth Certificate Minted" : "Consensus Achieved"}
+            </div>
+            
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-8 font-mono text-[10px] tracking-widest uppercase mb-12">
+              <div>
+                <div className="text-white/30 mb-2">Final Score</div>
+                <div className="text-xl text-white/90">{activeVerification.confidence.toFixed(1)}%</div>
+              </div>
+              <div>
+                <div className="text-white/30 mb-2">Fraud Prob</div>
+                <div className="text-lg text-white/60">LOW</div>
+              </div>
+              <div>
+                <div className="text-white/30 mb-2">Est Value</div>
+                <div className="text-lg text-white/60">{activeVerification.valueEstimate || "$418,000"}</div>
+              </div>
+              <div>
+                <div className="text-white/30 mb-2">Status</div>
+                <div className="text-lg text-emerald-400">VERIFIED</div>
+              </div>
+            </div>
+
+            {isConfirmed && hash ? (
+              <div className="p-6 border border-white/10 bg-black/50 mb-8">
+                <h5 className="font-mono text-[9px] text-white/40 uppercase tracking-widest mb-4">Audit Trail & Evidence</h5>
+                <div className="space-y-3 font-mono text-[10px] text-white/70 break-all">
+                  <div className="flex flex-col"><span className="text-white/30">Mantle TX:</span> {hash}</div>
+                  <div className="flex flex-col"><span className="text-white/30">Evidence Hash:</span> 0x8a92f8e1...4b9c (SHA-256)</div>
+                  <div className="flex flex-col"><span className="text-white/30">Verified By:</span> Aletheia Engine (7 Nodes)</div>
+                </div>
+                <div className="mt-6 text-right">
+                  <a href={`https://explorer.sepolia.mantle.xyz/tx/${hash}`} target="_blank" rel="noreferrer" className="text-[10px] font-mono text-cyan-500 hover:text-cyan-400 uppercase tracking-widest transition-colors">
+                    View on Mantle Explorer ↗
+                  </a>
+                </div>
+              </div>
+            ) : null}
+            
+            {!isConfirmed && (
+              <button 
+                onClick={() => {
+                  if (!address) return;
+                  writeContract({
+                    address: '0x86C41594e9aDeCcf8c85ba9EEe0138C7c9E70dBc', // TruthCertificateNFT
+                    abi: truthCertificateABI,
+                    functionName: 'mintCertificate',
+                    args: [
+                      address,
+                      assetId || "REG-8492-TX",
+                      Math.floor(activeVerification.confidence),
+                      BigInt(60 * 60 * 24 * 30), // 30 days
+                      "QmEvidenceHash..." // This would be the real hash from the API in production
+                    ]
+                  });
+                }}
+                disabled={isWritePending || isConfirming || !address}
+                className="w-full py-4 bg-white hover:bg-white/90 text-black font-sans text-[11px] tracking-[0.2em] uppercase transition-colors disabled:opacity-50"
+              >
+                {!address ? 'CONNECT IDENTITY TO MINT' : isWritePending ? 'AWAITING SIGNATURE...' : isConfirming ? 'MINTING ON MANTLE...' : 'Issue Truth Certificate'}
+              </button>
+            )}
+          </motion.div>
+        </div>
+      );
+    }
+
+    // Default to DATA_COLLECTION and DEBATE_PHASE view
+    return (
+      <div className="flex-1 flex flex-col max-w-4xl mx-auto w-full">
+        {/* Agent Activation Sequence */}
+        <div className="mb-12">
+          <h4 className="font-mono text-[10px] text-white/30 tracking-[0.2em] uppercase border-b border-white/[0.04] pb-3 mb-6">Node Activation Matrix</h4>
+          <div className="flex flex-wrap gap-4">
+            {Object.keys(AGENTS).map((agent, i) => {
+              const isActive = true; // Always active in this view
+              return (
+                <motion.div
+                  key={agent}
+                  initial={{ opacity: 0, scale: 0.8 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ delay: i * 0.1, duration: 0.5 }}
+                  className="flex flex-col gap-3"
+                >
+                  <div className={`w-8 h-8 border flex items-center justify-center transition-colors duration-500 border-white/30 bg-white/5`}>
+                    <div className="w-1.5 h-1.5 bg-white/80 animate-pulse"></div>
+                  </div>
+                  <span className="font-mono text-[8px] uppercase tracking-widest text-white/40">{agent.substring(0,3)}</span>
+                </motion.div>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Debate Chamber */}
+        <div className="flex-1 flex flex-col min-h-0 mb-8">
+           <h4 className="font-mono text-[10px] text-white/30 tracking-[0.2em] uppercase border-b border-white/[0.04] pb-3 mb-6 flex justify-between">
+             <span>Debate Timeline</span>
+             <span className="text-white/60 animate-[pulse_3s_ease-in-out_infinite]">{activeVerification.state.replace("_", " ")}</span>
+           </h4>
+           
+           <div className="flex-1 overflow-y-auto space-y-6 pr-4 custom-scrollbar">
+              <AnimatePresence>
+                {globalLogs.map((log) => (
+                   <motion.div
+                     key={log.id}
+                     initial={{ opacity: 0, x: -10 }}
+                     animate={{ opacity: 1, x: 0 }}
+                     transition={{ duration: 0.5, ease: "easeOut" }}
+                     className={`pl-4 border-l ${log.actionType === "DEBATING" ? 'border-amber-500/50' : 'border-white/[0.05]'}`}
+                   >
+                     <div className="flex items-center gap-4 mb-2 font-mono text-[9px] tracking-[0.2em] uppercase">
+                        <span className={log.actionType === "DEBATING" ? "text-amber-400" : "text-white/60"}>{log.agent}</span>
+                        {log.actionType === "DEBATING" && <span className="text-amber-500/60 ml-auto">CROSS-EXAMINATION</span>}
+                     </div>
+                     <div className="text-[12px] text-white/80 font-sans font-light leading-relaxed">
+                       "{log.message}"
+                     </div>
+                   </motion.div>
+                ))}
+              </AnimatePresence>
+           </div>
+        </div>
+      </div>
+    );
   };
 
   return (
     <div className="h-full flex flex-col md:flex-row bg-[#000000] text-white">
       
       {/* Left Panel: Submission Form */}
-      <div className="w-full md:w-[400px] p-10 border-r border-white/[0.04] bg-[#000000] flex flex-col relative z-10">
+      <div className="w-full md:w-[450px] p-10 border-r border-white/[0.04] bg-[#000000] flex flex-col relative z-10 overflow-y-auto custom-scrollbar">
         <div className="flex-grow">
           <div className="mb-12">
             <h2 className="text-2xl font-light mb-2 text-white/90 tracking-tight">Verify Asset</h2>
-            <p className="text-white/40 text-[11px] font-sans font-light tracking-wide">Input registry parameters to initialize the multi-agent consensus protocol.</p>
+            <p className="text-white/40 text-[11px] font-sans font-light tracking-wide">Input parameters and documentary evidence to initialize the Aletheia consensus protocol.</p>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-8">
+            {/* Input 1: Registry ID */}
+            <div className="space-y-3">
+              <label className="text-[10px] font-mono text-white/50 uppercase tracking-[0.2em]">Registry Identifier</label>
+              <input
+                type="text"
+                value={assetId}
+                onChange={(e) => setAssetId(e.target.value)}
+                placeholder="REG-8492-TX"
+                className="w-full bg-white/[0.02] border border-white/10 focus:border-white/40 rounded-none px-4 py-3 focus:outline-none font-mono text-[11px] text-white placeholder:text-white/20 transition-colors"
+                disabled={isSubmitting}
+              />
+            </div>
+
+            {/* Input 2: Coordinates */}
             <div className="space-y-3">
               <label className="text-[10px] font-mono text-white/50 uppercase tracking-[0.2em] flex justify-between">
-                <span>Registry Identifier</span>
-                <span className="text-white/20">MVP</span>
+                <span>Geo-Coordinates</span>
+                <span className="text-white/20">OPTIONAL</span>
               </label>
-              <div className="relative">
-                <input
-                  type="text"
-                  value={assetId}
-                  onChange={(e) => setAssetId(e.target.value)}
-                  placeholder="REG-8492-TX"
-                  className="w-full bg-white/[0.02] border border-white/10 hover:border-white/20 focus:border-white/40 rounded-none px-4 py-3 focus:outline-none font-mono text-[11px] text-white placeholder:text-white/20 transition-colors"
-                  disabled={isSubmitting}
-                />
-              </div>
+              <input
+                type="text"
+                value={coords}
+                onChange={(e) => setCoords(e.target.value)}
+                placeholder="30.2672° N, 97.7431° W"
+                className="w-full bg-white/[0.02] border border-white/10 focus:border-white/40 rounded-none px-4 py-3 focus:outline-none font-mono text-[11px] text-white placeholder:text-white/20 transition-colors"
+                disabled={isSubmitting}
+              />
+            </div>
+
+            {/* Input 3: Mock File Upload - Images */}
+            <div className="space-y-3">
+               <label className="text-[10px] font-mono text-white/50 uppercase tracking-[0.2em]">Asset Imagery</label>
+               <div className={`border border-dashed ${isSubmitting ? 'border-white/10' : 'border-white/20 hover:border-white/40 cursor-pointer'} p-6 flex flex-col items-center justify-center text-center transition-colors`}>
+                 <div className="w-6 h-6 border border-white/20 mb-3 flex items-center justify-center text-white/40">+</div>
+                 <div className="text-[10px] font-mono text-white/40 uppercase tracking-widest">Select files or drag & drop</div>
+                 <div className="text-[9px] font-sans text-white/20 mt-1">JPG, PNG up to 10MB</div>
+               </div>
+            </div>
+
+            {/* Input 4: Mock File Upload - Docs */}
+            <div className="space-y-3">
+               <label className="text-[10px] font-mono text-white/50 uppercase tracking-[0.2em]">Ownership Deed / Legal Docs</label>
+               <div className={`border border-dashed ${isSubmitting ? 'border-white/10' : 'border-white/20 hover:border-white/40 cursor-pointer'} p-6 flex flex-col items-center justify-center text-center transition-colors`}>
+                 <div className="w-6 h-6 border border-white/20 mb-3 flex items-center justify-center text-white/40">+</div>
+                 <div className="text-[10px] font-mono text-white/40 uppercase tracking-widest">Select files or drag & drop</div>
+                 <div className="text-[9px] font-sans text-white/20 mt-1">PDF, DOCX up to 20MB</div>
+               </div>
             </div>
             
             <button
               type="submit"
               disabled={isSubmitting || !assetId}
-              className="w-full bg-white/10 hover:bg-white/20 text-white font-sans text-[11px] tracking-[0.2em] uppercase py-4 transition-colors disabled:opacity-30 flex items-center justify-center gap-3"
+              className="w-full bg-white/10 hover:bg-white/20 text-white font-sans text-[11px] tracking-[0.2em] uppercase py-4 transition-colors disabled:opacity-30 flex items-center justify-center gap-3 relative overflow-hidden"
             >
-              {isSubmitting ? (
-                <>
-                  <div className="w-2 h-2 bg-white/50 animate-[pulse_1.5s_ease-in-out_infinite]"></div>
-                  INITIALIZING...
-                </>
-              ) : (
-                "EXECUTE CONSENSUS"
+              {/* Upload Progress Bar Layer */}
+              {isUploading && (
+                <motion.div 
+                  className="absolute left-0 top-0 h-full bg-white/10" 
+                  initial={{ width: 0 }}
+                  animate={{ width: `${uploadProgress}%` }}
+                  transition={{ ease: "linear", duration: 0.4 }}
+                />
               )}
+              
+              <span className="relative z-10 flex items-center gap-3">
+                {isUploading ? (
+                  <>
+                    <div className="w-2 h-2 bg-white/50 animate-[pulse_1.5s_ease-in-out_infinite]"></div>
+                    UPLOADING DATA... {uploadProgress}%
+                  </>
+                ) : activeVerification.state !== "PENDING" && activeVerification.state !== "FINALIZED" ? (
+                  <>
+                    <div className="w-2 h-2 bg-white/50 animate-[pulse_1.5s_ease-in-out_infinite]"></div>
+                    CONSENSUS IN PROGRESS
+                  </>
+                ) : (
+                  "INITIATE PROOF-OF-REALITY"
+                )}
+              </span>
             </button>
           </form>
         </div>
 
         {/* Dynamic Confidence Meter */}
-        <div className="mt-auto pt-10 border-t border-white/[0.04]">
+        <div className="mt-12 pt-10 border-t border-white/[0.04]">
           <div className="flex justify-between items-end mb-4">
             <span className="text-[10px] font-mono text-white/40 uppercase tracking-[0.2em]">
               Confidence Delta
@@ -89,142 +384,8 @@ export default function VerifyPage() {
       </div>
 
       {/* Right Panel: Live System Details */}
-      <div className="flex-1 p-10 relative flex flex-col bg-[#020202]">
-        {activeVerification.state === "IDLE" ? (
-          <div className="m-auto flex flex-col items-center justify-center text-white/20">
-             <div className="w-16 h-16 border border-white/10 flex items-center justify-center mb-6">
-               <div className="w-2 h-2 bg-white/10"></div>
-             </div>
-            <div className="font-mono tracking-[0.2em] uppercase text-[10px]">Awaiting Target Input</div>
-          </div>
-        ) : (
-          <div className="flex-1 flex flex-col max-w-4xl mx-auto w-full">
-            
-            {/* Agent Activation Sequence */}
-            <div className="mb-12">
-              <h4 className="font-mono text-[10px] text-white/30 tracking-[0.2em] uppercase border-b border-white/[0.04] pb-3 mb-6">Node Activation Matrix</h4>
-              <div className="flex gap-4">
-                {Object.keys(AGENTS).map((agent, i) => {
-                  const isActive = activeVerification.state !== 'IDLE';
-                  return (
-                    <motion.div
-                      key={agent}
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      transition={{ delay: i * 0.2, duration: 1 }}
-                      className="flex flex-col gap-3"
-                    >
-                      <div className={`w-8 h-8 border flex items-center justify-center transition-colors duration-1000 ${isActive ? 'border-white/30 bg-white/5' : 'border-white/5'}`}>
-                        <div className={`w-1.5 h-1.5 transition-colors duration-1000 ${isActive ? 'bg-white/80' : 'bg-white/10'}`}></div>
-                      </div>
-                      <span className="font-mono text-[8px] uppercase tracking-widest text-white/40">{agent.substring(0,3)}</span>
-                    </motion.div>
-                  );
-                })}
-              </div>
-            </div>
-
-            {/* Debate Chamber */}
-            <div className="flex-1 flex flex-col min-h-0 mb-8">
-               <h4 className="font-mono text-[10px] text-white/30 tracking-[0.2em] uppercase border-b border-white/[0.04] pb-3 mb-6 flex justify-between">
-                 <span>Debate Timeline</span>
-                 <span className="text-white/60 animate-[pulse_3s_ease-in-out_infinite]">{activeVerification.state}</span>
-               </h4>
-               
-               <div className="flex-1 overflow-y-auto space-y-6 pr-4 custom-scrollbar">
-                  <AnimatePresence>
-                    {globalLogs.filter(l => l.actionType === "DEBATING" || l.actionType === "ANOMALY").map((log) => (
-                       <motion.div
-                         key={log.id}
-                         initial={{ opacity: 0, y: 10 }}
-                         animate={{ opacity: 1, y: 0 }}
-                         transition={{ duration: 0.8, ease: "easeOut" }}
-                         className={`pl-4 border-l border-white/[0.05]`}
-                       >
-                         <div className="flex items-center gap-4 mb-2 font-mono text-[9px] tracking-[0.2em] uppercase">
-                            <span className="text-white/60">{log.agent}</span>
-                            <span className="text-white/20">CF: {log.confidence.toFixed(2)}</span>
-                            {log.actionType === "ANOMALY" && <span className="text-amber-500/60">ANOMALY DETECTED</span>}
-                         </div>
-                         <div className="text-[12px] text-white/80 font-sans font-light leading-relaxed">
-                           "{log.message}"
-                         </div>
-                       </motion.div>
-                    ))}
-                  </AnimatePresence>
-               </div>
-            </div>
-
-            {/* Final Result */}
-            {activeVerification.state === "FINALIZED" && (
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ duration: 1.5, ease: "easeOut" }}
-                className="p-8 bg-white/[0.02] border border-white/10"
-              >
-                <div className="flex items-center gap-4 text-white/90 mb-8 font-sans font-medium tracking-[0.2em] uppercase text-[11px] border-b border-white/[0.04] pb-4">
-                  <div className="w-2 h-2 bg-emerald-500/80"></div>
-                  Consensus Achieved
-                </div>
-                
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-8 font-mono text-[10px] tracking-widest uppercase">
-                  <div>
-                    <div className="text-white/30 mb-2">Final Score</div>
-                    <div className="text-xl text-white/90">{activeVerification.confidence.toFixed(1)}%</div>
-                  </div>
-                  <div>
-                    <div className="text-white/30 mb-2">Fraud Prob</div>
-                    <div className="text-lg text-white/60">0.024</div>
-                  </div>
-                  <div>
-                    <div className="text-white/30 mb-2">Est Value</div>
-                    <div className="text-lg text-white/60">{activeVerification.valueEstimate || "$418,000"}</div>
-                  </div>
-                  <div>
-                    <div className="text-white/30 mb-2">Status</div>
-                    <div className="text-lg text-white/90">VERIFIED</div>
-                  </div>
-                </div>
-                
-                <button 
-                  onClick={() => {
-                    if (!address) return;
-                    writeContract({
-                      address: '0x86C41594e9aDeCcf8c85ba9EEe0138C7c9E70dBc', // TruthCertificateNFT on Mantle Sepolia
-                      abi: truthCertificateABI,
-                      functionName: 'mintCertificate',
-                      args: [
-                        address,
-                        assetId || "REG-8492-TX",
-                        Math.floor(activeVerification.confidence),
-                        BigInt(60 * 60 * 24 * 30), // 30 days
-                        "QmEvidenceHash..."
-                      ]
-                    });
-                  }}
-                  disabled={isPending || isSuccess || !address}
-                  className="mt-8 w-full py-4 bg-white hover:bg-white/90 text-black font-sans text-[11px] tracking-[0.2em] uppercase transition-colors disabled:opacity-50"
-                >
-                  {!address ? 'CONNECT IDENTITY TO MINT' : isPending ? 'AWAITING SIGNATURE...' : isSuccess ? 'CERTIFICATE ISSUED' : 'Issue Truth Certificate'}
-                </button>
-                {hash && (
-                  <div className="mt-6 text-center">
-                    <a 
-                      href={`https://explorer.sepolia.mantle.xyz/tx/${hash}`} 
-                      target="_blank" 
-                      rel="noreferrer" 
-                      className="text-[10px] font-mono text-cyan-500/80 hover:text-cyan-500 tracking-[0.2em] uppercase transition-colors"
-                    >
-                      View on Mantle Explorer ↗
-                    </a>
-                  </div>
-                )}
-              </motion.div>
-            )}
-
-          </div>
-        )}
+      <div className="flex-1 p-10 relative flex flex-col bg-[#020202] overflow-hidden">
+        {renderRightPanel()}
       </div>
     </div>
   );
