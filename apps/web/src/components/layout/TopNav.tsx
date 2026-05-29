@@ -2,8 +2,8 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Activity } from "lucide-react";
 import { useMock } from "./MockProvider";
+import { ConnectButton } from "@rainbow-me/rainbowkit";
 
 export function TopNav() {
   const pathname = usePathname();
@@ -15,7 +15,6 @@ export function TopNav() {
     <header className="sticky top-0 z-50 flex items-center justify-between px-8 py-4 border-b border-white/[0.04] bg-[#000000]/80 backdrop-blur-xl">
       <div className="flex items-center gap-12">
         <Link href="/" className="flex items-center gap-3">
-          {/* Replaced Hexagon with a minimal static square/circle combo representing structured data */}
           <div className="relative w-5 h-5 flex items-center justify-center">
             <div className="absolute inset-0 border border-white/20"></div>
             <div className="w-1.5 h-1.5 bg-white"></div>
@@ -68,10 +67,109 @@ export function TopNav() {
           )}
         </div>
 
-        {/* Mock Wallet Button */}
-        <button className="flex items-center gap-2 px-5 py-2 bg-white/5 hover:bg-white/10 text-white/70 hover:text-white text-[10px] font-sans tracking-widest uppercase transition-colors duration-300 border border-white/5">
-          Connect Identity
-        </button>
+        {/* Custom Web3 Identity Button */}
+        <ConnectButton.Custom>
+          {({
+            account,
+            chain,
+            openAccountModal,
+            openChainModal,
+            openConnectModal,
+            authenticationStatus,
+            mounted,
+          }) => {
+            const ready = mounted && authenticationStatus !== 'loading';
+            const connected =
+              ready &&
+              account &&
+              chain &&
+              (!authenticationStatus ||
+                authenticationStatus === 'authenticated');
+
+            return (
+              <div
+                {...(!ready && {
+                  'aria-hidden': true,
+                  'style': {
+                    opacity: 0,
+                    pointerEvents: 'none',
+                    userSelect: 'none',
+                  },
+                })}
+              >
+                {(() => {
+                  if (!connected) {
+                    return (
+                      <button 
+                        onClick={openConnectModal} 
+                        type="button"
+                        className="flex items-center gap-2 px-5 py-2 bg-white/5 hover:bg-white/10 text-white/70 hover:text-white text-[10px] font-sans tracking-widest uppercase transition-colors duration-300 border border-white/5"
+                      >
+                        Connect Identity
+                      </button>
+                    );
+                  }
+
+                  if (chain.unsupported) {
+                    return (
+                      <button 
+                        onClick={openChainModal} 
+                        type="button"
+                        className="flex items-center gap-2 px-5 py-2 bg-amber-500/10 text-amber-500 text-[10px] font-sans tracking-widest uppercase transition-colors duration-300 border border-amber-500/20"
+                      >
+                        Wrong Network
+                      </button>
+                    );
+                  }
+
+                  return (
+                    <div className="flex items-center gap-3">
+                      <button
+                        onClick={openChainModal}
+                        style={{ display: 'flex', alignItems: 'center' }}
+                        type="button"
+                        className="flex items-center gap-2 px-3 py-2 text-white/50 hover:text-white text-[10px] font-mono tracking-widest uppercase transition-colors duration-300"
+                      >
+                        {chain.hasIcon && (
+                          <div
+                            style={{
+                              background: chain.iconBackground,
+                              width: 12,
+                              height: 12,
+                              borderRadius: 999,
+                              overflow: 'hidden',
+                              marginRight: 4,
+                            }}
+                          >
+                            {chain.iconUrl && (
+                              <img
+                                alt={chain.name ?? 'Chain icon'}
+                                src={chain.iconUrl}
+                                style={{ width: 12, height: 12 }}
+                              />
+                            )}
+                          </div>
+                        )}
+                        {chain.name}
+                      </button>
+
+                      <button 
+                        onClick={openAccountModal} 
+                        type="button"
+                        className="flex items-center gap-2 px-5 py-2 bg-[#000000] text-white/90 hover:bg-white/5 text-[10px] font-mono tracking-widest uppercase transition-colors duration-300 border border-white/10"
+                      >
+                        {account.displayName}
+                        {account.displayBalance
+                          ? ` // ${account.displayBalance}`
+                          : ''}
+                      </button>
+                    </div>
+                  );
+                })()}
+              </div>
+            );
+          }}
+        </ConnectButton.Custom>
       </div>
     </header>
   );

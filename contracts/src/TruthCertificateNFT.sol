@@ -32,7 +32,7 @@ contract TruthCertificateNFT is ERC721, Ownable {
         uint8 consensusScore,
         uint256 decayTimer,
         string memory evidenceHash
-    ) external onlyOwner returns (uint256) {
+    ) external returns (uint256) {
         uint256 tokenId = _nextTokenId++;
         _safeMint(to, tokenId);
 

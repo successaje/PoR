@@ -4,8 +4,12 @@ import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useMock } from "@/components/layout/MockProvider";
 import { AGENTS } from "@/lib/mockEngine";
+import { useAccount, useWriteContract } from 'wagmi';
+import { truthCertificateABI } from '@/lib/abi';
 
 export default function VerifyPage() {
+  const { address } = useAccount();
+  const { writeContract, isPending, isSuccess, data: hash } = useWriteContract();
   const { activeVerification, startVerification, globalLogs } = useMock();
   const [assetId, setAssetId] = useState("");
   
@@ -183,9 +187,39 @@ export default function VerifyPage() {
                   </div>
                 </div>
                 
-                <button className="mt-8 w-full py-4 bg-white hover:bg-white/90 text-black font-sans text-[11px] tracking-[0.2em] uppercase transition-colors">
-                  Issue Truth Certificate
+                <button 
+                  onClick={() => {
+                    if (!address) return;
+                    writeContract({
+                      address: '0x86C41594e9aDeCcf8c85ba9EEe0138C7c9E70dBc', // TruthCertificateNFT on Mantle Sepolia
+                      abi: truthCertificateABI,
+                      functionName: 'mintCertificate',
+                      args: [
+                        address,
+                        assetId || "REG-8492-TX",
+                        Math.floor(activeVerification.confidence),
+                        BigInt(60 * 60 * 24 * 30), // 30 days
+                        "QmEvidenceHash..."
+                      ]
+                    });
+                  }}
+                  disabled={isPending || isSuccess || !address}
+                  className="mt-8 w-full py-4 bg-white hover:bg-white/90 text-black font-sans text-[11px] tracking-[0.2em] uppercase transition-colors disabled:opacity-50"
+                >
+                  {!address ? 'CONNECT IDENTITY TO MINT' : isPending ? 'AWAITING SIGNATURE...' : isSuccess ? 'CERTIFICATE ISSUED' : 'Issue Truth Certificate'}
                 </button>
+                {hash && (
+                  <div className="mt-6 text-center">
+                    <a 
+                      href={`https://explorer.sepolia.mantle.xyz/tx/${hash}`} 
+                      target="_blank" 
+                      rel="noreferrer" 
+                      className="text-[10px] font-mono text-cyan-500/80 hover:text-cyan-500 tracking-[0.2em] uppercase transition-colors"
+                    >
+                      View on Mantle Explorer ↗
+                    </a>
+                  </div>
+                )}
               </motion.div>
             )}
 
