@@ -1,0 +1,33 @@
+# General
+.DS_Store
+.vscode/
+.idea/
+.env
+.env.local
+.env.*.local
+*.log
+
+# Node & pnpm
+node_modules/
+npm-debug.log
+yarn-error.log
+pnpm-debug.log
+
+# Next.js (apps/web)
+apps/web/.next/
+apps/web/out/
+apps/web/build/
+
+# Python (apps/api)
+apps/api/venv/
+apps/api/__pycache__/
+apps/api/.pytest_cache/
+*.pyc
+*.pyo
+*.pyd
+
+# Foundry / Smart Contracts (contracts)
+contracts/cache/
+contracts/out/
+contracts/broadcast/
+contracts/.temp/

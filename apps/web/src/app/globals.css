@@ -1,0 +1,38 @@
+@import "tailwindcss";
+
+@theme {
+  --color-background: #000000;
+  --color-foreground: #f8fafc;
+}
+
+:root {
+  --background: #000000;
+  --foreground: #f8fafc;
+}
+
+body {
+  background-color: var(--background);
+  color: var(--foreground);
+}
+
+/* Very subtle security grid texture for backgrounds */
+.bg-security-grid {
+  background-image: 
+    linear-gradient(to right, rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+  background-size: 40px 40px;
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+  width: 4px;
+}
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
