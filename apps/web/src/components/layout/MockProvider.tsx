@@ -27,33 +27,7 @@ export function MockProvider({ children }: { children: ReactNode }) {
     valueEstimate: "",
   });
 
-  // Global background activity simulation
-  useEffect(() => {
-    const interval = setInterval(() => {
-      if (activeVerification.state !== "IDLE" && activeVerification.state !== "FINALIZED") {
-        const agentNames = Object.keys(AGENTS) as AgentName[];
-        const randomAgent = agentNames[Math.floor(Math.random() * agentNames.length)];
-        const newLog = generateMockLog(randomAgent, activeVerification.state);
-        
-        setGlobalLogs(prev => {
-          const updated = [...prev, newLog];
-          if (updated.length > 50) updated.shift();
-          return updated;
-        });
-
-        // Simulate confidence oscillating upwards
-        if (activeVerification.state === "SCANNING" || activeVerification.state === "DEBATING") {
-          setActiveVerification(prev => ({
-            ...prev,
-            confidence: Math.min(99, prev.confidence + (Math.random() * 4 - 1)),
-          }));
-        }
-      }
-    }, 1500); // New log every 1.5s
-
-    return () => clearInterval(interval);
-  }, [activeVerification.state]);
-
+  // No more mock interval! State is driven purely by the API stream.
   const startVerification = (assetId: string) => {
     setActiveVerification({
       id: assetId,
@@ -64,10 +38,61 @@ export function MockProvider({ children }: { children: ReactNode }) {
     });
     setGlobalLogs([]);
 
-    // Simulate State Machine
-    setTimeout(() => setActiveVerification(p => ({ ...p, state: "DEBATING" })), 5000);
-    setTimeout(() => setActiveVerification(p => ({ ...p, state: "CONSENSUS", confidence: 92, fraudRisk: 3, valueEstimate: "$1.2M" })), 12000);
-    setTimeout(() => setActiveVerification(p => ({ ...p, state: "FINALIZED" })), 15000);
+    const eventSource = new EventSource(`http://localhost:8000/stream/${assetId}`);
+
+    eventSource.onmessage = (event) => {
+      const data = JSON.parse(event.data);
+      
+      if (data.type === "done") {
+        eventSource.close();
+        setActiveVerification(p => ({ ...p, state: "FINALIZED" }));
+        return;
+      }
+
+      if (data.type === "finding" || data.type === "debate" || data.type === "status") {
+        const newLog: AgentLog = {
+          id: Math.random().toString(),
+          timestamp: new Date().toISOString(),
+          agent: (data.agent || "Aletheia") as AgentName,
+          actionType: data.type === "finding" ? "SCANNING" : data.type === "debate" ? "DEBATING" : "CONSENSUS",
+          message: data.message,
+          confidence: data.confidence || 50,
+          txHash: null
+        };
+        
+        setGlobalLogs(prev => {
+          const updated = [...prev, newLog];
+          if (updated.length > 50) updated.shift();
+          return updated;
+        });
+
+        if (data.type === "status") {
+           setActiveVerification(p => ({ 
+             ...p, 
+             state: data.message.includes("Debate") ? "DEBATING" : "SCANNING",
+             confidence: data.confidence || p.confidence
+           }));
+        }
+      }
+
+      if (data.type === "consensus") {
+        setActiveVerification(p => ({ ...p, state: "CONSENSUS", confidence: data.confidence || p.confidence }));
+      }
+
+      if (data.type === "final_result") {
+        setActiveVerification(p => ({
+          ...p,
+          confidence: data.data.confidence,
+          valueEstimate: data.data.market_value_estimate
+        }));
+      }
+    };
+
+    eventSource.onerror = (err) => {
+      console.error("EventSource failed:", err);
+      eventSource.close();
+      setActiveVerification(p => ({ ...p, state: "FINALIZED" }));
+    };
   };
 
   return (
