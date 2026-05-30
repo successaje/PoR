@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useMock } from "@/components/layout/MockProvider";
 import { AGENTS } from "@/lib/mockEngine";
@@ -16,6 +16,11 @@ export default function VerifyPage() {
   const [assetId, setAssetId] = useState("");
   const [coords, setCoords] = useState("");
   
+  const imageInputRef = useRef<HTMLInputElement>(null);
+  const docInputRef = useRef<HTMLInputElement>(null);
+  const [imageName, setImageName] = useState<string | null>(null);
+  const [docName, setDocName] = useState<string | null>(null);
+  
   // Local mock upload state
   const [isUploading, setIsUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
@@ -30,16 +35,17 @@ export default function VerifyPage() {
     setIsUploading(true);
     setUploadProgress(0);
     
+    let progress = 0;
     const interval = setInterval(() => {
-      setUploadProgress(p => {
-        if (p >= 100) {
-          clearInterval(interval);
-          setIsUploading(false);
-          startVerification(assetId);
-          return 100;
-        }
-        return p + 25;
-      });
+      progress += 25;
+      if (progress >= 100) {
+        clearInterval(interval);
+        setIsUploading(false);
+        setUploadProgress(100);
+        startVerification(assetId);
+      } else {
+        setUploadProgress(progress);
+      }
     }, 400);
   };
 
@@ -311,20 +317,56 @@ export default function VerifyPage() {
             {/* Input 3: Mock File Upload - Images */}
             <div className="space-y-3">
                <label className="text-[10px] font-mono text-white/50 uppercase tracking-[0.2em]">Asset Imagery</label>
-               <div className={`border border-dashed ${isSubmitting ? 'border-white/10' : 'border-white/20 hover:border-white/40 cursor-pointer'} p-6 flex flex-col items-center justify-center text-center transition-colors`}>
-                 <div className="w-6 h-6 border border-white/20 mb-3 flex items-center justify-center text-white/40">+</div>
-                 <div className="text-[10px] font-mono text-white/40 uppercase tracking-widest">Select files or drag & drop</div>
-                 <div className="text-[9px] font-sans text-white/20 mt-1">JPG, PNG up to 10MB</div>
+               <input 
+                 type="file" 
+                 ref={imageInputRef} 
+                 className="hidden" 
+                 accept="image/jpeg, image/png"
+                 onChange={(e) => {
+                   if (e.target.files && e.target.files.length > 0) {
+                     setImageName(e.target.files[0].name);
+                   }
+                 }}
+               />
+               <div 
+                 onClick={() => !isSubmitting && imageInputRef.current?.click()}
+                 className={`border border-dashed ${isSubmitting ? 'border-white/10 cursor-not-allowed' : 'border-white/20 hover:border-white/40 cursor-pointer'} p-6 flex flex-col items-center justify-center text-center transition-colors`}
+               >
+                 <div className={`w-6 h-6 border ${imageName ? 'border-emerald-500/50 text-emerald-500/80 bg-emerald-500/10' : 'border-white/20 text-white/40'} mb-3 flex items-center justify-center`}>
+                   {imageName ? '✓' : '+'}
+                 </div>
+                 <div className={`text-[10px] font-mono ${imageName ? 'text-emerald-400' : 'text-white/40'} uppercase tracking-widest`}>
+                   {imageName ? imageName : 'Select files or drag & drop'}
+                 </div>
+                 {!imageName && <div className="text-[9px] font-sans text-white/20 mt-1">JPG, PNG up to 10MB</div>}
                </div>
             </div>
 
             {/* Input 4: Mock File Upload - Docs */}
             <div className="space-y-3">
                <label className="text-[10px] font-mono text-white/50 uppercase tracking-[0.2em]">Ownership Deed / Legal Docs</label>
-               <div className={`border border-dashed ${isSubmitting ? 'border-white/10' : 'border-white/20 hover:border-white/40 cursor-pointer'} p-6 flex flex-col items-center justify-center text-center transition-colors`}>
-                 <div className="w-6 h-6 border border-white/20 mb-3 flex items-center justify-center text-white/40">+</div>
-                 <div className="text-[10px] font-mono text-white/40 uppercase tracking-widest">Select files or drag & drop</div>
-                 <div className="text-[9px] font-sans text-white/20 mt-1">PDF, DOCX up to 20MB</div>
+               <input 
+                 type="file" 
+                 ref={docInputRef} 
+                 className="hidden" 
+                 accept=".pdf,.doc,.docx"
+                 onChange={(e) => {
+                   if (e.target.files && e.target.files.length > 0) {
+                     setDocName(e.target.files[0].name);
+                   }
+                 }}
+               />
+               <div 
+                 onClick={() => !isSubmitting && docInputRef.current?.click()}
+                 className={`border border-dashed ${isSubmitting ? 'border-white/10 cursor-not-allowed' : 'border-white/20 hover:border-white/40 cursor-pointer'} p-6 flex flex-col items-center justify-center text-center transition-colors`}
+               >
+                 <div className={`w-6 h-6 border ${docName ? 'border-emerald-500/50 text-emerald-500/80 bg-emerald-500/10' : 'border-white/20 text-white/40'} mb-3 flex items-center justify-center`}>
+                   {docName ? '✓' : '+'}
+                 </div>
+                 <div className={`text-[10px] font-mono ${docName ? 'text-emerald-400' : 'text-white/40'} uppercase tracking-widest`}>
+                   {docName ? docName : 'Select files or drag & drop'}
+                 </div>
+                 {!docName && <div className="text-[9px] font-sans text-white/20 mt-1">PDF, DOCX up to 20MB</div>}
                </div>
             </div>
             

@@ -7,6 +7,7 @@ from nodes import (
 )
 import asyncio
 import json
+import hashlib
 
 def route_debate(state: AssetVerificationState):
     """Conditional Edge router"""
@@ -123,12 +124,17 @@ async def run_debate(asset_data: dict, emit_func):
         # Because graph.astream yields incremental dicts, we need to merge or grab the final payload.
         # If the last node was consensus, it output status, etc.
         if final_state:
+            # Generate cryptographic evidence hash
+            state_str = json.dumps(final_state, sort_keys=True, default=str)
+            evidence_hash = "0x" + hashlib.sha256(state_str.encode('utf-8')).hexdigest()
+
             return {
                 "status": final_state.get("status", "VERIFIED"),
                 "confidence": final_state.get("consensus_score", 95.0),
                 "fraud_probability": final_state.get("fraud_probability", "LOW"),
                 "market_value_estimate": final_state.get("market_value_estimate", "$0"),
-                "yield_band": final_state.get("yield_band", "0%")
+                "yield_band": final_state.get("yield_band", "0%"),
+                "evidence_hash": evidence_hash
             }
         
     except Exception as e:

@@ -11,6 +11,7 @@ interface MockContextProps {
     confidence: number;
     fraudRisk: number;
     valueEstimate: string;
+    evidenceHash: string;
   };
   startVerification: (assetId: string) => void;
 }
@@ -25,6 +26,7 @@ export function MockProvider({ children }: { children: ReactNode }) {
     confidence: 0,
     fraudRisk: 0,
     valueEstimate: "",
+    evidenceHash: "",
   });
 
   // No more mock interval! State is driven purely by the API stream.
@@ -35,6 +37,7 @@ export function MockProvider({ children }: { children: ReactNode }) {
       confidence: 10,
       fraudRisk: 0,
       valueEstimate: "",
+      evidenceHash: "",
     });
     setGlobalLogs([]);
 
@@ -92,7 +95,8 @@ export function MockProvider({ children }: { children: ReactNode }) {
         setActiveVerification(p => ({
           ...p,
           confidence: data.data.confidence,
-          valueEstimate: data.data.market_value_estimate
+          valueEstimate: data.data.market_value_estimate,
+          evidenceHash: data.data.evidence_hash || "QmEvidenceHashMock..."
         }));
       }
     };
