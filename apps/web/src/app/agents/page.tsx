@@ -1,6 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
+import Link from "next/link";
 import { AGENTS } from "@/lib/mockEngine";
 
 export default function AgentsPage() {
@@ -20,13 +21,13 @@ export default function AgentsPage() {
           const repScore = (0.81 + (i * 0.02)).toFixed(3);
 
           return (
-            <motion.div
-              key={name}
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: i * 0.15, duration: 1.5, ease: "easeOut" }}
-              className="bg-[#000000] hover:bg-[#020202] transition-colors duration-700 relative overflow-hidden group"
-            >
+            <Link href={`/agents/${name}`} key={name} className="block group">
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: i * 0.15, duration: 1.5, ease: "easeOut" }}
+                className="bg-[#000000] border border-transparent group-hover:border-white/10 group-hover:bg-[#020202] transition-colors duration-700 relative overflow-hidden h-full"
+              >
               <div className="p-8">
                 <div className="flex justify-between items-start mb-10">
                   <div>
@@ -67,6 +68,7 @@ export default function AgentsPage() {
                 </svg>
               </div>
             </motion.div>
+            </Link>
           );
         })}
       </div>

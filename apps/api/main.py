@@ -32,6 +32,8 @@ async def debate_event_generator(asset_data: dict):
     async def debate_runner():
         final_result = await run_debate(asset_data, emit)
         await emit({"type": "final_result", "data": final_result})
+        # Let the UI linger on the beautiful radial convergence consensus animation
+        await asyncio.sleep(4)
         await emit({"type": "done"})
 
     task = asyncio.create_task(debate_runner())

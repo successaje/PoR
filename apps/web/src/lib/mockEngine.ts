@@ -1,9 +1,9 @@
-export type AgentName = "Atlas" | "Ledger" | "Prism" | "Oracle" | "Pulse" | "Tempest" | "Sentinel";
+import { NodeId, PROTOCOL_NODES } from "../config/nodes";
 
 export type AgentLog = {
   id: string;
-  agent: AgentName;
-  actionType: "INVESTIGATING" | "DEBATING" | "COMPLETED" | "ANOMALY" | "SCANNING" | "CONSENSUS";
+  agent: NodeId;
+  actionType: "INVESTIGATING" | "DEBATING" | "COMPLETED" | "ANOMALY" | "SCANNING" | "CONSENSUS" | "ARBITRATING";
   message: string;
   confidence: number;
   timestamp: number;
@@ -11,53 +11,78 @@ export type AgentLog = {
 
 export type VerificationState = "PENDING" | "AGENTS_ACTIVATING" | "DATA_COLLECTION" | "INDEPENDENT_ANALYSIS" | "DEBATE_PHASE" | "CONSENSUS_FORMING" | "FINALIZED" | "MINTED_ON_CHAIN" | "ARCHIVED";
 
-export const AGENTS: Record<AgentName, { role: string; color: string }> = {
-  Atlas: { role: "Geo-spatial Intelligence", color: "text-blue-400" },
-  Ledger: { role: "Registry & Ownership", color: "text-emerald-400" },
-  Prism: { role: "Fraud Detection", color: "text-purple-400" },
-  Oracle: { role: "Market Valuation", color: "text-amber-400" },
-  Pulse: { role: "Social Signals", color: "text-cyan-400" },
-  Tempest: { role: "Climate Risk", color: "text-teal-400" },
-  Sentinel: { role: "Compliance", color: "text-indigo-400" }
-};
+// Export AGENTS for backwards compatibility in other components,
+// though we encourage migrating to PROTOCOL_NODES directly.
+export const AGENTS = PROTOCOL_NODES;
 
 export const MOCK_ASSETS = [
   { id: "REG-8492-TX", address: "1440 Broadway, New York, NY", type: "Commercial", value: "$42M" },
   { id: "LGS-9921-VI", address: "Ikoyi Peninsula Plot 4A, Lagos", type: "Residential", value: "₦850M" },
+  { id: "DBI-1029-WH", address: "Jafza Warehouse Zone C, Dubai", type: "Industrial", value: "AED 120M" },
   { id: "LDN-3341-EC", address: "Canary Wharf Block 2, London", type: "Commercial", value: "£18M" },
+  { id: "TKY-5501-DC", address: "Shinjuku Data Center, Tokyo", type: "Infrastructure", value: "¥8.5B" },
+  { id: "PAR-8820-HM", address: "Le Marais Boutique Hotel, Paris", type: "Hospitality", value: "€32M" },
+  { id: "BER-2091-LH", address: "Brandenburg Logistics Hub, Berlin", type: "Industrial", value: "€45M" },
+  { id: "SYD-4102-SF", address: "Outback Solar Farm, Sydney", type: "Energy", value: "$110M AUD" },
+  { id: "MIA-7734-BC", address: "South Beach Condo, Miami", type: "Residential", value: "$12.5M" },
+  { id: "SGP-9912-MR", address: "Marina Bay Retail Plaza, Singapore", type: "Commercial", value: "$280M SGD" },
+  { id: "TOR-6621-HR", address: "King Street High-Rise, Toronto", type: "Residential", value: "$85M CAD" },
+  { id: "ATX-3310-TC", address: "Domain Tech Campus, Austin", type: "Commercial", value: "$155M" },
 ];
 
-export const generateMockLog = (agent: AgentName, phase: VerificationState): AgentLog => {
+export const generateMockLog = (agent: NodeId, phase: VerificationState): AgentLog => {
   const confidence = 0.5 + Math.random() * 0.49; // 0.5 to 0.99
   let actionType: AgentLog["actionType"] = "INVESTIGATING";
   let message = "Initiating scan...";
 
-  if (phase === "SCANNING") {
-    const messages = [
-      "Cross-referencing satellite timestamp data...",
-      "Validating structural integrity from public records...",
-      "Checking title deed against municipal database...",
-      "Analyzing market comparables within 5km radius...",
-      "Evaluating climate risk exposure index..."
-    ];
-    message = messages[Math.floor(Math.random() * messages.length)];
-  } else if (phase === "DEBATING") {
-    actionType = Math.random() > 0.7 ? "ANOMALY" : "DEBATING";
-    const messages = [
-      "Discrepancy found in valuation delta. Requesting re-check.",
-      "Ownership records verified. No liens detected.",
-      "Image metadata suggests minor manipulation on facade photos.",
-      "Climate models show acceptable flood risk threshold.",
-      "KYC cleared for all involved parties."
-    ];
-    message = messages[Math.floor(Math.random() * messages.length)];
-  } else if (phase === "CONSENSUS") {
-    actionType = "COMPLETED";
-    message = "Agent consensus reached. Data locked.";
+  if (agent === "Aegis") {
+    // Special logic for the meta-consensus node
+    if (phase === "CONSENSUS_FORMING") {
+      actionType = "ARBITRATING";
+      const messages = [
+        "Analyzing contradictions between Oracle and Prism...",
+        "Resolving valuation anomaly based on Ledger data...",
+        "Synthesizing final meta-consensus...",
+        "Calculating final probability distribution..."
+      ];
+      message = messages[Math.floor(Math.random() * messages.length)];
+    } else if (phase === "FINALIZED") {
+      actionType = "CONSENSUS";
+      message = "Ultimate truth synthesis locked and ready for on-chain anchoring.";
+    } else {
+      actionType = "INVESTIGATING";
+      message = "Monitoring sub-node telemetry...";
+    }
+  } else {
+    // Logic for the 7 investigation nodes
+    if (phase === "SCANNING" || phase === "DATA_COLLECTION") {
+      actionType = "SCANNING";
+      const messages = [
+        "Cross-referencing external data points...",
+        "Validating structural integrity...",
+        "Checking databases...",
+        "Analyzing comparables...",
+        "Evaluating risk exposure..."
+      ];
+      message = messages[Math.floor(Math.random() * messages.length)];
+    } else if (phase === "DEBATING" || phase === "INDEPENDENT_ANALYSIS") {
+      actionType = Math.random() > 0.7 ? "ANOMALY" : "DEBATING";
+      const messages = [
+        "Discrepancy found. Requesting re-check.",
+        "Records verified. No immediate issues detected.",
+        "Data suggests minor deviation from baseline.",
+        "Models show acceptable threshold.",
+        "Cleared for standard processing."
+      ];
+      message = messages[Math.floor(Math.random() * messages.length)];
+    } else if (phase === "CONSENSUS_FORMING" || phase === "CONSENSUS") {
+      actionType = "COMPLETED";
+      message = "Node analysis submitted to Aegis for arbitration.";
+    }
   }
 
   return {
-    id: Math.random().toString(36).substr(2, 9),
+    id: Math.random().toString(36).substring(2, 11),
     agent,
     actionType,
     message,

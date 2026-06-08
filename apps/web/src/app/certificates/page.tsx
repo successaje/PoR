@@ -1,6 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
+import Link from "next/link";
 import { MOCK_ASSETS, AGENTS } from "@/lib/mockEngine";
 
 export default function CertificatesPage() {
@@ -23,13 +24,13 @@ export default function CertificatesPage() {
           const tokenId = `0x7F${i}A9B${(i*3).toString(16).padStart(2, '0')}...E${i}1C`;
 
           return (
-            <motion.div
-              key={asset.id}
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: i * 0.2, duration: 1.5, ease: "easeOut" }}
-              className="group flex flex-col md:flex-row bg-[#000000] border border-white/5 hover:border-white/20 transition-colors duration-700"
-            >
+            <Link href={`/case/${asset.id}`} key={asset.id} className="block group">
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: i * 0.2, duration: 1.5, ease: "easeOut" }}
+                className="flex flex-col md:flex-row bg-[#000000] border border-white/5 group-hover:border-white/20 transition-colors duration-700 h-full"
+              >
               {/* NFT Visual Representation */}
               <div className="w-full md:w-48 bg-[#020202] border-r border-white/5 flex flex-col items-center justify-center p-8 relative overflow-hidden">
                 <div className="absolute inset-0 bg-security-grid opacity-20"></div>
@@ -78,7 +79,8 @@ export default function CertificatesPage() {
                   </div>
                 </div>
               </div>
-            </motion.div>
+              </motion.div>
+            </Link>
           );
         })}
       </div>

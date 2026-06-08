@@ -109,16 +109,16 @@ async def run_debate(asset_data: dict, emit_func):
                     await emit_func({"type": "finding", "agent": "Sentinel", "message": state_update.get("compliance_report")[:100] + "..."})
                 elif node_name == "consensus":
                     if state_update.get("anomalies_detected"):
-                        await emit_func({"type": "status", "message": "Anomalies detected. Routing to Aletheia Debate Chamber.", "confidence": 60})
+                        await emit_func({"type": "status", "message": "Anomalies detected. Routing to Aegis for Meta-Consensus.", "confidence": 60})
                     else:
-                        await emit_func({"type": "consensus", "message": "Consensus Achieved by Aletheia Engine.", "confidence": state_update.get("consensus_score")})
+                        await emit_func({"type": "consensus", "message": "Consensus Achieved by Aegis.", "confidence": state_update.get("consensus_score")})
                 elif node_name == "debate_chamber":
-                    await emit_func({"type": "debate", "agent": "Aletheia", "message": "Cross-examining conflicting data points..."})
+                    await emit_func({"type": "debate", "agent": "Aegis", "message": "Cross-examining conflicting data points..."})
                 
                 final_state = state_update
             
-            # Small delay to simulate processing so the UI looks cool
-            await asyncio.sleep(1)
+            # Increased delay to simulate deep analysis and let the UI breathe
+            await asyncio.sleep(3)
 
         # Return the final structure the UI expects
         # Because graph.astream yields incremental dicts, we need to merge or grab the final payload.

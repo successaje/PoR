@@ -1,16 +1,23 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import Link from "next/link";
 import { useMock } from "@/components/layout/MockProvider";
 import { AGENTS } from "@/lib/mockEngine";
 import { useAccount, useWriteContract, useWaitForTransactionReceipt } from 'wagmi';
-import { truthCertificateABI } from '@/lib/abi';
+import { truthCertificateABI, verificationManagerABI } from '@/lib/abi';
+
+const VERIFICATION_MANAGER_ADDRESS = "0x34d156d6c062804771652b48f2d65d58d3794113";
 
 export default function VerifyPage() {
   const { address } = useAccount();
   const { writeContract, data: hash, isPending: isWritePending } = useWriteContract();
   const { isLoading: isConfirming, isSuccess: isConfirmed } = useWaitForTransactionReceipt({ hash });
+  
+  // Mocking case creation for flawless demo flow
+  const [isMockSignPending, setIsMockSignPending] = useState(false);
+  const [isMockConfirming, setIsMockConfirming] = useState(false);
   
   const { activeVerification, startVerification, globalLogs } = useMock();
   const [assetId, setAssetId] = useState("");
@@ -29,24 +36,30 @@ export default function VerifyPage() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!assetId) return;
+    if (!assetId || !address) return;
     
-    // Simulate File Uploads
-    setIsUploading(true);
-    setUploadProgress(0);
+    setIsMockSignPending(true);
     
-    let progress = 0;
-    const interval = setInterval(() => {
-      progress += 25;
-      if (progress >= 100) {
-        clearInterval(interval);
-        setIsUploading(false);
-        setUploadProgress(100);
-        startVerification(assetId);
-      } else {
+    // Simulate user signing transaction
+    setTimeout(() => {
+      setIsMockSignPending(false);
+      setIsMockConfirming(true);
+      
+      // Simulate transaction confirming + upload progress
+      setIsUploading(true);
+      setUploadProgress(0);
+      let progress = 0;
+      const interval = setInterval(() => {
+        progress += 10;
         setUploadProgress(progress);
-      }
-    }, 400);
+        if (progress >= 100) {
+          clearInterval(interval);
+          setIsUploading(false);
+          setIsMockConfirming(false);
+          startVerification(assetId);
+        }
+      }, 200); // 2 seconds total
+    }, 1500); // 1.5 seconds wait for signature
   };
 
   // Determine current UI State for the right panel
@@ -87,18 +100,19 @@ export default function VerifyPage() {
           <h4 className="absolute top-10 left-10 font-mono text-[10px] text-white/30 tracking-[0.2em] uppercase">Radial Convergence</h4>
           
           <div className="relative w-64 h-64 flex items-center justify-center">
-            {/* Center Core */}
+            {/* Center Core: Aegis */}
             <motion.div 
               initial={{ scale: 0 }}
               animate={{ scale: [1, 1.2, 1] }}
               transition={{ repeat: Infinity, duration: 2 }}
-              className="w-16 h-16 bg-white/10 border border-white/30 rounded-full z-10 flex items-center justify-center backdrop-blur-md"
+              className="w-20 h-20 bg-rose-500/10 border border-rose-500/50 rounded-full z-10 flex flex-col items-center justify-center backdrop-blur-md relative"
             >
-              <span className="font-mono text-[10px] text-white/80">{activeVerification.confidence.toFixed(0)}%</span>
+              <span className="font-mono text-[8px] text-rose-400 uppercase tracking-widest absolute -top-4">Aegis</span>
+              <span className="font-mono text-[12px] text-white/90">{activeVerification.confidence.toFixed(0)}%</span>
             </motion.div>
             
-            {/* Orbiting Agents */}
-            {Object.keys(AGENTS).map((agent, i) => {
+            {/* Orbiting Agents (7 nodes) */}
+            {Object.keys(AGENTS).filter(a => a !== 'Aegis').map((agent, i) => {
               const angle = (i / 7) * Math.PI * 2;
               const radius = 100;
               const x = Math.cos(angle) * radius;
@@ -175,38 +189,46 @@ export default function VerifyPage() {
                 <div className="space-y-3 font-mono text-[10px] text-white/70 break-all">
                   <div className="flex flex-col"><span className="text-white/30">Mantle TX:</span> {hash}</div>
                   <div className="flex flex-col"><span className="text-white/30">Evidence Hash:</span> 0x8a92f8e1...4b9c (SHA-256)</div>
-                  <div className="flex flex-col"><span className="text-white/30">Verified By:</span> Aletheia Engine (7 Nodes)</div>
+                  <div className="flex flex-col"><span className="text-white/30">Verified By:</span> Aletheia Engine (8 Nodes)</div>
                 </div>
                 <div className="mt-6 text-right">
                   <a href={`https://explorer.sepolia.mantle.xyz/tx/${hash}`} target="_blank" rel="noreferrer" className="text-[10px] font-mono text-cyan-500 hover:text-cyan-400 uppercase tracking-widest transition-colors">
                     View on Mantle Explorer ↗
                   </a>
                 </div>
+                <div className="mt-6">
+                  <Link href={`/case/${assetId || "REG-8492-TX"}`} className="block w-full text-center py-3 bg-white/10 hover:bg-white/20 text-white font-sans text-[11px] tracking-[0.2em] uppercase transition-colors">
+                    Enter Verification Room
+                  </Link>
+                </div>
               </div>
             ) : null}
             
             {!isConfirmed && (
-              <button 
-                onClick={() => {
-                  if (!address) return;
-                  writeContract({
-                    address: '0x86C41594e9aDeCcf8c85ba9EEe0138C7c9E70dBc', // TruthCertificateNFT
-                    abi: truthCertificateABI,
-                    functionName: 'mintCertificate',
-                    args: [
-                      address,
-                      assetId || "REG-8492-TX",
-                      Math.floor(activeVerification.confidence),
-                      BigInt(60 * 60 * 24 * 30), // 30 days
-                      "QmEvidenceHash..." // This would be the real hash from the API in production
-                    ]
-                  });
-                }}
-                disabled={isWritePending || isConfirming || !address}
-                className="w-full py-4 bg-white hover:bg-white/90 text-black font-sans text-[11px] tracking-[0.2em] uppercase transition-colors disabled:opacity-50"
-              >
-                {!address ? 'CONNECT IDENTITY TO MINT' : isWritePending ? 'AWAITING SIGNATURE...' : isConfirming ? 'MINTING ON MANTLE...' : 'Issue Truth Certificate'}
-              </button>
+              <div className="space-y-4">
+                {/* TODO: Add useWriteContract for VerificationManager.resolveCase here if not done off-chain */}
+                <button 
+                  onClick={() => {
+                    if (!address) return;
+                    writeContract({
+                      address: '0x86C41594e9aDeCcf8c85ba9EEe0138C7c9E70dBc', // TruthCertificateNFT
+                      abi: truthCertificateABI,
+                      functionName: 'mintCertificate',
+                      args: [
+                        address,
+                        assetId || "REG-8492-TX",
+                        Math.floor(activeVerification.confidence),
+                        BigInt(60 * 60 * 24 * 30), // 30 days
+                        "QmEvidenceHash..." // This would be the real hash from the API in production
+                      ]
+                    });
+                  }}
+                  disabled={isWritePending || isConfirming || !address}
+                  className="w-full py-4 bg-white hover:bg-white/90 text-black font-sans text-[11px] tracking-[0.2em] uppercase transition-colors disabled:opacity-50"
+                >
+                  {!address ? 'CONNECT IDENTITY TO MINT' : isWritePending ? 'AWAITING SIGNATURE...' : isConfirming ? 'MINTING ON MANTLE...' : 'Issue Truth Certificate'}
+                </button>
+              </div>
             )}
           </motion.div>
         </div>
@@ -230,10 +252,10 @@ export default function VerifyPage() {
                   transition={{ delay: i * 0.1, duration: 0.5 }}
                   className="flex flex-col gap-3"
                 >
-                  <div className={`w-8 h-8 border flex items-center justify-center transition-colors duration-500 border-white/30 bg-white/5`}>
-                    <div className="w-1.5 h-1.5 bg-white/80 animate-pulse"></div>
+                  <div className={`w-8 h-8 border flex items-center justify-center transition-colors duration-500 border-white/30 ${agent === 'Aegis' ? 'bg-rose-500/10 border-rose-500/50' : 'bg-white/5'}`}>
+                    <div className={`w-1.5 h-1.5 animate-pulse ${agent === 'Aegis' ? 'bg-rose-400' : 'bg-white/80'}`}></div>
                   </div>
-                  <span className="font-mono text-[8px] uppercase tracking-widest text-white/40">{agent.substring(0,3)}</span>
+                  <span className={`font-mono text-[8px] uppercase tracking-widest ${agent === 'Aegis' ? 'text-rose-400/80' : 'text-white/40'}`}>{agent.substring(0,3)}</span>
                 </motion.div>
               );
             })}
@@ -370,37 +392,44 @@ export default function VerifyPage() {
                </div>
             </div>
             
-            <button
-              type="submit"
-              disabled={isSubmitting || !assetId}
-              className="w-full bg-white/10 hover:bg-white/20 text-white font-sans text-[11px] tracking-[0.2em] uppercase py-4 transition-colors disabled:opacity-30 flex items-center justify-center gap-3 relative overflow-hidden"
-            >
-              {/* Upload Progress Bar Layer */}
-              {isUploading && (
-                <motion.div 
-                  className="absolute left-0 top-0 h-full bg-white/10" 
-                  initial={{ width: 0 }}
-                  animate={{ width: `${uploadProgress}%` }}
-                  transition={{ ease: "linear", duration: 0.4 }}
-                />
-              )}
-              
-              <span className="relative z-10 flex items-center gap-3">
-                {isUploading ? (
-                  <>
-                    <div className="w-2 h-2 bg-white/50 animate-[pulse_1.5s_ease-in-out_infinite]"></div>
-                    UPLOADING DATA... {uploadProgress}%
-                  </>
-                ) : activeVerification.state !== "PENDING" && activeVerification.state !== "FINALIZED" ? (
-                  <>
-                    <div className="w-2 h-2 bg-white/50 animate-[pulse_1.5s_ease-in-out_infinite]"></div>
-                    CONSENSUS IN PROGRESS
-                  </>
-                ) : (
-                  "INITIATE PROOF-OF-REALITY"
+              <button
+                type="submit"
+                disabled={isSubmitting || !assetId || !address}
+                className="w-full bg-white/10 hover:bg-white/20 text-white font-sans text-[11px] tracking-[0.2em] uppercase py-4 transition-colors disabled:opacity-30 flex items-center justify-center gap-3 relative overflow-hidden"
+              >
+                {/* Upload Progress Bar Layer */}
+                {isUploading && (
+                  <motion.div 
+                    className="absolute left-0 top-0 h-full bg-white/10" 
+                    initial={{ width: 0 }}
+                    animate={{ width: `${uploadProgress}%` }}
+                    transition={{ ease: "linear", duration: 0.4 }}
+                  />
                 )}
-              </span>
-            </button>
+                
+                <span className="relative z-10 flex items-center gap-3">
+                  {!address ? (
+                    "CONNECT WALLET TO INITIATE"
+                  ) : isMockSignPending ? (
+                    <>
+                      <div className="w-2 h-2 bg-white/50 animate-[pulse_1.5s_ease-in-out_infinite]"></div>
+                      AWAITING SIGNATURE...
+                    </>
+                  ) : isMockConfirming || isUploading ? (
+                    <>
+                      <div className="w-2 h-2 bg-white/50 animate-[pulse_1.5s_ease-in-out_infinite]"></div>
+                      CREATING ON MANTLE... {uploadProgress}%
+                    </>
+                  ) : activeVerification.state !== "PENDING" && activeVerification.state !== "FINALIZED" ? (
+                    <>
+                      <div className="w-2 h-2 bg-white/50 animate-[pulse_1.5s_ease-in-out_infinite]"></div>
+                      CONSENSUS IN PROGRESS
+                    </>
+                  ) : (
+                    "INITIATE PROOF-OF-REALITY"
+                  )}
+                </span>
+              </button>
           </form>
         </div>
 
