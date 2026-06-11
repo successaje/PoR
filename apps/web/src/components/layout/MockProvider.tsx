@@ -70,19 +70,28 @@ export function MockProvider({ children }: { children: ReactNode }) {
       setActiveVerification(p => ({ ...p, state: "DATA_COLLECTION", confidence: 35 }));
       
       // Simulate investigation logs over the next 10 seconds
+      const scanMessages = [
+        "Acquiring satellite imagery and extracting geolocation metadata...",
+        "Querying local municipal databases for ownership records...",
+        "Scanning global sanctions list and OFAC registries...",
+        "Ingesting recent market comparables from area APIs...",
+        "Evaluating historical transaction graph for anomalies..."
+      ];
+      const scanAgents = ["Atlas", "Oracle", "Sentinel", "Prism", "Ledger"];
+      
       for (let i = 0; i < 5; i++) {
+        // Vary confirmation times randomly between 500ms and 9500ms
+        const delay = 500 + Math.random() * 9000;
         timers.push(setTimeout(() => {
-          const agents = Object.keys(AGENTS) as AgentName[];
-          const randomAgent = agents[Math.floor(Math.random() * agents.length)];
           addLog({
-            agent: randomAgent,
+            agent: scanAgents[i],
             actionType: "SCANNING",
-            message: `Acquiring satellite imagery and extracting geolocation metadata for registry ${assetId}...`,
+            message: scanMessages[i],
             confidence: 35 + (i * 5),
             txHash: null
           });
           setActiveVerification(p => ({ ...p, confidence: p.confidence + Math.random() * 5 }));
-        }, i * 2000)); // Every 2 seconds
+        }, delay));
       }
     }, 2000));
 
@@ -91,17 +100,25 @@ export function MockProvider({ children }: { children: ReactNode }) {
       setActiveVerification(p => ({ ...p, state: "DEBATE_PHASE", confidence: 65 }));
       
       timers.push(setTimeout(() => {
-        addLog({ agent: "Prism", actionType: "DEBATING", message: "Discrepancy found in valuation metric derived from local property registries. Flagging for cross-examination.", confidence: 60, txHash: null });
+        addLog({ agent: "Prism", actionType: "DEBATING", message: "CRITICAL: Document metadata anomaly detected in EXIF timestamps. Dates do not align with municipal claims.", confidence: 60, txHash: null });
       }, 1000));
       
       timers.push(setTimeout(() => {
-        addLog({ agent: "Ledger", actionType: "DEBATING", message: "Cross-referencing Prism's claim. Historical transaction data does not support the discrepancy. Suggesting re-evaluation.", confidence: 68, txHash: null });
-      }, 3500));
+        addLog({ agent: "Aegis", actionType: "ARBITRATING", message: "Aegis requests re-evaluation. Oracle, verify KYC metadata against Ledger's historical index.", confidence: 62, txHash: null });
+      }, 2500));
 
       timers.push(setTimeout(() => {
-        addLog({ agent: "Aegis", actionType: "DEBATING", message: "Conflict resolution initiated. Weighting Ledger's historical index higher. Discrepancy resolved.", confidence: 75, txHash: null });
+        addLog({ agent: "Oracle", actionType: "SCANNING", message: "Re-evaluating... KYC provider confirms secondary shell company associated with title deed. Prism is correct.", confidence: 68, txHash: null });
+      }, 4000));
+      
+      timers.push(setTimeout(() => {
+        addLog({ agent: "Ledger", actionType: "DEBATING", message: "On-chain transaction graph verifies shell company linkage. Anomalous behavior confirmed.", confidence: 72, txHash: null });
+      }, 5500));
+
+      timers.push(setTimeout(() => {
+        addLog({ agent: "Aegis", actionType: "RESOLUTION", message: "Conflict resolved. Fraud risk elevated but within acceptable threshold. Adjusting final truth score.", confidence: 75, txHash: null });
         setActiveVerification(p => ({ ...p, confidence: 75 }));
-      }, 6000));
+      }, 7000));
 
     }, 12000)); // 2s + 10s
 

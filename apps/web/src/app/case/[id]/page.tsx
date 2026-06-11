@@ -1,15 +1,28 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { AGENTS } from "@/lib/mockEngine";
+import { AGENTS, MOCK_ASSETS } from "@/lib/mockEngine";
 import Link from "next/link";
 import { use } from "react";
+import TextScramble from "@/components/ui/TextScramble";
 
 export default function VerificationRoom({ params }: { params: Promise<{ id: string }> }) {
   const resolvedParams = use(params);
   const { id } = resolvedParams;
 
-  const mockDebateLogs = [
+  const idHash = id.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+  const isRejected = idHash % 3 === 0;
+
+  const asset = MOCK_ASSETS.find(a => a.id === id) || { value: "Valuation Unknown" };
+
+  const mockDebateLogs = isRejected ? [
+    { time: "00:00:12", agent: "Atlas", action: "SCANNING", text: "Cross-referencing global geospatial registry. Coordinates validated." },
+    { time: "00:00:14", agent: "Oracle", action: "SCANNING", text: "Querying local municipal databases for ownership records." },
+    { time: "00:00:18", agent: "Prism", action: "FLAGGED", text: "CRITICAL: Synthetic manipulation detected in structural survey metadata. EXIF data inconsistent with claimed date." },
+    { time: "00:00:21", agent: "Sentinel", action: "DEBATING", text: "Sanctions list cleared, but KYC provider flagged secondary shell company associated with title deed." },
+    { time: "00:00:25", agent: "Aegis", action: "RESOLUTION", text: "Conflict resolution failed. Prism's metadata discrepancy cannot be resolved. Risk threshold exceeded." },
+    { time: "00:00:28", agent: "Aletheia", action: "REJECTED", text: "Consensus aborted. Verification failed. Fraud risk too high to mint truth certificate." }
+  ] : [
     { time: "00:00:12", agent: "Atlas", action: "SCANNING", text: "Cross-referencing global geospatial registry. Coordinates validated." },
     { time: "00:00:14", agent: "Oracle", action: "SCANNING", text: "Querying local municipal databases for ownership records." },
     { time: "00:00:18", agent: "Prism", action: "DEBATING", text: "Discrepancy found in valuation metric derived from local property registries. Flagging for cross-examination." },
@@ -28,14 +41,18 @@ export default function VerificationRoom({ params }: { params: Promise<{ id: str
             ← Back to Registry
           </Link>
           <h1 className="text-4xl font-light tracking-tight text-white/90 mb-2">Verification Case</h1>
-          <p className="font-mono text-[12px] text-white/40 tracking-[0.2em] uppercase">{id}</p>
+          <p className="font-mono text-[12px] text-white/40 tracking-[0.2em] uppercase">
+            <TextScramble text={id} />
+          </p>
         </div>
         <div className="flex flex-col items-end">
-          <div className="text-[10px] font-mono text-emerald-500/80 uppercase tracking-[0.2em] mb-2 flex items-center gap-2">
-            <div className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></div>
-            Finalized & Minted
+          <div className={`text-[10px] font-mono ${isRejected ? 'text-red-500/80' : 'text-emerald-500/80'} uppercase tracking-[0.2em] mb-2 flex items-center gap-2`}>
+            <div className={`w-2 h-2 ${isRejected ? 'bg-red-500' : 'bg-emerald-500'} rounded-full animate-pulse`}></div>
+            {isRejected ? "Verification Failed" : "Finalized & Minted"}
           </div>
-          <p className="text-[10px] font-mono text-white/30 uppercase tracking-[0.2em]">Mantle Network: 0x8f...4b9c</p>
+          <p className="text-[10px] font-mono text-white/30 uppercase tracking-[0.2em]">
+            {isRejected ? "Mantle Network: TX REJECTED" : "Mantle Network: 0x8f...4b9c"}
+          </p>
         </div>
       </div>
 
@@ -48,23 +65,45 @@ export default function VerificationRoom({ params }: { params: Promise<{ id: str
           <div className="bg-[#050505] border border-white/10 p-8 space-y-8">
             <div>
               <h3 className="text-[10px] font-mono text-white/40 uppercase tracking-[0.2em] mb-2">Truth Score</h3>
-              <div className="text-5xl font-light text-white/90">96.8<span className="text-2xl text-white/30">%</span></div>
+              <div className="text-5xl font-light text-white/90">
+                <TextScramble text={isRejected ? "41.2" : "96.8"} duration={1200} />
+                <span className="text-2xl text-white/30">%</span>
+              </div>
             </div>
             
             <div className="grid grid-cols-2 gap-6 pt-6 border-t border-white/[0.04]">
               <div>
                 <h3 className="text-[9px] font-mono text-white/40 uppercase tracking-[0.2em] mb-1">Fraud Risk</h3>
-                <div className="text-xl text-emerald-400 font-light">1.2%</div>
+                <div className={`text-xl font-light ${isRejected ? 'text-red-400' : 'text-emerald-400'}`}>
+                  <TextScramble text={isRejected ? "87.5%" : "1.2%"} duration={1000} delay={200} />
+                </div>
               </div>
               <div>
                 <h3 className="text-[9px] font-mono text-white/40 uppercase tracking-[0.2em] mb-1">Risk Level</h3>
-                <div className="text-xl text-emerald-400 font-light">LOW</div>
+                <div className={`text-xl font-light ${isRejected ? 'text-red-400' : 'text-emerald-400'}`}>
+                  <TextScramble text={isRejected ? "CRITICAL" : "LOW"} duration={800} delay={400} />
+                </div>
               </div>
               <div className="col-span-2">
                 <h3 className="text-[9px] font-mono text-white/40 uppercase tracking-[0.2em] mb-1">Market Value (Est.)</h3>
-                <div className="text-2xl text-white/80 font-light">$1,450,000</div>
+                <div className="text-2xl text-white/80 font-light">
+                  <TextScramble text={asset.value} duration={1500} delay={300} />
+                </div>
               </div>
             </div>
+          </div>
+
+          {/* Executive Summary */}
+          <div className="bg-[#050505] border border-white/10 p-8">
+            <h3 className="text-[10px] font-mono text-white/40 uppercase tracking-[0.2em] mb-4 flex items-center gap-3">
+              <div className="w-1.5 h-1.5 bg-white/20"></div>
+              Consensus Reasoning
+            </h3>
+            <p className="text-sm text-white/70 font-light leading-relaxed">
+              {isRejected 
+                ? "Aletheia Global Network aborted consensus due to synthetic manipulation detected in structural survey metadata by the Prism node. Historical data conflicts could not be resolved, and the fraud risk exceeded acceptable protocol thresholds."
+                : "Aletheia Global Network reached consensus after successfully verifying multi-source geospatial data, clearing global sanctions lists, and validating local municipal ownership registries. No anomalies were detected in the historical transaction graph."}
+            </p>
           </div>
 
           {/* Evidence Layer */}
@@ -76,7 +115,9 @@ export default function VerificationRoom({ params }: { params: Promise<{ id: str
             <div className="space-y-4 font-mono text-[10px] text-white/60">
               <div className="flex flex-col">
                 <span className="text-white/30 uppercase tracking-widest mb-1">Root Hash (SHA-256)</span>
-                <span className="break-all">0x8a92f8e134b9c7d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8</span>
+                <span className="break-all">
+                  <TextScramble text="0x8a92f8e134b9c7d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8" duration={2000} delay={500} />
+                </span>
               </div>
               <div className="flex flex-col pt-4 border-t border-white/[0.04]">
                 <span className="text-white/30 uppercase tracking-widest mb-1">Data Sources Evaluated</span>
@@ -112,8 +153,13 @@ export default function VerificationRoom({ params }: { params: Promise<{ id: str
                     <span className="text-white/20">{data.role.split(" ")[0]}</span>
                   </div>
                   <div className="flex justify-between items-end">
-                    <span className="text-2xl font-light text-white/90">{(94.1 + (i * 0.65)).toFixed(1)}<span className="text-sm text-white/30">%</span></span>
-                    <span className="text-[9px] font-mono text-white/30 uppercase tracking-widest">Weight: {(0.12 + (i * 0.015)).toFixed(2)}</span>
+                    <span className="text-2xl font-light text-white/90">
+                      <TextScramble text={(94.1 + (i * 0.65)).toFixed(1)} duration={1000} delay={i * 100} />
+                      <span className="text-sm text-white/30">%</span>
+                    </span>
+                    <span className="text-[9px] font-mono text-white/30 uppercase tracking-widest">
+                      Weight: <TextScramble text={(0.12 + (i * 0.015)).toFixed(2)} duration={800} delay={i * 100 + 200} />
+                    </span>
                   </div>
                   <div className="h-1 w-full bg-white/5 mt-3">
                     <div className="h-full bg-white/20" style={{ width: `${94.1 + (i * 0.65)}%` }}></div>
@@ -139,13 +185,15 @@ export default function VerificationRoom({ params }: { params: Promise<{ id: str
                   transition={{ delay: i * 0.1 }}
                   className={`pl-6 border-l-2 ${
                     log.action === "DEBATING" ? "border-amber-500/50" : 
-                    log.action === "RESOLUTION" ? "border-emerald-500/50" : 
+                    log.action === "RESOLUTION" || log.action === "CONSENSUS" ? "border-emerald-500/50" : 
+                    log.action === "FLAGGED" || log.action === "REJECTED" ? "border-red-500/50" :
                     "border-white/10"
                   } relative`}
                 >
                   <div className={`absolute -left-[5px] top-1 w-2 h-2 rounded-full ${
                     log.action === "DEBATING" ? "bg-amber-500" : 
-                    log.action === "RESOLUTION" ? "bg-emerald-500" : 
+                    log.action === "RESOLUTION" || log.action === "CONSENSUS" ? "bg-emerald-500" : 
+                    log.action === "FLAGGED" || log.action === "REJECTED" ? "bg-red-500" :
                     "bg-white/20"
                   }`}></div>
                   
@@ -153,7 +201,8 @@ export default function VerificationRoom({ params }: { params: Promise<{ id: str
                     <span className="text-white/30">{log.time}</span>
                     <span className={
                       log.action === "DEBATING" ? "text-amber-400" : 
-                      log.action === "RESOLUTION" ? "text-emerald-400" : 
+                      log.action === "RESOLUTION" || log.action === "CONSENSUS" ? "text-emerald-400" : 
+                      log.action === "FLAGGED" || log.action === "REJECTED" ? "text-red-400" :
                       "text-white/60"
                     }>{log.agent}</span>
                     <span className="text-white/20">•</span>

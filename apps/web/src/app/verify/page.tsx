@@ -277,11 +277,25 @@ export default function VerifyPage() {
                      initial={{ opacity: 0, x: -10 }}
                      animate={{ opacity: 1, x: 0 }}
                      transition={{ duration: 0.5, ease: "easeOut" }}
-                     className={`pl-4 border-l ${log.actionType === "DEBATING" ? 'border-amber-500/50' : 'border-white/[0.05]'}`}
+                     className={`pl-4 border-l ${
+                       log.actionType === "DEBATING" ? 'border-amber-500/50' : 
+                       log.actionType === "ARBITRATING" ? 'border-purple-500/50' :
+                       log.actionType === "RESOLUTION" || log.actionType === "CONSENSUS" ? 'border-emerald-500/50' :
+                       log.actionType === "SCANNING" ? 'border-cyan-500/50' :
+                       'border-white/[0.05]'
+                     }`}
                    >
                      <div className="flex items-center gap-4 mb-2 font-mono text-[9px] tracking-[0.2em] uppercase">
-                        <span className={log.actionType === "DEBATING" ? "text-amber-400" : "text-white/60"}>{log.agent}</span>
+                        <span className={
+                          log.actionType === "DEBATING" ? "text-amber-400" : 
+                          log.actionType === "ARBITRATING" ? "text-purple-400" :
+                          log.actionType === "RESOLUTION" || log.actionType === "CONSENSUS" ? "text-emerald-400" :
+                          log.actionType === "SCANNING" ? "text-cyan-400" :
+                          "text-white/60"
+                        }>{log.agent}</span>
                         {log.actionType === "DEBATING" && <span className="text-amber-500/60 ml-auto">CROSS-EXAMINATION</span>}
+                        {log.actionType === "ARBITRATING" && <span className="text-purple-500/60 ml-auto">META-CONSENSUS</span>}
+                        {log.actionType === "RESOLUTION" && <span className="text-emerald-500/60 ml-auto">CONFLICT RESOLVED</span>}
                      </div>
                      <div className="text-[12px] text-white/80 font-sans font-light leading-relaxed">
                        "{log.message}"
