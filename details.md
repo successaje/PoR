@@ -346,11 +346,11 @@ Smart Contracts
 * Foundry
 * Mantle Network
 
-Core Contracts
+Core Contracts & Deployed Addresses (Mantle Sepolia)
 
-* VerificationManager
-* AgentRegistry
-* TruthCertificateNFT
+* **TruthCertificateNFT**: [`0x86C41594e9aDeCcf8c85ba9EEe0138C7c9E70dBc`](https://explorer.sepolia.mantle.xyz/address/0x86C41594e9aDeCcf8c85ba9EEe0138C7c9E70dBc)
+* **AgentRegistry**: [`0xc4d732199b7d21207a74cfe6ced4d17dd330c7ea`](https://explorer.sepolia.mantle.xyz/address/0xc4d732199b7d21207a74cfe6ced4d17dd330c7ea)
+* **VerificationManager**: [`0x34d156d6c062804771652b48f2d65d58d3794113`](https://explorer.sepolia.mantle.xyz/address/0x34d156d6c062804771652b48f2d65d58d3794113)
 
 ---
 
