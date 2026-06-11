@@ -1,7 +1,7 @@
 "use client";
 
 import React, { createContext, useContext, useState, useEffect, ReactNode, useRef } from "react";
-import { AgentLog, VerificationState, AgentName, AGENTS } from "@/lib/mockEngine";
+import { AgentLog, VerificationState, AGENTS } from "@/lib/mockEngine";
 
 interface MockContextProps {
   globalLogs: AgentLog[];
