@@ -42,7 +42,7 @@ export function MockProvider({ children }: { children: ReactNode }) {
 
   const addLog = (log: Omit<AgentLog, "id" | "timestamp">) => {
     setGlobalLogs(prev => {
-      const newLog: AgentLog = { ...log, id: Math.random().toString(), timestamp: new Date().toISOString() };
+      const newLog: AgentLog = { ...log, id: Math.random().toString(), timestamp: Date.now() };
       const updated = [...prev, newLog];
       if (updated.length > 50) updated.shift();
       return updated;
