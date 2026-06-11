@@ -187,26 +187,36 @@ export default function VerifyPage() {
               </div>
             </div>
 
-            {isConfirmed && hash ? (
-              <div className="p-6 border border-white/10 bg-black/50 mb-8">
-                <h5 className="font-mono text-[9px] text-white/40 uppercase tracking-widest mb-4">Audit Trail & Evidence</h5>
-                <div className="space-y-3 font-mono text-[10px] text-white/70 break-all">
-                  <div className="flex flex-col"><span className="text-white/30">Mantle TX:</span> {hash}</div>
-                  <div className="flex flex-col"><span className="text-white/30">Evidence Hash:</span> 0x8a92f8e1...4b9c (SHA-256)</div>
-                  <div className="flex flex-col"><span className="text-white/30">Verified By:</span> Aletheia Engine (8 Nodes)</div>
-                </div>
-                <div className="mt-6 text-right">
-                  <a href={`https://explorer.sepolia.mantle.xyz/tx/${hash}`} target="_blank" rel="noreferrer" className="text-[10px] font-mono text-cyan-500 hover:text-cyan-400 uppercase tracking-widest transition-colors">
-                    View on Mantle Explorer ↗
-                  </a>
-                </div>
+            <div className="p-6 border border-white/10 bg-black/50 mb-8">
+              <h5 className="font-mono text-[9px] text-white/40 uppercase tracking-widest mb-4">Audit Trail & Evidence</h5>
+              <div className="space-y-3 font-mono text-[10px] text-white/70 break-all">
+                {createCaseHash && (
+                  <div className="flex flex-col">
+                    <span className="text-white/30">Case Initiation TX:</span> 
+                    <a href={`https://explorer.sepolia.mantle.xyz/tx/${createCaseHash}`} target="_blank" rel="noreferrer" className="text-cyan-500 hover:text-cyan-400 transition-colors">
+                      {createCaseHash} ↗
+                    </a>
+                  </div>
+                )}
+                {isConfirmed && hash && (
+                  <div className="flex flex-col">
+                    <span className="text-white/30">Certificate Mint TX:</span> 
+                    <a href={`https://explorer.sepolia.mantle.xyz/tx/${hash}`} target="_blank" rel="noreferrer" className="text-cyan-500 hover:text-cyan-400 transition-colors">
+                      {hash} ↗
+                    </a>
+                  </div>
+                )}
+                <div className="flex flex-col"><span className="text-white/30">Evidence Hash:</span> 0x8a92f8e1...4b9c (SHA-256)</div>
+                <div className="flex flex-col"><span className="text-white/30">Verified By:</span> Aletheia Engine (8 Nodes)</div>
+              </div>
+              {isConfirmed && hash && (
                 <div className="mt-6">
                   <Link href={`/case/${assetId || "REG-8492-TX"}`} className="block w-full text-center py-3 bg-white/10 hover:bg-white/20 text-white font-sans text-[11px] tracking-[0.2em] uppercase transition-colors">
                     Enter Verification Room
                   </Link>
                 </div>
-              </div>
-            ) : null}
+              )}
+            </div>
             
             {!isConfirmed && (
               <div className="space-y-4">
