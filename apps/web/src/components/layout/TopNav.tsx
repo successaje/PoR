@@ -49,7 +49,7 @@ export function TopNav() {
         {/* Status Indicator */}
         <div className="flex items-center gap-3 font-sans text-[10px] tracking-widest uppercase text-white/40">
           <span className="hidden sm:block">System Status</span>
-          {activeVerification.state === "IDLE" ? (
+          {activeVerification.state === "PENDING" ? (
              <div className="flex items-center gap-2 text-white/60">
                <span className="w-1.5 h-1.5 rounded-full bg-white/20"></span>
                STANDBY

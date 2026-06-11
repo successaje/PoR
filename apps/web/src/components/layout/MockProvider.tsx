@@ -127,7 +127,7 @@ export function MockProvider({ children }: { children: ReactNode }) {
       setActiveVerification(p => ({ ...p, state: "CONSENSUS_FORMING", confidence: 85 }));
       
       timers.push(setTimeout(() => {
-        addLog({ agent: "Aletheia", actionType: "CONSENSUS", message: "Synthesizing final cryptographic evidence layer. Preparing payload for on-chain anchoring.", confidence: 92, txHash: null });
+        addLog({ agent: "Aegis", actionType: "CONSENSUS", message: "Synthesizing final cryptographic evidence layer. Preparing payload for on-chain anchoring.", confidence: 92, txHash: null });
         setActiveVerification(p => ({ ...p, confidence: 92 }));
       }, 1500));
 

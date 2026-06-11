@@ -7,6 +7,7 @@ export type AgentLog = {
   message: string;
   confidence: number;
   timestamp: number;
+  txHash?: string | null;
 };
 
 export type VerificationState = "PENDING" | "AGENTS_ACTIVATING" | "DATA_COLLECTION" | "INDEPENDENT_ANALYSIS" | "DEBATE_PHASE" | "CONSENSUS_FORMING" | "FINALIZED" | "MINTED_ON_CHAIN" | "ARCHIVED";
@@ -55,7 +56,7 @@ export const generateMockLog = (agent: NodeId, phase: VerificationState): AgentL
     }
   } else {
     // Logic for the 7 investigation nodes
-    if (phase === "SCANNING" || phase === "DATA_COLLECTION") {
+    if (phase === "DATA_COLLECTION") {
       actionType = "SCANNING";
       const messages = [
         "Cross-referencing external data points...",
@@ -65,7 +66,7 @@ export const generateMockLog = (agent: NodeId, phase: VerificationState): AgentL
         "Evaluating risk exposure..."
       ];
       message = messages[Math.floor(Math.random() * messages.length)];
-    } else if (phase === "DEBATING" || phase === "INDEPENDENT_ANALYSIS") {
+    } else if (phase === "DEBATE_PHASE" || phase === "INDEPENDENT_ANALYSIS") {
       actionType = Math.random() > 0.7 ? "ANOMALY" : "DEBATING";
       const messages = [
         "Discrepancy found. Requesting re-check.",
@@ -75,7 +76,7 @@ export const generateMockLog = (agent: NodeId, phase: VerificationState): AgentL
         "Cleared for standard processing."
       ];
       message = messages[Math.floor(Math.random() * messages.length)];
-    } else if (phase === "CONSENSUS_FORMING" || phase === "CONSENSUS") {
+    } else if (phase === "CONSENSUS_FORMING") {
       actionType = "COMPLETED";
       message = "Node analysis submitted to Aegis for arbitration.";
     }
