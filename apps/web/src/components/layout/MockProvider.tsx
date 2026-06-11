@@ -84,7 +84,7 @@ export function MockProvider({ children }: { children: ReactNode }) {
         const delay = 500 + Math.random() * 9000;
         timers.push(setTimeout(() => {
           addLog({
-            agent: scanAgents[i],
+            agent: scanAgents[i] as keyof typeof AGENTS,
             actionType: "SCANNING",
             message: scanMessages[i],
             confidence: 35 + (i * 5),
