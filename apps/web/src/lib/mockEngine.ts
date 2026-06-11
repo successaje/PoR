@@ -3,7 +3,7 @@ import { NodeId, PROTOCOL_NODES } from "../config/nodes";
 export type AgentLog = {
   id: string;
   agent: NodeId;
-  actionType: "INVESTIGATING" | "DEBATING" | "COMPLETED" | "ANOMALY" | "SCANNING" | "CONSENSUS" | "ARBITRATING";
+  actionType: "INVESTIGATING" | "DEBATING" | "COMPLETED" | "ANOMALY" | "SCANNING" | "CONSENSUS" | "ARBITRATING" | "RESOLUTION";
   message: string;
   confidence: number;
   timestamp: number;
