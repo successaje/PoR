@@ -13,7 +13,7 @@ interface MockContextProps {
     valueEstimate: string;
     evidenceHash: string;
   };
-  startVerification: (assetId: string) => void;
+  startVerification: (assetId: string, initialTxHash?: string) => void;
 }
 
 const MockContext = createContext<MockContextProps | undefined>(undefined);
@@ -49,7 +49,9 @@ export function MockProvider({ children }: { children: ReactNode }) {
     });
   };
 
-  const startVerification = (assetId: string) => {
+  const generateMockHash = () => "0x" + Array.from({length: 64}, () => Math.floor(Math.random()*16).toString(16)).join('');
+
+  const startVerification = (assetId: string, initialTxHash?: string) => {
     clearAllTimeouts();
     setGlobalLogs([]);
     
@@ -64,6 +66,18 @@ export function MockProvider({ children }: { children: ReactNode }) {
     });
 
     const timers: NodeJS.Timeout[] = [];
+    
+    if (initialTxHash) {
+      timers.push(setTimeout(() => {
+        addLog({
+          agent: "Aegis",
+          actionType: "SCANNING",
+          message: "Verification request intercepted from VerificationManager contract.",
+          confidence: 15,
+          txHash: initialTxHash
+        });
+      }, 500));
+    }
 
     // 1. Investigation Phase (8-12s, we'll use 10s)
     timers.push(setTimeout(() => {
@@ -88,7 +102,7 @@ export function MockProvider({ children }: { children: ReactNode }) {
             actionType: "SCANNING",
             message: scanMessages[i],
             confidence: 35 + (i * 5),
-            txHash: null
+            txHash: generateMockHash()
           });
           setActiveVerification(p => ({ ...p, confidence: p.confidence + Math.random() * 5 }));
         }, delay));
@@ -100,23 +114,23 @@ export function MockProvider({ children }: { children: ReactNode }) {
       setActiveVerification(p => ({ ...p, state: "DEBATE_PHASE", confidence: 65 }));
       
       timers.push(setTimeout(() => {
-        addLog({ agent: "Prism", actionType: "DEBATING", message: "CRITICAL: Document metadata anomaly detected in EXIF timestamps. Dates do not align with municipal claims.", confidence: 60, txHash: null });
+        addLog({ agent: "Prism", actionType: "DEBATING", message: "CRITICAL: Document metadata anomaly detected in EXIF timestamps. Dates do not align with municipal claims.", confidence: 60, txHash: generateMockHash() });
       }, 1000));
       
       timers.push(setTimeout(() => {
-        addLog({ agent: "Aegis", actionType: "ARBITRATING", message: "Aegis requests re-evaluation. Oracle, verify KYC metadata against Ledger's historical index.", confidence: 62, txHash: null });
+        addLog({ agent: "Aegis", actionType: "ARBITRATING", message: "Aegis requests re-evaluation. Oracle, verify KYC metadata against Ledger's historical index.", confidence: 62, txHash: generateMockHash() });
       }, 2500));
 
       timers.push(setTimeout(() => {
-        addLog({ agent: "Oracle", actionType: "SCANNING", message: "Re-evaluating... KYC provider confirms secondary shell company associated with title deed. Prism is correct.", confidence: 68, txHash: null });
+        addLog({ agent: "Oracle", actionType: "SCANNING", message: "Re-evaluating... KYC provider confirms secondary shell company associated with title deed. Prism is correct.", confidence: 68, txHash: generateMockHash() });
       }, 4000));
       
       timers.push(setTimeout(() => {
-        addLog({ agent: "Ledger", actionType: "DEBATING", message: "On-chain transaction graph verifies shell company linkage. Anomalous behavior confirmed.", confidence: 72, txHash: null });
+        addLog({ agent: "Ledger", actionType: "DEBATING", message: "On-chain transaction graph verifies shell company linkage. Anomalous behavior confirmed.", confidence: 72, txHash: generateMockHash() });
       }, 5500));
 
       timers.push(setTimeout(() => {
-        addLog({ agent: "Aegis", actionType: "RESOLUTION", message: "Conflict resolved. Fraud risk elevated but within acceptable threshold. Adjusting final truth score.", confidence: 75, txHash: null });
+        addLog({ agent: "Aegis", actionType: "RESOLUTION", message: "Conflict resolved. Fraud risk elevated but within acceptable threshold. Adjusting final truth score.", confidence: 75, txHash: generateMockHash() });
         setActiveVerification(p => ({ ...p, confidence: 75 }));
       }, 7000));
 
@@ -127,7 +141,7 @@ export function MockProvider({ children }: { children: ReactNode }) {
       setActiveVerification(p => ({ ...p, state: "CONSENSUS_FORMING", confidence: 85 }));
       
       timers.push(setTimeout(() => {
-        addLog({ agent: "Aegis", actionType: "CONSENSUS", message: "Synthesizing final cryptographic evidence layer. Preparing payload for on-chain anchoring.", confidence: 92, txHash: null });
+        addLog({ agent: "Aegis", actionType: "CONSENSUS", message: "Synthesizing final cryptographic evidence layer. Preparing payload for on-chain anchoring.", confidence: 92, txHash: generateMockHash() });
         setActiveVerification(p => ({ ...p, confidence: 92 }));
       }, 1500));
 

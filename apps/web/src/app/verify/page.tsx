@@ -15,9 +15,8 @@ export default function VerifyPage() {
   const { writeContract, data: hash, isPending: isWritePending } = useWriteContract();
   const { isLoading: isConfirming, isSuccess: isConfirmed } = useWaitForTransactionReceipt({ hash });
   
-  // Mocking case creation for flawless demo flow
-  const [isMockSignPending, setIsMockSignPending] = useState(false);
-  const [isMockConfirming, setIsMockConfirming] = useState(false);
+  const { writeContract: writeCreateCase, data: createCaseHash, isPending: isCreateCasePending } = useWriteContract();
+  const { isLoading: isCreateCaseConfirming, isSuccess: isCreateCaseConfirmed } = useWaitForTransactionReceipt({ hash: createCaseHash });
   
   const { activeVerification, startVerification, globalLogs } = useMock();
   const [assetId, setAssetId] = useState("");
@@ -38,29 +37,31 @@ export default function VerifyPage() {
     e.preventDefault();
     if (!assetId || !address) return;
     
-    setIsMockSignPending(true);
-    
-    // Simulate user signing transaction
-    setTimeout(() => {
-      setIsMockSignPending(false);
-      setIsMockConfirming(true);
-      
-      // Simulate transaction confirming + upload progress
+    writeCreateCase({
+      address: VERIFICATION_MANAGER_ADDRESS,
+      abi: verificationManagerABI,
+      functionName: 'createCase',
+      args: [assetId]
+    });
+  };
+
+  useEffect(() => {
+    if (isCreateCaseConfirmed && createCaseHash) {
+      // Simulate fast upload progress before starting the verification
       setIsUploading(true);
       setUploadProgress(0);
       let progress = 0;
       const interval = setInterval(() => {
-        progress += 10;
+        progress += 20;
         setUploadProgress(progress);
         if (progress >= 100) {
           clearInterval(interval);
           setIsUploading(false);
-          setIsMockConfirming(false);
-          startVerification(assetId);
+          startVerification(assetId, createCaseHash);
         }
-      }, 200); // 2 seconds total
-    }, 1500); // 1.5 seconds wait for signature
-  };
+      }, 200);
+    }
+  }, [isCreateCaseConfirmed, createCaseHash, assetId, startVerification]);
 
   // Determine current UI State for the right panel
   const renderRightPanel = () => {
@@ -408,7 +409,7 @@ export default function VerifyPage() {
             
               <button
                 type="submit"
-                disabled={isSubmitting || !assetId || !address}
+                disabled={isCreateCasePending || isCreateCaseConfirming || isSubmitting || !assetId || !address}
                 className="w-full bg-white/10 hover:bg-white/20 text-white font-sans text-[11px] tracking-[0.2em] uppercase py-4 transition-colors disabled:opacity-30 flex items-center justify-center gap-3 relative overflow-hidden"
               >
                 {/* Upload Progress Bar Layer */}
@@ -424,12 +425,12 @@ export default function VerifyPage() {
                 <span className="relative z-10 flex items-center gap-3">
                   {!address ? (
                     "CONNECT WALLET TO INITIATE"
-                  ) : isMockSignPending ? (
+                  ) : isCreateCasePending ? (
                     <>
                       <div className="w-2 h-2 bg-white/50 animate-[pulse_1.5s_ease-in-out_infinite]"></div>
                       AWAITING SIGNATURE...
                     </>
-                  ) : isMockConfirming || isUploading ? (
+                  ) : isCreateCaseConfirming || isUploading ? (
                     <>
                       <div className="w-2 h-2 bg-white/50 animate-[pulse_1.5s_ease-in-out_infinite]"></div>
                       CREATING ON MANTLE... {uploadProgress}%
