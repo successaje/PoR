@@ -26,7 +26,7 @@ export function GlobalActivityFeed() {
       </div>
 
       <div className="flex-1 overflow-y-auto p-5 space-y-4 custom-scrollbar font-mono text-[10px] tracking-wide relative">
-        {globalLogs.length === 0 && activeVerification.state === "IDLE" ? (
+        {globalLogs.length === 0 && activeVerification.state === "PENDING" ? (
           <div className="text-white/20 uppercase tracking-widest text-center mt-10">System monitoring...</div>
         ) : (
           <AnimatePresence initial={false}>
