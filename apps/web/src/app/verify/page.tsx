@@ -45,8 +45,11 @@ export default function VerifyPage() {
     });
   };
 
+  const hasStarted = useRef(false);
+
   useEffect(() => {
-    if (isCreateCaseConfirmed && createCaseHash) {
+    if (isCreateCaseConfirmed && createCaseHash && !hasStarted.current) {
+      hasStarted.current = true;
       // Simulate fast upload progress before starting the verification
       setIsUploading(true);
       setUploadProgress(0);
