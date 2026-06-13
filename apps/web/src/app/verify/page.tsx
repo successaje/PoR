@@ -26,6 +26,31 @@ export default function VerifyPage() {
   const { activeVerification, startVerification, globalLogs } = useMock();
   const [assetId, setAssetId] = useState("");
   const [coords, setCoords] = useState("");
+  const [description, setDescription] = useState("");
+  const [jurisdiction, setJurisdiction] = useState("");
+  const [assetCategories, setAssetCategories] = useState<string[]>(["Residential District", "High-value Real Estate Zone", "RWA (Real World Asset)"]);
+  const [infrastructureText, setInfrastructureText] = useState("");
+  const [infrastructureTags, setInfrastructureTags] = useState<string[]>([]);
+
+  const handleInfrastructureChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    const val = e.target.value;
+    setInfrastructureText(val);
+    
+    const lowerVal = val.toLowerCase();
+    const newTags = new Set(infrastructureTags);
+    
+    if (lowerVal.includes("electrical") || lowerVal.includes("underground")) {
+      newTags.add("Underground electrical systems");
+    }
+    if (lowerVal.includes("fiber") || lowerVal.includes("internet")) {
+      newTags.add("Fiber optic internet infrastructure");
+    }
+    if (lowerVal.includes("sewage") || lowerVal.includes("water")) {
+      newTags.add("Central sewage and water treatment system");
+    }
+    
+    setInfrastructureTags(Array.from(newTags));
+  };
   
   const imageInputRef = useRef<HTMLInputElement>(null);
   const docInputRef = useRef<HTMLInputElement>(null);
@@ -370,21 +395,101 @@ export default function VerifyPage() {
               />
             </div>
 
-            {/* Input 2: Coordinates */}
+            {/* Input: Asset Description */}
             <div className="space-y-3">
-              <label className="text-[10px] font-mono text-white/50 uppercase tracking-[0.2em] flex justify-between">
-                <span>Geo-Coordinates</span>
-                <span className="text-white/20">OPTIONAL</span>
-              </label>
-              <input
-                type="text"
-                value={coords}
-                onChange={(e) => setCoords(e.target.value)}
-                placeholder="30.2672° N, 97.7431° W"
-                className="w-full bg-white/[0.02] border border-white/10 focus:border-white/40 rounded-none px-4 py-3 focus:outline-none font-mono text-[11px] text-white placeholder:text-white/20 transition-colors"
+              <label className="text-[10px] font-mono text-white/50 uppercase tracking-[0.2em]">Asset Description</label>
+              <textarea
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                placeholder="Detailed description of the real-world asset..."
+                className="w-full h-20 bg-white/[0.02] border border-white/10 focus:border-white/40 rounded-none px-4 py-3 focus:outline-none font-mono text-[11px] text-white placeholder:text-white/20 transition-colors resize-none custom-scrollbar"
                 disabled={isSubmitting}
               />
             </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              {/* Input: Jurisdiction */}
+              <div className="space-y-3">
+                <label className="text-[10px] font-mono text-white/50 uppercase tracking-[0.2em]">Jurisdiction</label>
+                <input
+                  type="text"
+                  value={jurisdiction}
+                  onChange={(e) => setJurisdiction(e.target.value)}
+                  placeholder="e.g. Austin, Texas"
+                  className="w-full bg-white/[0.02] border border-white/10 focus:border-white/40 rounded-none px-4 py-3 focus:outline-none font-mono text-[11px] text-white placeholder:text-white/20 transition-colors"
+                  disabled={isSubmitting}
+                />
+              </div>
+
+              {/* Input 2: Coordinates */}
+              <div className="space-y-3">
+                <label className="text-[10px] font-mono text-white/50 uppercase tracking-[0.2em] flex justify-between">
+                  <span>Geo-Coordinates</span>
+                  <span className="text-white/20">OPTIONAL</span>
+                </label>
+                <input
+                  type="text"
+                  value={coords}
+                  onChange={(e) => setCoords(e.target.value)}
+                  placeholder="30.2672° N, 97.7431° W"
+                  className="w-full bg-white/[0.02] border border-white/10 focus:border-white/40 rounded-none px-4 py-3 focus:outline-none font-mono text-[11px] text-white placeholder:text-white/20 transition-colors"
+                  disabled={isSubmitting}
+                />
+              </div>
+            </div>
+
+            {/* Input: Asset Category */}
+            <div className="space-y-3">
+              <label className="text-[10px] font-mono text-white/50 uppercase tracking-[0.2em]">Asset Category</label>
+              <div className="grid grid-cols-2 gap-3">
+                {["Residential District", "High-value Real Estate Zone", "RWA (Real World Asset)", "Commercial Property", "Industrial Asset"].map((category) => (
+                  <label key={category} className="flex items-center gap-3 cursor-pointer group">
+                    <div className={`w-4 h-4 border ${assetCategories.includes(category) ? 'border-emerald-500 bg-emerald-500/20' : 'border-white/20 group-hover:border-white/40'} flex items-center justify-center transition-colors`}>
+                      {assetCategories.includes(category) && <div className="w-2 h-2 bg-emerald-500" />}
+                    </div>
+                    <span className="text-[10px] font-mono text-white/70 uppercase tracking-widest group-hover:text-white transition-colors">{category}</span>
+                    <input 
+                      type="checkbox" 
+                      className="hidden"
+                      checked={assetCategories.includes(category)}
+                      onChange={(e) => {
+                        if (e.target.checked) {
+                          setAssetCategories([...assetCategories, category]);
+                        } else {
+                          setAssetCategories(assetCategories.filter(c => c !== category));
+                        }
+                      }}
+                      disabled={isSubmitting}
+                    />
+                  </label>
+                ))}
+              </div>
+            </div>
+
+            {/* Input: Infrastructure Metadata */}
+            <div className="space-y-3">
+              <label className="text-[10px] font-mono text-white/50 uppercase tracking-[0.2em]">Infrastructure Metadata</label>
+              <textarea
+                value={infrastructureText}
+                onChange={handleInfrastructureChange}
+                placeholder="Paste survey data to auto-extract infrastructure tags..."
+                className="w-full h-16 bg-white/[0.02] border border-white/10 focus:border-white/40 rounded-none px-4 py-3 focus:outline-none font-mono text-[11px] text-white placeholder:text-white/20 transition-colors resize-none custom-scrollbar"
+                disabled={isSubmitting}
+              />
+              {infrastructureTags.length > 0 && (
+                <div className="flex flex-col gap-2 mt-2">
+                  {["Underground electrical systems", "Fiber optic internet infrastructure", "Central sewage and water treatment system"].map((tag) => (
+                    infrastructureTags.includes(tag) && (
+                      <div key={tag} className="flex items-center gap-2 text-[10px] font-mono text-cyan-400/80 uppercase tracking-widest">
+                        <span className="text-cyan-500">✓</span> {tag}
+                      </div>
+                    )
+                  ))}
+                </div>
+              )}
+            </div>
+
+
 
             {/* Input 3: Mock File Upload - Images */}
             <div className="space-y-3">
