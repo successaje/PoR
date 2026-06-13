@@ -7,6 +7,7 @@ import { useMock } from "@/components/layout/MockProvider";
 import { AGENTS } from "@/lib/mockEngine";
 import { useAccount, useWriteContract, useWaitForTransactionReceipt } from 'wagmi';
 import { truthCertificateABI, verificationManagerABI } from '@/lib/abi';
+import { DebateModal } from "@/components/layout/DebateModal";
 
 const VERIFICATION_MANAGER_ADDRESS = "0x34d156d6c062804771652b48f2d65d58d3794113";
 
@@ -17,6 +18,10 @@ export default function VerifyPage() {
   
   const { writeContract: writeCreateCase, data: createCaseHash, isPending: isCreateCasePending } = useWriteContract();
   const { isLoading: isCreateCaseConfirming, isSuccess: isCreateCaseConfirmed } = useWaitForTransactionReceipt({ hash: createCaseHash });
+  
+  const [isMockSignPending, setIsMockSignPending] = useState(false);
+  const [isMockConfirming, setIsMockConfirming] = useState(false);
+  const [isDebateModalOpen, setIsDebateModalOpen] = useState(false);
   
   const { activeVerification, startVerification, globalLogs } = useMock();
   const [assetId, setAssetId] = useState("");
@@ -220,6 +225,12 @@ export default function VerifyPage() {
             
             {!isConfirmed && (
               <div className="space-y-4">
+                <button 
+                  onClick={() => setIsDebateModalOpen(true)}
+                  className="w-full py-4 bg-white/5 hover:bg-white/10 text-white font-sans text-[11px] tracking-[0.2em] uppercase transition-colors border border-white/10"
+                >
+                  View Debate Chamber
+                </button>
                 {/* TODO: Add useWriteContract for VerificationManager.resolveCase here if not done off-chain */}
                 <button 
                   onClick={() => {
@@ -245,6 +256,12 @@ export default function VerifyPage() {
               </div>
             )}
           </motion.div>
+          
+          <DebateModal 
+            isOpen={isDebateModalOpen} 
+            onClose={() => setIsDebateModalOpen(false)} 
+            logs={globalLogs} 
+          />
         </div>
       );
     }
@@ -318,6 +335,11 @@ export default function VerifyPage() {
                 ))}
               </AnimatePresence>
            </div>
+           <DebateModal 
+             isOpen={isDebateModalOpen} 
+             onClose={() => setIsDebateModalOpen(false)} 
+             logs={globalLogs} 
+           />
         </div>
       </div>
     );
