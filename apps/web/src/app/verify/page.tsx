@@ -67,6 +67,24 @@ export default function VerifyPage() {
     e.preventDefault();
     if (!assetId || !address) return;
     
+    // Background fetch to trigger the real Python backend (hybrid demo mode)
+    fetch("http://localhost:8000/submit", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        asset_id: assetId,
+        metadata: {
+          description,
+          jurisdiction,
+          assetCategories,
+          infrastructureTags,
+          coords
+        }
+      })
+    }).catch(err => console.error("Backend submission failed:", err));
+    
     writeCreateCase({
       address: VERIFICATION_MANAGER_ADDRESS,
       abi: verificationManagerABI,
