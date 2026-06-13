@@ -29,8 +29,8 @@ export default function VerifyPage() {
   
   const imageInputRef = useRef<HTMLInputElement>(null);
   const docInputRef = useRef<HTMLInputElement>(null);
-  const [imageName, setImageName] = useState<string | null>(null);
-  const [docName, setDocName] = useState<string | null>(null);
+  const [imageNames, setImageNames] = useState<string[]>([]);
+  const [docNames, setDocNames] = useState<string[]>([]);
   
   // Local mock upload state
   const [isUploading, setIsUploading] = useState(false);
@@ -394,9 +394,10 @@ export default function VerifyPage() {
                  ref={imageInputRef} 
                  className="hidden" 
                  accept="image/jpeg, image/png"
+                 multiple
                  onChange={(e) => {
                    if (e.target.files && e.target.files.length > 0) {
-                     setImageName(e.target.files[0].name);
+                     setImageNames(Array.from(e.target.files).map(f => f.name));
                    }
                  }}
                />
@@ -404,13 +405,15 @@ export default function VerifyPage() {
                  onClick={() => !isSubmitting && imageInputRef.current?.click()}
                  className={`border border-dashed ${isSubmitting ? 'border-white/10 cursor-not-allowed' : 'border-white/20 hover:border-white/40 cursor-pointer'} p-6 flex flex-col items-center justify-center text-center transition-colors`}
                >
-                 <div className={`w-6 h-6 border ${imageName ? 'border-emerald-500/50 text-emerald-500/80 bg-emerald-500/10' : 'border-white/20 text-white/40'} mb-3 flex items-center justify-center`}>
-                   {imageName ? '✓' : '+'}
+                 <div className={`w-6 h-6 border ${imageNames.length > 0 ? 'border-emerald-500/50 text-emerald-500/80 bg-emerald-500/10' : 'border-white/20 text-white/40'} mb-3 flex items-center justify-center`}>
+                   {imageNames.length > 0 ? '✓' : '+'}
                  </div>
-                 <div className={`text-[10px] font-mono ${imageName ? 'text-emerald-400' : 'text-white/40'} uppercase tracking-widest`}>
-                   {imageName ? imageName : 'Select files or drag & drop'}
+                 <div className={`text-[10px] font-mono ${imageNames.length > 0 ? 'text-emerald-400' : 'text-white/40'} uppercase tracking-widest`}>
+                   {imageNames.length > 0 
+                     ? imageNames.length === 1 ? imageNames[0] : `${imageNames.length} files selected` 
+                     : 'Select files or drag & drop'}
                  </div>
-                 {!imageName && <div className="text-[9px] font-sans text-white/20 mt-1">JPG, PNG up to 10MB</div>}
+                 {imageNames.length === 0 && <div className="text-[9px] font-sans text-white/20 mt-1">JPG, PNG up to 10MB</div>}
                </div>
             </div>
 
@@ -422,9 +425,10 @@ export default function VerifyPage() {
                  ref={docInputRef} 
                  className="hidden" 
                  accept=".pdf,.doc,.docx"
+                 multiple
                  onChange={(e) => {
                    if (e.target.files && e.target.files.length > 0) {
-                     setDocName(e.target.files[0].name);
+                     setDocNames(Array.from(e.target.files).map(f => f.name));
                    }
                  }}
                />
@@ -432,13 +436,15 @@ export default function VerifyPage() {
                  onClick={() => !isSubmitting && docInputRef.current?.click()}
                  className={`border border-dashed ${isSubmitting ? 'border-white/10 cursor-not-allowed' : 'border-white/20 hover:border-white/40 cursor-pointer'} p-6 flex flex-col items-center justify-center text-center transition-colors`}
                >
-                 <div className={`w-6 h-6 border ${docName ? 'border-emerald-500/50 text-emerald-500/80 bg-emerald-500/10' : 'border-white/20 text-white/40'} mb-3 flex items-center justify-center`}>
-                   {docName ? '✓' : '+'}
+                 <div className={`w-6 h-6 border ${docNames.length > 0 ? 'border-emerald-500/50 text-emerald-500/80 bg-emerald-500/10' : 'border-white/20 text-white/40'} mb-3 flex items-center justify-center`}>
+                   {docNames.length > 0 ? '✓' : '+'}
                  </div>
-                 <div className={`text-[10px] font-mono ${docName ? 'text-emerald-400' : 'text-white/40'} uppercase tracking-widest`}>
-                   {docName ? docName : 'Select files or drag & drop'}
+                 <div className={`text-[10px] font-mono ${docNames.length > 0 ? 'text-emerald-400' : 'text-white/40'} uppercase tracking-widest`}>
+                   {docNames.length > 0 
+                     ? docNames.length === 1 ? docNames[0] : `${docNames.length} files selected` 
+                     : 'Select files or drag & drop'}
                  </div>
-                 {!docName && <div className="text-[9px] font-sans text-white/20 mt-1">PDF, DOCX up to 20MB</div>}
+                 {docNames.length === 0 && <div className="text-[9px] font-sans text-white/20 mt-1">PDF, DOCX up to 20MB</div>}
                </div>
             </div>
             
