@@ -146,8 +146,8 @@ The protocol contracts are fully secured with Role-Based Access Control (RBAC) e
 
 | Contract | Address | Purpose |
 |----------|---------|---------|
-| **VerificationManager** | `0x34d156d6c062804771652b48f2d65d58d3794113` | Orchestrates the Verification Pipeline |
-| **TruthCertificateNFT** | `0x86C41594e9aDeCcf8c85ba9EEe0138C7c9E70dBc` | Mints final Truth on-chain |
+| **VerificationManager** | [`0x34d156d6c062804771652b48f2d65d58d3794113`](https://sepolia.mantlescan.xyz/address/0x34d156d6c062804771652b48f2d65d58d3794113) | Orchestrates the Verification Pipeline |
+| **TruthCertificateNFT** | [`0x86C41594e9aDeCcf8c85ba9EEe0138C7c9E70dBc`](https://sepolia.mantlescan.xyz/address/0x86C41594e9aDeCcf8c85ba9EEe0138C7c9E70dBc) | Mints final Truth on-chain |
 | **AgentRegistry** | *(Available upon governance vote)* | Manages Node Operator identities & reputations |
 
 ---
