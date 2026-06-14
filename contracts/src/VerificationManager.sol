@@ -2,8 +2,9 @@
 pragma solidity ^0.8.20;
 
 import "./AgentRegistry.sol";
+import {Ownable} from "openzeppelin-contracts/contracts/access/Ownable.sol";
 
-contract VerificationManager {
+contract VerificationManager is Ownable {
     enum CaseStatus { Open, InProgress, Resolved, Closed }
 
     struct Case {
@@ -22,7 +23,7 @@ contract VerificationManager {
     event AgentAssigned(uint256 indexed caseId, uint256 indexed agentId);
     event CaseResolved(uint256 indexed id, string result);
 
-    constructor(address _agentRegistryAddress) {
+    constructor(address initialOwner, address _agentRegistryAddress) Ownable(initialOwner) {
         agentRegistry = AgentRegistry(_agentRegistryAddress);
     }
 
@@ -37,7 +38,7 @@ contract VerificationManager {
         return id;
     }
 
-    function assignAgent(uint256 _caseId, uint256 _agentId) external {
+    function assignAgent(uint256 _caseId, uint256 _agentId) external onlyOwner {
         require(cases[_caseId].id != 0, "Case does not exist");
         require(cases[_caseId].status == CaseStatus.Open || cases[_caseId].status == CaseStatus.InProgress, "Case not open");
         
@@ -51,7 +52,7 @@ contract VerificationManager {
         emit AgentAssigned(_caseId, _agentId);
     }
 
-    function resolveCase(uint256 _caseId, string memory _result) external {
+    function resolveCase(uint256 _caseId, string memory _result) external onlyOwner {
         require(cases[_caseId].id != 0, "Case does not exist");
         require(cases[_caseId].status == CaseStatus.InProgress, "Case must be in progress");
         

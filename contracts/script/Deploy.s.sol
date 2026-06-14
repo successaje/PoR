@@ -18,10 +18,10 @@ contract DeployScript is Script {
         TruthCertificateNFT nft = new TruthCertificateNFT(deployer);
         console.log("TruthCertificateNFT deployed at:", address(nft));
 
-        AgentRegistry agentRegistry = new AgentRegistry();
+        AgentRegistry agentRegistry = new AgentRegistry(deployer);
         console.log("AgentRegistry deployed at:", address(agentRegistry));
 
-        VerificationManager verificationManager = new VerificationManager(address(agentRegistry));
+        VerificationManager verificationManager = new VerificationManager(deployer, address(agentRegistry));
         console.log("VerificationManager deployed at:", address(verificationManager));
 
         vm.stopBroadcast();

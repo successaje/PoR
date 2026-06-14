@@ -7,6 +7,7 @@ import { useMock } from "@/components/layout/MockProvider";
 import { AGENTS } from "@/lib/mockEngine";
 import { useAccount, useWriteContract, useWaitForTransactionReceipt } from 'wagmi';
 import { truthCertificateABI, verificationManagerABI } from '@/lib/abi';
+import { DebateModal } from "@/components/layout/DebateModal";
 
 const VERIFICATION_MANAGER_ADDRESS = "0x34d156d6c062804771652b48f2d65d58d3794113";
 
@@ -15,18 +16,46 @@ export default function VerifyPage() {
   const { writeContract, data: hash, isPending: isWritePending } = useWriteContract();
   const { isLoading: isConfirming, isSuccess: isConfirmed } = useWaitForTransactionReceipt({ hash });
   
-  // Mocking case creation for flawless demo flow
+  const { writeContract: writeCreateCase, data: createCaseHash, isPending: isCreateCasePending } = useWriteContract();
+  const { isLoading: isCreateCaseConfirming, isSuccess: isCreateCaseConfirmed } = useWaitForTransactionReceipt({ hash: createCaseHash });
+  
   const [isMockSignPending, setIsMockSignPending] = useState(false);
   const [isMockConfirming, setIsMockConfirming] = useState(false);
+  const [isDebateModalOpen, setIsDebateModalOpen] = useState(false);
   
   const { activeVerification, startVerification, globalLogs } = useMock();
   const [assetId, setAssetId] = useState("");
   const [coords, setCoords] = useState("");
+  const [description, setDescription] = useState("");
+  const [jurisdiction, setJurisdiction] = useState("");
+  const [assetCategories, setAssetCategories] = useState<string[]>(["Residential District", "High-value Real Estate Zone", "RWA (Real World Asset)"]);
+  const [infrastructureText, setInfrastructureText] = useState("");
+  const [infrastructureTags, setInfrastructureTags] = useState<string[]>([]);
+
+  const handleInfrastructureChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    const val = e.target.value;
+    setInfrastructureText(val);
+    
+    const lowerVal = val.toLowerCase();
+    const newTags = new Set(infrastructureTags);
+    
+    if (lowerVal.includes("electrical") || lowerVal.includes("underground")) {
+      newTags.add("Underground electrical systems");
+    }
+    if (lowerVal.includes("fiber") || lowerVal.includes("internet")) {
+      newTags.add("Fiber optic internet infrastructure");
+    }
+    if (lowerVal.includes("sewage") || lowerVal.includes("water")) {
+      newTags.add("Central sewage and water treatment system");
+    }
+    
+    setInfrastructureTags(Array.from(newTags));
+  };
   
   const imageInputRef = useRef<HTMLInputElement>(null);
   const docInputRef = useRef<HTMLInputElement>(null);
-  const [imageName, setImageName] = useState<string | null>(null);
-  const [docName, setDocName] = useState<string | null>(null);
+  const [imageNames, setImageNames] = useState<string[]>([]);
+  const [docNames, setDocNames] = useState<string[]>([]);
   
   // Local mock upload state
   const [isUploading, setIsUploading] = useState(false);
@@ -38,29 +67,52 @@ export default function VerifyPage() {
     e.preventDefault();
     if (!assetId || !address) return;
     
-    setIsMockSignPending(true);
+    // Background fetch to trigger the real Python backend (hybrid demo mode)
+    fetch("http://localhost:8000/submit", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        asset_id: assetId,
+        metadata: {
+          description,
+          jurisdiction,
+          assetCategories,
+          infrastructureTags,
+          coords
+        }
+      })
+    }).catch(err => console.error("Backend submission failed:", err));
     
-    // Simulate user signing transaction
-    setTimeout(() => {
-      setIsMockSignPending(false);
-      setIsMockConfirming(true);
-      
-      // Simulate transaction confirming + upload progress
+    writeCreateCase({
+      address: VERIFICATION_MANAGER_ADDRESS,
+      abi: verificationManagerABI,
+      functionName: 'createCase',
+      args: [assetId]
+    });
+  };
+
+  const hasStarted = useRef(false);
+
+  useEffect(() => {
+    if (isCreateCaseConfirmed && createCaseHash && !hasStarted.current) {
+      hasStarted.current = true;
+      // Simulate fast upload progress before starting the verification
       setIsUploading(true);
       setUploadProgress(0);
       let progress = 0;
       const interval = setInterval(() => {
-        progress += 10;
+        progress += 20;
         setUploadProgress(progress);
         if (progress >= 100) {
           clearInterval(interval);
           setIsUploading(false);
-          setIsMockConfirming(false);
-          startVerification(assetId);
+          startVerification(assetId, createCaseHash);
         }
-      }, 200); // 2 seconds total
-    }, 1500); // 1.5 seconds wait for signature
-  };
+      }, 200);
+    }
+  }, [isCreateCaseConfirmed, createCaseHash, assetId, startVerification]);
 
   // Determine current UI State for the right panel
   const renderRightPanel = () => {
@@ -183,29 +235,45 @@ export default function VerifyPage() {
               </div>
             </div>
 
-            {isConfirmed && hash ? (
-              <div className="p-6 border border-white/10 bg-black/50 mb-8">
-                <h5 className="font-mono text-[9px] text-white/40 uppercase tracking-widest mb-4">Audit Trail & Evidence</h5>
-                <div className="space-y-3 font-mono text-[10px] text-white/70 break-all">
-                  <div className="flex flex-col"><span className="text-white/30">Mantle TX:</span> {hash}</div>
-                  <div className="flex flex-col"><span className="text-white/30">Evidence Hash:</span> 0x8a92f8e1...4b9c (SHA-256)</div>
-                  <div className="flex flex-col"><span className="text-white/30">Verified By:</span> Aletheia Engine (8 Nodes)</div>
-                </div>
-                <div className="mt-6 text-right">
-                  <a href={`https://explorer.sepolia.mantle.xyz/tx/${hash}`} target="_blank" rel="noreferrer" className="text-[10px] font-mono text-cyan-500 hover:text-cyan-400 uppercase tracking-widest transition-colors">
-                    View on Mantle Explorer ↗
-                  </a>
-                </div>
+            <div className="p-6 border border-white/10 bg-black/50 mb-8">
+              <h5 className="font-mono text-[9px] text-white/40 uppercase tracking-widest mb-4">Audit Trail & Evidence</h5>
+              <div className="space-y-3 font-mono text-[10px] text-white/70 break-all">
+                {createCaseHash && (
+                  <div className="flex flex-col">
+                    <span className="text-white/30">Case Initiation TX:</span> 
+                    <a href={`https://explorer.sepolia.mantle.xyz/tx/${createCaseHash}`} target="_blank" rel="noreferrer" className="text-cyan-500 hover:text-cyan-400 transition-colors">
+                      {createCaseHash} ↗
+                    </a>
+                  </div>
+                )}
+                {isConfirmed && hash && (
+                  <div className="flex flex-col">
+                    <span className="text-white/30">Certificate Mint TX:</span> 
+                    <a href={`https://explorer.sepolia.mantle.xyz/tx/${hash}`} target="_blank" rel="noreferrer" className="text-cyan-500 hover:text-cyan-400 transition-colors">
+                      {hash} ↗
+                    </a>
+                  </div>
+                )}
+                <div className="flex flex-col"><span className="text-white/30">Evidence Hash:</span> 0x8a92f8e1...4b9c (SHA-256)</div>
+                <div className="flex flex-col"><span className="text-white/30">Verified By:</span> Aletheia Engine (8 Nodes)</div>
+              </div>
+              {isConfirmed && hash && (
                 <div className="mt-6">
                   <Link href={`/case/${assetId || "REG-8492-TX"}`} className="block w-full text-center py-3 bg-white/10 hover:bg-white/20 text-white font-sans text-[11px] tracking-[0.2em] uppercase transition-colors">
                     Enter Verification Room
                   </Link>
                 </div>
-              </div>
-            ) : null}
+              )}
+            </div>
             
             {!isConfirmed && (
               <div className="space-y-4">
+                <button 
+                  onClick={() => setIsDebateModalOpen(true)}
+                  className="w-full py-4 bg-white/5 hover:bg-white/10 text-white font-sans text-[11px] tracking-[0.2em] uppercase transition-colors border border-white/10"
+                >
+                  View Debate Chamber
+                </button>
                 {/* TODO: Add useWriteContract for VerificationManager.resolveCase here if not done off-chain */}
                 <button 
                   onClick={() => {
@@ -231,6 +299,12 @@ export default function VerifyPage() {
               </div>
             )}
           </motion.div>
+          
+          <DebateModal 
+            isOpen={isDebateModalOpen} 
+            onClose={() => setIsDebateModalOpen(false)} 
+            logs={globalLogs} 
+          />
         </div>
       );
     }
@@ -304,6 +378,11 @@ export default function VerifyPage() {
                 ))}
               </AnimatePresence>
            </div>
+           <DebateModal 
+             isOpen={isDebateModalOpen} 
+             onClose={() => setIsDebateModalOpen(false)} 
+             logs={globalLogs} 
+           />
         </div>
       </div>
     );
@@ -334,21 +413,101 @@ export default function VerifyPage() {
               />
             </div>
 
-            {/* Input 2: Coordinates */}
+            {/* Input: Asset Description */}
             <div className="space-y-3">
-              <label className="text-[10px] font-mono text-white/50 uppercase tracking-[0.2em] flex justify-between">
-                <span>Geo-Coordinates</span>
-                <span className="text-white/20">OPTIONAL</span>
-              </label>
-              <input
-                type="text"
-                value={coords}
-                onChange={(e) => setCoords(e.target.value)}
-                placeholder="30.2672° N, 97.7431° W"
-                className="w-full bg-white/[0.02] border border-white/10 focus:border-white/40 rounded-none px-4 py-3 focus:outline-none font-mono text-[11px] text-white placeholder:text-white/20 transition-colors"
+              <label className="text-[10px] font-mono text-white/50 uppercase tracking-[0.2em]">Asset Description</label>
+              <textarea
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                placeholder="Detailed description of the real-world asset..."
+                className="w-full h-20 bg-white/[0.02] border border-white/10 focus:border-white/40 rounded-none px-4 py-3 focus:outline-none font-mono text-[11px] text-white placeholder:text-white/20 transition-colors resize-none custom-scrollbar"
                 disabled={isSubmitting}
               />
             </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              {/* Input: Jurisdiction */}
+              <div className="space-y-3">
+                <label className="text-[10px] font-mono text-white/50 uppercase tracking-[0.2em]">Jurisdiction</label>
+                <input
+                  type="text"
+                  value={jurisdiction}
+                  onChange={(e) => setJurisdiction(e.target.value)}
+                  placeholder="e.g. Austin, Texas"
+                  className="w-full bg-white/[0.02] border border-white/10 focus:border-white/40 rounded-none px-4 py-3 focus:outline-none font-mono text-[11px] text-white placeholder:text-white/20 transition-colors"
+                  disabled={isSubmitting}
+                />
+              </div>
+
+              {/* Input 2: Coordinates */}
+              <div className="space-y-3">
+                <label className="text-[10px] font-mono text-white/50 uppercase tracking-[0.2em] flex justify-between">
+                  <span>Geo-Coordinates</span>
+                  <span className="text-white/20">OPTIONAL</span>
+                </label>
+                <input
+                  type="text"
+                  value={coords}
+                  onChange={(e) => setCoords(e.target.value)}
+                  placeholder="30.2672° N, 97.7431° W"
+                  className="w-full bg-white/[0.02] border border-white/10 focus:border-white/40 rounded-none px-4 py-3 focus:outline-none font-mono text-[11px] text-white placeholder:text-white/20 transition-colors"
+                  disabled={isSubmitting}
+                />
+              </div>
+            </div>
+
+            {/* Input: Asset Category */}
+            <div className="space-y-3">
+              <label className="text-[10px] font-mono text-white/50 uppercase tracking-[0.2em]">Asset Category</label>
+              <div className="grid grid-cols-2 gap-3">
+                {["Residential District", "High-value Real Estate Zone", "RWA (Real World Asset)", "Commercial Property", "Industrial Asset"].map((category) => (
+                  <label key={category} className="flex items-center gap-3 cursor-pointer group">
+                    <div className={`w-4 h-4 border ${assetCategories.includes(category) ? 'border-emerald-500 bg-emerald-500/20' : 'border-white/20 group-hover:border-white/40'} flex items-center justify-center transition-colors`}>
+                      {assetCategories.includes(category) && <div className="w-2 h-2 bg-emerald-500" />}
+                    </div>
+                    <span className="text-[10px] font-mono text-white/70 uppercase tracking-widest group-hover:text-white transition-colors">{category}</span>
+                    <input 
+                      type="checkbox" 
+                      className="hidden"
+                      checked={assetCategories.includes(category)}
+                      onChange={(e) => {
+                        if (e.target.checked) {
+                          setAssetCategories([...assetCategories, category]);
+                        } else {
+                          setAssetCategories(assetCategories.filter(c => c !== category));
+                        }
+                      }}
+                      disabled={isSubmitting}
+                    />
+                  </label>
+                ))}
+              </div>
+            </div>
+
+            {/* Input: Infrastructure Metadata */}
+            <div className="space-y-3">
+              <label className="text-[10px] font-mono text-white/50 uppercase tracking-[0.2em]">Infrastructure Metadata</label>
+              <textarea
+                value={infrastructureText}
+                onChange={handleInfrastructureChange}
+                placeholder="Paste survey data to auto-extract infrastructure tags..."
+                className="w-full h-16 bg-white/[0.02] border border-white/10 focus:border-white/40 rounded-none px-4 py-3 focus:outline-none font-mono text-[11px] text-white placeholder:text-white/20 transition-colors resize-none custom-scrollbar"
+                disabled={isSubmitting}
+              />
+              {infrastructureTags.length > 0 && (
+                <div className="flex flex-col gap-2 mt-2">
+                  {["Underground electrical systems", "Fiber optic internet infrastructure", "Central sewage and water treatment system"].map((tag) => (
+                    infrastructureTags.includes(tag) && (
+                      <div key={tag} className="flex items-center gap-2 text-[10px] font-mono text-cyan-400/80 uppercase tracking-widest">
+                        <span className="text-cyan-500">✓</span> {tag}
+                      </div>
+                    )
+                  ))}
+                </div>
+              )}
+            </div>
+
+
 
             {/* Input 3: Mock File Upload - Images */}
             <div className="space-y-3">
@@ -358,9 +517,10 @@ export default function VerifyPage() {
                  ref={imageInputRef} 
                  className="hidden" 
                  accept="image/jpeg, image/png"
+                 multiple
                  onChange={(e) => {
                    if (e.target.files && e.target.files.length > 0) {
-                     setImageName(e.target.files[0].name);
+                     setImageNames(Array.from(e.target.files).map(f => f.name));
                    }
                  }}
                />
@@ -368,13 +528,15 @@ export default function VerifyPage() {
                  onClick={() => !isSubmitting && imageInputRef.current?.click()}
                  className={`border border-dashed ${isSubmitting ? 'border-white/10 cursor-not-allowed' : 'border-white/20 hover:border-white/40 cursor-pointer'} p-6 flex flex-col items-center justify-center text-center transition-colors`}
                >
-                 <div className={`w-6 h-6 border ${imageName ? 'border-emerald-500/50 text-emerald-500/80 bg-emerald-500/10' : 'border-white/20 text-white/40'} mb-3 flex items-center justify-center`}>
-                   {imageName ? '✓' : '+'}
+                 <div className={`w-6 h-6 border ${imageNames.length > 0 ? 'border-emerald-500/50 text-emerald-500/80 bg-emerald-500/10' : 'border-white/20 text-white/40'} mb-3 flex items-center justify-center`}>
+                   {imageNames.length > 0 ? '✓' : '+'}
                  </div>
-                 <div className={`text-[10px] font-mono ${imageName ? 'text-emerald-400' : 'text-white/40'} uppercase tracking-widest`}>
-                   {imageName ? imageName : 'Select files or drag & drop'}
+                 <div className={`text-[10px] font-mono ${imageNames.length > 0 ? 'text-emerald-400' : 'text-white/40'} uppercase tracking-widest`}>
+                   {imageNames.length > 0 
+                     ? imageNames.length === 1 ? imageNames[0] : `${imageNames.length} files selected` 
+                     : 'Select files or drag & drop'}
                  </div>
-                 {!imageName && <div className="text-[9px] font-sans text-white/20 mt-1">JPG, PNG up to 10MB</div>}
+                 {imageNames.length === 0 && <div className="text-[9px] font-sans text-white/20 mt-1">JPG, PNG up to 10MB</div>}
                </div>
             </div>
 
@@ -386,9 +548,10 @@ export default function VerifyPage() {
                  ref={docInputRef} 
                  className="hidden" 
                  accept=".pdf,.doc,.docx"
+                 multiple
                  onChange={(e) => {
                    if (e.target.files && e.target.files.length > 0) {
-                     setDocName(e.target.files[0].name);
+                     setDocNames(Array.from(e.target.files).map(f => f.name));
                    }
                  }}
                />
@@ -396,19 +559,21 @@ export default function VerifyPage() {
                  onClick={() => !isSubmitting && docInputRef.current?.click()}
                  className={`border border-dashed ${isSubmitting ? 'border-white/10 cursor-not-allowed' : 'border-white/20 hover:border-white/40 cursor-pointer'} p-6 flex flex-col items-center justify-center text-center transition-colors`}
                >
-                 <div className={`w-6 h-6 border ${docName ? 'border-emerald-500/50 text-emerald-500/80 bg-emerald-500/10' : 'border-white/20 text-white/40'} mb-3 flex items-center justify-center`}>
-                   {docName ? '✓' : '+'}
+                 <div className={`w-6 h-6 border ${docNames.length > 0 ? 'border-emerald-500/50 text-emerald-500/80 bg-emerald-500/10' : 'border-white/20 text-white/40'} mb-3 flex items-center justify-center`}>
+                   {docNames.length > 0 ? '✓' : '+'}
                  </div>
-                 <div className={`text-[10px] font-mono ${docName ? 'text-emerald-400' : 'text-white/40'} uppercase tracking-widest`}>
-                   {docName ? docName : 'Select files or drag & drop'}
+                 <div className={`text-[10px] font-mono ${docNames.length > 0 ? 'text-emerald-400' : 'text-white/40'} uppercase tracking-widest`}>
+                   {docNames.length > 0 
+                     ? docNames.length === 1 ? docNames[0] : `${docNames.length} files selected` 
+                     : 'Select files or drag & drop'}
                  </div>
-                 {!docName && <div className="text-[9px] font-sans text-white/20 mt-1">PDF, DOCX up to 20MB</div>}
+                 {docNames.length === 0 && <div className="text-[9px] font-sans text-white/20 mt-1">PDF, DOCX up to 20MB</div>}
                </div>
             </div>
             
               <button
                 type="submit"
-                disabled={isSubmitting || !assetId || !address}
+                disabled={isCreateCasePending || isCreateCaseConfirming || isSubmitting || !assetId || !address}
                 className="w-full bg-white/10 hover:bg-white/20 text-white font-sans text-[11px] tracking-[0.2em] uppercase py-4 transition-colors disabled:opacity-30 flex items-center justify-center gap-3 relative overflow-hidden"
               >
                 {/* Upload Progress Bar Layer */}
@@ -424,12 +589,12 @@ export default function VerifyPage() {
                 <span className="relative z-10 flex items-center gap-3">
                   {!address ? (
                     "CONNECT WALLET TO INITIATE"
-                  ) : isMockSignPending ? (
+                  ) : isCreateCasePending ? (
                     <>
                       <div className="w-2 h-2 bg-white/50 animate-[pulse_1.5s_ease-in-out_infinite]"></div>
                       AWAITING SIGNATURE...
                     </>
-                  ) : isMockConfirming || isUploading ? (
+                  ) : isCreateCaseConfirming || isUploading ? (
                     <>
                       <div className="w-2 h-2 bg-white/50 animate-[pulse_1.5s_ease-in-out_infinite]"></div>
                       CREATING ON MANTLE... {uploadProgress}%

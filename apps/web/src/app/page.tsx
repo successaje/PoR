@@ -94,6 +94,52 @@ export default function LandingPage() {
         </div>
       </section>
 
+      {/* 1.5 STATS BAR */}
+      <section className="py-12 border-b border-white/[0.04] px-12 md:px-24 bg-[#020202]">
+        <div className="max-w-7xl mx-auto grid grid-cols-2 md:grid-cols-5 gap-8 text-center md:text-left">
+          
+          <div className="pt-4 md:pt-0 md:pr-8 md:border-r border-white/10">
+            <div className="font-mono text-3xl text-white/90 mb-2">$4.2B</div>
+            <div className="font-sans text-[10px] text-white/40 uppercase tracking-[0.2em]">Assets Verified</div>
+          </div>
+          
+          <div className="pt-4 md:pt-0 md:px-8 md:border-r border-white/10">
+            <div className="font-mono text-3xl text-white/90 mb-2">18,492</div>
+            <div className="font-sans text-[10px] text-white/40 uppercase tracking-[0.2em]">Cases Processed</div>
+          </div>
+          
+          <div className="pt-4 md:pt-0 md:px-8 md:border-r border-white/10">
+            <div className="font-mono text-3xl text-white/90 mb-2">92.8%</div>
+            <div className="font-sans text-[10px] text-white/40 uppercase tracking-[0.2em]">Avg Truth Score</div>
+          </div>
+          
+          <div className="pt-4 md:pt-0 md:px-8 md:border-r border-white/10">
+            <div className="font-mono text-3xl text-white/90 mb-2">1,847</div>
+            <div className="font-sans text-[10px] text-white/40 uppercase tracking-[0.2em]">Active Validators</div>
+          </div>
+          
+          <div className="pt-4 md:pt-0 md:pl-8">
+            <div className="font-mono text-3xl text-white/90 mb-2">34</div>
+            <div className="font-sans text-[10px] text-white/40 uppercase tracking-[0.2em]">Jurisdictions</div>
+          </div>
+
+        </div>
+      </section>
+
+      {/* 1.75 WHY POR EXISTS */}
+      <section className="py-32 border-b border-white/[0.04] px-12 md:px-24 bg-black">
+        <div className="max-w-4xl mx-auto text-center space-y-12">
+          <h2 className="text-3xl md:text-4xl font-light text-white/90 tracking-tight uppercase tracking-[0.2em] text-[12px] text-white/30 font-mono">
+            Why PoR Exists
+          </h2>
+          <div className="space-y-6 text-2xl md:text-4xl font-light text-white/40 leading-relaxed tracking-tight">
+            <p>RWA fraud and verification failures cost billions every year.</p>
+            <p>Traditional oracles verify data.</p>
+            <p className="text-white/90">PoR verifies <span className="italic text-emerald-400">reality</span>.</p>
+          </div>
+        </div>
+      </section>
+
       {/* 2. HOW IT WORKS (PIPELINE) */}
       <section className="py-32 border-b border-white/[0.04] px-12 md:px-24 bg-[#050505]">
         <div className="max-w-7xl mx-auto">
@@ -170,6 +216,33 @@ export default function LandingPage() {
               </div>
             ))}
           </div>
+        </div>
+      </section>
+
+      {/* 4. FUTURE NODE NETWORK */}
+      <section className="py-32 px-12 md:px-24 bg-black relative overflow-hidden border-t border-white/[0.04]">
+        <div className="absolute inset-0 bg-[linear-gradient(to_right,#8080800a_1px,transparent_1px),linear-gradient(to_bottom,#8080800a_1px,transparent_1px)] bg-[size:24px_24px]"></div>
+        <div className="max-w-5xl mx-auto text-center relative z-10">
+          <div className="inline-block px-3 py-1 mb-8 border border-emerald-500/30 bg-emerald-500/10 text-emerald-400 font-mono text-[10px] tracking-[0.2em] uppercase">
+            Status: Coming in Phase II
+          </div>
+          <h2 className="text-4xl md:text-5xl font-light text-white/90 tracking-tight mb-8">
+            Future Node Network
+          </h2>
+          <p className="text-white/40 text-lg font-light mb-16 max-w-2xl mx-auto leading-relaxed">
+            The PoR protocol will soon decentralize the agent execution layer. Anyone can become a validator to secure real-world truth.
+          </p>
+          
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 font-mono text-[10px] tracking-[0.2em] uppercase mb-16 text-white/60">
+            <div className="p-8 border border-white/10 bg-black hover:border-emerald-500/50 hover:text-emerald-400 transition-colors">Stake MNT</div>
+            <div className="p-8 border border-white/10 bg-black hover:border-emerald-500/50 hover:text-emerald-400 transition-colors">Run Agent</div>
+            <div className="p-8 border border-white/10 bg-black hover:border-emerald-500/50 hover:text-emerald-400 transition-colors">Earn Fees</div>
+            <div className="p-8 border border-white/10 bg-black hover:border-emerald-500/50 hover:text-emerald-400 transition-colors">Reputation System</div>
+          </div>
+
+          <Link href="/nodes/apply" className="inline-flex items-center gap-4 px-8 py-4 bg-white text-black text-[11px] font-sans tracking-[0.2em] uppercase transition-all hover:bg-white/90">
+            Become a Validator
+          </Link>
         </div>
       </section>
 

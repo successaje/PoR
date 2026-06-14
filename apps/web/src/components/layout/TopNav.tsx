@@ -159,7 +159,7 @@ export function TopNav() {
                         className="flex items-center gap-2 px-5 py-2 bg-[#000000] text-white/90 hover:bg-white/5 text-[10px] font-mono tracking-widest uppercase transition-colors duration-300 border border-white/10"
                       >
                         {account.displayName}
-                        {account.displayBalance
+                        {account.displayBalance && !account.displayBalance.includes('NaN')
                           ? ` // ${account.displayBalance}`
                           : ''}
                       </button>

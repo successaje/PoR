@@ -65,9 +65,20 @@ export function GlobalActivityFeed() {
                   }`}>
                     {log.actionType}
                   </span>
+
+                  {log.txHash && (
+                    <a 
+                      href={`https://explorer.sepolia.mantle.xyz/tx/${log.txHash}`}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="text-[8px] font-mono text-cyan-500/60 hover:text-cyan-400 transition-colors uppercase tracking-widest"
+                    >
+                      [TX: {log.txHash.slice(0,6)}...{log.txHash.slice(-4)}]
+                    </a>
+                  )}
                   
                   <span className="text-white/20 ml-auto flex items-center gap-1">
-                    CF: <span className="text-white/50">{(log.confidence * 100).toFixed(0)}</span>
+                    CF: <span className="text-white/50">{log.confidence.toFixed(0)}</span>
                   </span>
                 </div>
               </motion.div>
