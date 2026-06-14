@@ -140,6 +140,18 @@ sequenceDiagram
 
 ---
 
+## 📜 Smart Contracts (Mantle Sepolia)
+
+The protocol contracts are fully secured with Role-Based Access Control (RBAC) ensuring only the verified Agent Relayer can resolve cases and mint certificates.
+
+| Contract | Address | Purpose |
+|----------|---------|---------|
+| **VerificationManager** | `0x34d156d6c062804771652b48f2d65d58d3794113` | Orchestrates the Verification Pipeline |
+| **TruthCertificateNFT** | `0x86C41594e9aDeCcf8c85ba9EEe0138C7c9E70dBc` | Mints final Truth on-chain |
+| **AgentRegistry** | *(Available upon governance vote)* | Manages Node Operator identities & reputations |
+
+---
+
 ## 🛠️ Technology Stack
 
 - **Frontend:** Next.js 16, React 19, TailwindCSS v4, Framer Motion, Wagmi, Viem.

@@ -32,7 +32,7 @@ contract TruthCertificateNFT is ERC721, Ownable {
         uint8 consensusScore,
         uint256 decayTimer,
         string memory evidenceHash
-    ) external returns (uint256) {
+    ) external onlyOwner returns (uint256) {
         uint256 tokenId = _nextTokenId++;
         _safeMint(to, tokenId);
 
@@ -49,7 +49,7 @@ contract TruthCertificateNFT is ERC721, Ownable {
     }
 
     // Simulated ERC-8004 concept (Dynamic Truth Decay)
-    function applyTruthDecay(uint256 tokenId) external {
+    function applyTruthDecay(uint256 tokenId) external onlyOwner {
         require(_ownerOf(tokenId) != address(0), "Token does not exist");
         TruthData storage data = truthRecords[tokenId];
         
