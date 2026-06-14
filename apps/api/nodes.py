@@ -30,6 +30,13 @@ class ConsensusReport(BaseModel):
     requires_debate: bool = Field(description="True if the reports heavily conflict and agents need to cross-examine.")
     synthesis_reasoning: str = Field(description="Explanation of how consensus was reached or why debate is needed.")
 
+class DebateTurn(BaseModel):
+    agent_name: str = Field(description="The name of the agent speaking (e.g. Prism, Ledger, Aegis).")
+    argument: str = Field(description="The argument or rebuttal.")
+
+class DebateOutput(BaseModel):
+    turns: list[DebateTurn] = Field(description="The sequence of debate turns in this round.")
+
 
 # --- Mock RAG Tools ---
 
@@ -142,17 +149,6 @@ def analyze_compliance(state: AssetVerificationState) -> AssetVerificationState:
 
 def synthesize_consensus(state: AssetVerificationState) -> AssetVerificationState:
     """Aletheia: The Consensus Synthesizer"""
-    
-    if state.get("debate_round", 0) > 1:
-        return {
-            "status": "VERIFIED",
-            "consensus_score": 85.5,
-            "fraud_probability": "LOW",
-            "market_value_estimate": "$420,000",
-            "yield_band": "8.0%-10.5%",
-            "evidence_hash": hashlib.sha256("FORCED_CONSENSUS".encode()).hexdigest(),
-            "anomalies_detected": False
-        }
 
     prompt = ChatPromptTemplate.from_messages([
         ("system", """You are Aletheia, the Master Consensus Engine of the PoR protocol.
@@ -207,8 +203,54 @@ def synthesize_consensus(state: AssetVerificationState) -> AssetVerificationStat
 def run_debate_round(state: AssetVerificationState) -> AssetVerificationState:
     """The Debate Chamber Node"""
     current_round = state.get("debate_round", 0) + 1
-    debate_msg = SystemMessage(content=f"Aletheia initiated Cross-Examination Phase {current_round}. Low confidence agents must re-evaluate.")
+    
+    prompt = ChatPromptTemplate.from_messages([
+        ("system", """You are Aegis, the Master Debate Moderator of the Proof-of-Reality protocol.
+        The 7 specialized AI agents have submitted their reports, but Aletheia detected a conflict that requires debate.
+        Your job is to moderate a Cross-Examination Phase between the agents who disagree.
+        Identify the anomalies, and generate a dynamic transcript of the agents arguing their points and defending their findings.
+        The agents are: Atlas (Geo), Oracle (Financial), Ledger (Legal), Prism (Fraud), Pulse (Sentiment), Tempest (Climate), Sentinel (Compliance)."""),
+        ("human", """
+        Agent Reports:
+        Geo: {geo}
+        Financial: {financial}
+        Legal: {legal}
+        Fraud: {fraud}
+        Sentiment: {sentiment}
+        Climate: {climate}
+        Compliance: {compliance}
+        
+        Previous Debate History: {debate}
+        
+        Generate the next phase of the debate.
+        """)
+    ])
+    
+    chain = prompt | llm.with_structured_output(DebateOutput)
+    
+    debate_str = ""
+    if state.get("debate_history"):
+        for m in state["debate_history"]:
+            debate_str += f"{m.type}: {m.content}\n"
+            
+    result = chain.invoke({
+        "geo": state.get("geo_report", "N/A"),
+        "financial": state.get("financial_report", "N/A"),
+        "legal": state.get("legal_report", "N/A"),
+        "fraud": state.get("fraud_report", "N/A"),
+        "sentiment": state.get("sentiment_report", "N/A"),
+        "climate": state.get("climate_report", "N/A"),
+        "compliance": state.get("compliance_report", "N/A"),
+        "debate": debate_str or "None yet."
+    })
+    
+    new_messages = []
+    # Add a moderator intro for the round
+    new_messages.append(SystemMessage(content=f"Aegis initiated Cross-Examination Phase {current_round}."))
+    for turn in result.turns:
+        new_messages.append(SystemMessage(content=f"**{turn.agent_name}**: {turn.argument}"))
+        
     return {
-        "debate_history": [debate_msg],
+        "debate_history": new_messages,
         "debate_round": current_round
     }
