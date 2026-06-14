@@ -3,6 +3,9 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { PROTOCOL_NODES } from "@/config/nodes";
+import { useAccount, useSendTransaction } from "wagmi";
+import { parseEther } from "viem";
+import { ConnectButton } from "@rainbow-me/rainbowkit";
 
 export default function NodeApplicationPage() {
   const [formData, setFormData] = useState({
@@ -15,14 +18,36 @@ export default function NodeApplicationPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const { address, isConnected } = useAccount();
+  const { sendTransactionAsync } = useSendTransaction();
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!isConnected) {
+      alert("Please connect your wallet first.");
+      return;
+    }
+
     setIsSubmitting(true);
-    // Simulate network delay for application submission
-    setTimeout(() => {
+    
+    try {
+      // Prompt the Wagmi staking transaction (1,000 MNT)
+      await sendTransactionAsync({
+        to: "0x34d156d6c062804771652b48f2d65d58d3794113", // VerificationManager / AgentRegistry proxy
+        value: parseEther("1000"), // 1,000 MNT Stake
+      });
+      
       setIsSubmitting(false);
       setIsSubmitted(true);
-    }, 1500);
+    } catch (error) {
+      console.error("Staking transaction failed:", error);
+      setIsSubmitting(false);
+      
+      // Fallback for hackathon demo purposes if user rejects or has no funds
+      if (window.confirm("Transaction failed or rejected. Proceed with simulated success for the demo?")) {
+        setIsSubmitted(true);
+      }
+    }
   };
 
   if (isSubmitted) {
@@ -51,12 +76,23 @@ export default function NodeApplicationPage() {
       <div className="w-full max-w-lg mx-auto flex flex-col">
         <div className="mb-12">
           <h1 className="text-3xl font-light text-white/90 tracking-tight mb-2">Become a Node Operator</h1>
-          <p className="text-white/40 text-[11px] font-mono tracking-widest uppercase">
+          <p className="text-white/40 text-[11px] font-mono tracking-widest uppercase mb-6">
             Join the decentralized Aletheia consensus engine. Provide compute and models to verify real-world assets.
           </p>
+          {!isConnected && (
+            <div className="p-6 border border-emerald-500/20 bg-emerald-500/5 mb-8 flex flex-col items-start gap-4">
+              <div className="text-[10px] font-mono text-emerald-400 uppercase tracking-widest">
+                Action Required
+              </div>
+              <div className="text-sm text-white/80 font-light">
+                Node operators are required to stake 1,000 $MNT to participate in the consensus engine. Please connect your wallet to apply.
+              </div>
+              <ConnectButton />
+            </div>
+          )}
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-8 flex-1">
+        <form onSubmit={handleSubmit} className={`space-y-8 flex-1 ${!isConnected ? 'opacity-50 pointer-events-none' : ''}`}>
           <div className="space-y-3">
             <label className="text-[10px] font-mono text-white/50 uppercase tracking-[0.2em]">Email Address</label>
             <input
@@ -122,10 +158,10 @@ export default function NodeApplicationPage() {
 
           <button
             type="submit"
-            disabled={isSubmitting}
-            className="w-full bg-white hover:bg-white/90 text-black font-sans text-[11px] tracking-[0.2em] uppercase py-4 transition-colors disabled:opacity-50"
+            disabled={isSubmitting || !isConnected}
+            className="w-full bg-white hover:bg-white/90 text-black font-sans text-[11px] tracking-[0.2em] uppercase py-4 transition-colors disabled:opacity-50 flex items-center justify-center gap-3"
           >
-            {isSubmitting ? "Submitting Application..." : "Submit Node Application"}
+            {isSubmitting ? "Awaiting Wallet Signature..." : "Stake 1,000 MNT & Apply"}
           </button>
         </form>
       </div>
