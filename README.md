@@ -189,7 +189,7 @@ Our goal is simple: **Make truth a verifiable on-chain primitive.**
 ## 📸 Product Screenshots
 
 ### Landing Page
-![Landing Page](https://github.com/successaje/PoR/apps/web/public/landing_page.png)
+![Landing Page](https://github.com/successaje/PoR/blob/main/apps/web/public/landing_page.png)
 
 ### Verification Dashboard
 ![Verification Dashboard](https://github.com/successaje/PoR/apps/web/public/verification_dashboard.png)
