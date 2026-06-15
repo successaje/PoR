@@ -94,26 +94,36 @@ async def run_debate(asset_data: dict, emit_func):
         async for output in graph.astream(initial_state):
             for node_name, state_update in output.items():
                 if node_name == "geo_agent":
-                    await emit_func({"type": "finding", "agent": "Atlas", "message": state_update.get("geo_report")[:100] + "..."})
+                    await emit_func({"type": "finding", "agent": "Atlas", "message": state_update.get("geo_report")})
                 elif node_name == "financial_agent":
-                    await emit_func({"type": "finding", "agent": "Oracle", "message": state_update.get("financial_report")[:100] + "..."})
+                    await emit_func({"type": "finding", "agent": "Oracle", "message": state_update.get("financial_report")})
                 elif node_name == "legal_agent":
-                    await emit_func({"type": "finding", "agent": "Ledger", "message": state_update.get("legal_report")[:100] + "..."})
+                    await emit_func({"type": "finding", "agent": "Ledger", "message": state_update.get("legal_report")})
                 elif node_name == "fraud_agent":
-                    await emit_func({"type": "finding", "agent": "Prism", "message": state_update.get("fraud_report")[:100] + "..."})
+                    await emit_func({"type": "finding", "agent": "Prism", "message": state_update.get("fraud_report")})
                 elif node_name == "sentiment_agent":
-                    await emit_func({"type": "finding", "agent": "Pulse", "message": state_update.get("sentiment_report")[:100] + "..."})
+                    await emit_func({"type": "finding", "agent": "Pulse", "message": state_update.get("sentiment_report")})
                 elif node_name == "climate_agent":
-                    await emit_func({"type": "finding", "agent": "Tempest", "message": state_update.get("climate_report")[:100] + "..."})
+                    await emit_func({"type": "finding", "agent": "Tempest", "message": state_update.get("climate_report")})
                 elif node_name == "compliance_agent":
-                    await emit_func({"type": "finding", "agent": "Sentinel", "message": state_update.get("compliance_report")[:100] + "..."})
+                    await emit_func({"type": "finding", "agent": "Sentinel", "message": state_update.get("compliance_report")})
                 elif node_name == "consensus":
                     if state_update.get("anomalies_detected"):
                         await emit_func({"type": "status", "message": "Anomalies detected. Routing to Aegis for Meta-Consensus.", "confidence": 60})
                     else:
-                        await emit_func({"type": "consensus", "message": "Consensus Achieved by Aegis.", "confidence": state_update.get("consensus_score")})
+                        await emit_func({"type": "consensus", "message": "Consensus Achieved by Aegis. " + state_update.get("synthesis_reasoning", ""), "confidence": state_update.get("consensus_score")})
                 elif node_name == "debate_chamber":
-                    await emit_func({"type": "debate", "agent": "Aegis", "message": "Cross-examining conflicting data points..."})
+                    for msg in state_update.get("debate_history", []):
+                        content = msg.content
+                        if content.startswith("**"):
+                            parts = content.split("**: ", 1)
+                            if len(parts) == 2:
+                                agent_name = parts[0].replace("**", "")
+                                await emit_func({"type": "debate", "agent": agent_name, "message": parts[1]})
+                                await asyncio.sleep(2.5)
+                                continue
+                        await emit_func({"type": "debate", "agent": "Aegis", "message": content})
+                        await asyncio.sleep(2)
                 
                 final_state = state_update
             
