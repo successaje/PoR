@@ -189,19 +189,19 @@ Our goal is simple: **Make truth a verifiable on-chain primitive.**
 ## 📸 Product Screenshots
 
 ### Landing Page
-![Landing Page](apps/web/public/landing_page.png)
+![Landing Page](https://github.com/successaje/PoR/apps/web/public/landing_page.png)
 
 ### Verification Dashboard
-![Verification Dashboard](apps/web/public/verification_dashboard.png)
+![Verification Dashboard](https://github.com/successaje/PoR/apps/web/public/verification_dashboard.png)
 
 ### Debate Chamber
-![Debate Chamber](apps/web/public/debate_chamber.png)
+![Debate Chamber](https://github.com/successaje/PoR/apps/web/public/debate_chamber.png)
 
 ### Truth Certificate
-![Truth Certificate](apps/web/public/truth_certificate.png)
+![Truth Certificate](https://github.com/successaje/PoR/apps/web/public/truth_certificate.png)
 
 ### Node Operator Portal
-![Node Operator Portal](apps/web/public/node_portal.png)
+![Node Operator Portal](https://github.com/successaje/PoR/apps/web/public/node_portal.png)
 
 ---
 
