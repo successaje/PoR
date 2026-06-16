@@ -1,8 +1,8 @@
-# The Trust Layer for Real-World Assets
+# The Trust Layer for Reality Itself
 
-Proof-of-Reality (PoR) transforms real-world facts into on-chain truth.
+Proof-of-Reality (PoR) transforms physical events and real-world assets into verifiable on-chain truth.
 
-By combining decentralized AI consensus, cryptographic evidence anchoring, and Mantle's low-cost execution layer, PoR creates verifiable Truth Certificates for tokenized assets.
+By combining decentralized AI consensus, cryptographic evidence anchoring, and Mantle's low-cost execution layer, PoR creates immutable Truth Certificates for physical assets, infrastructure, and real-world events.
 
 Built for the Mantle Turing Test Hackathon 2026.
 
@@ -26,27 +26,28 @@ Judges shouldn't have to hunt for links. Everything you need is right here:
 
 ---
 
-## 🚨 The RWA Verification Crisis
+## 🚨 The Reality Verification Crisis
 
-The tokenization of Real-World Assets is scaling rapidly, but the foundation of this ecosystem is fundamentally broken:
+The blockchain can execute logic flawlessly, but it is entirely blind to the physical world. Whether it's tokenizing a commercial building or triggering an insurance payout for a flood, the foundation of Web3's interaction with reality is broken:
 
-1. **RWAs rely on blind trust, not math:** When a token claims to represent a $10M commercial building, the blockchain has no way to verify if that building actually exists, has a clean title, or isn't underwater.
+1. **RWAs rely on blind trust, not math:** When a token claims to represent a $10M building or a warehouse of inventory, the blockchain has no way to verify if that physical state actually exists.
 2. **Centralized Oracles are fragile:** Traditional oracles pull from single Web2 APIs. They verify *data*, but they do not verify *reality*.
-3. **AI lacks consensus:** A single LLM hallucinates and carries bias. You cannot trust a single AI model with millions of dollars in DeFi liquidity.
+3. **AI lacks consensus:** A single LLM hallucinates and carries bias. You cannot trust a single AI model with millions of dollars in DeFi liquidity or parametric insurance payouts.
 
 ---
 
-## 📈 Market Opportunity
+## 📈 Market Opportunity: The "Reality Oracle"
 
-The tokenized RWA market is projected to exceed **$16 trillion by 2030**.
+While "RWA Oracles" focus solely on real estate or treasuries, Proof-of-Reality is the **AI consensus layer for reality itself**. This expands the Total Addressable Market (TAM) into the trillions.
 
-Every tokenized asset requires:
-- Verification
-- Compliance
-- Monitoring
-- Reverification
+PoR verifies both **Assets** and **Events**:
+- 🏢 **Tokenized Real Estate:** Building condition, title verification, market value.
+- 🌊 **Parametric Insurance:** "Did a flood actually happen in this jurisdiction?"
+- 🚢 **Global Supply Chain:** "Did the shipment arrive at the port intact?"
+- ⚡ **Physical Infrastructure Networks (DePIN):** "Did this solar farm actually produce 500 megawatts?"
+- 🏗️ **Construction Finance:** "Was milestone 3 of the project completed?"
 
-Proof-of-Reality is positioned as the trust infrastructure powering this entire ecosystem.
+Proof-of-Reality is positioned as the fundamental infrastructure primitive powering Web3's interaction with the physical world.
 
 ---
 
@@ -130,8 +131,8 @@ PoR is not chain-agnostic. The protocol was designed specifically around Mantle'
 
 - **Low-cost on-chain verification updates:** Allowing frequent reverification.
 - **RWA ecosystem alignment:** Mantle has a strong focus on institutional RWAs.
-- **Institutional liquidity focus:** DeFi protocols on Mantle need reliable collateral.
-- **Future MNT staking for node operators:** Aligning network security with the native token.
+- **Institutional liquidity focus:** DeFi protocols on Mantle need reliable collateral and event triggers.
+- **Double-Yield mETH Staking:** Aligning network security by requiring node operators to stake Mantle Staked Ether (mETH).
 - **High-frequency truth score refreshes:** Required for dynamic reality tracking.
 
 Mantle enables a verification layer that would be economically impractical on higher-cost networks.
@@ -176,10 +177,10 @@ Proof-of-Reality aims to become the decentralized trust layer for tokenized asse
 
 Future milestones:
 - Permissionless Node Network
-- MNT Staking
+- mETH / cmETH Node Staking (Double Yield)
 - Slashing Mechanisms
 - Cross-Chain Verification
-- Institutional APIs
+- PoR-Gated DeFi Lending Integration
 - AI Validator Marketplace
 
 Our goal is simple: **Make truth a verifiable on-chain primitive.**

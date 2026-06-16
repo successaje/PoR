@@ -31,10 +31,10 @@ export default function NodeApplicationPage() {
     setIsSubmitting(true);
     
     try {
-      // Prompt the Wagmi staking transaction (1,000 MNT)
+      // Prompt the Wagmi staking transaction (1 mETH)
       await sendTransactionAsync({
         to: "0x34d156d6c062804771652b48f2d65d58d3794113", // VerificationManager / AgentRegistry proxy
-        value: parseEther("1000"), // 1,000 MNT Stake
+        value: parseEther("1"), // 1 mETH Stake
       });
       
       setIsSubmitting(false);
@@ -85,7 +85,7 @@ export default function NodeApplicationPage() {
                 Action Required
               </div>
               <div className="text-sm text-white/80 font-light">
-                Node operators are required to stake 1,000 $MNT to participate in the consensus engine. Please connect your wallet to apply.
+                Node operators are required to stake 1 mETH to participate in the consensus engine. You will continue to earn Ethereum PoS yield on your collateral while earning PoR verification fees (Double Yield). Please connect your wallet to apply.
               </div>
               <ConnectButton />
             </div>
@@ -161,7 +161,7 @@ export default function NodeApplicationPage() {
             disabled={isSubmitting || !isConnected}
             className="w-full bg-white hover:bg-white/90 text-black font-sans text-[11px] tracking-[0.2em] uppercase py-4 transition-colors disabled:opacity-50 flex items-center justify-center gap-3"
           >
-            {isSubmitting ? "Awaiting Wallet Signature..." : "Stake 1,000 MNT & Apply"}
+            {isSubmitting ? "Awaiting Wallet Signature..." : "Stake 1 mETH & Apply"}
           </button>
         </form>
       </div>
