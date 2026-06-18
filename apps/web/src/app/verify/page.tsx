@@ -352,40 +352,42 @@ export default function VerifyPage() {
              <span className="text-white/60 animate-[pulse_3s_ease-in-out_infinite]">{activeVerification.state.replace("_", " ")}</span>
            </h4>
            
-           <div className="flex-1 overflow-y-auto space-y-6 pr-4 custom-scrollbar">
-              <AnimatePresence>
-                {globalLogs.map((log) => (
-                   <motion.div
-                     key={log.id}
-                     initial={{ opacity: 0, x: -10 }}
-                     animate={{ opacity: 1, x: 0 }}
-                     transition={{ duration: 0.5, ease: "easeOut" }}
-                     className={`pl-4 border-l ${
-                       log.actionType === "DEBATING" ? 'border-amber-500/50' : 
-                       log.actionType === "ARBITRATING" ? 'border-purple-500/50' :
-                       log.actionType === "RESOLUTION" || log.actionType === "CONSENSUS" ? 'border-emerald-500/50' :
-                       log.actionType === "SCANNING" ? 'border-cyan-500/50' :
-                       'border-white/[0.05]'
-                     }`}
-                   >
-                     <div className="flex items-center gap-4 mb-2 font-mono text-[9px] tracking-[0.2em] uppercase">
-                        <span className={
-                          log.actionType === "DEBATING" ? "text-amber-400" : 
-                          log.actionType === "ARBITRATING" ? "text-purple-400" :
-                          log.actionType === "RESOLUTION" || log.actionType === "CONSENSUS" ? "text-emerald-400" :
-                          log.actionType === "SCANNING" ? "text-cyan-400" :
-                          "text-white/60"
-                        }>{log.agent}</span>
-                        {log.actionType === "DEBATING" && <span className="text-amber-500/60 ml-auto">CROSS-EXAMINATION</span>}
-                        {log.actionType === "ARBITRATING" && <span className="text-purple-500/60 ml-auto">META-CONSENSUS</span>}
-                        {log.actionType === "RESOLUTION" && <span className="text-emerald-500/60 ml-auto">CONFLICT RESOLVED</span>}
-                     </div>
-                     <div className="text-[12px] text-white/80 font-sans font-light leading-relaxed">
-                       "{log.message}"
-                     </div>
-                   </motion.div>
-                ))}
-              </AnimatePresence>
+           <div className="flex-1 relative min-h-0">
+             <div className="absolute inset-0 overflow-y-auto space-y-6 pr-4 custom-scrollbar pb-8">
+               <AnimatePresence>
+                 {globalLogs.map((log) => (
+                    <motion.div
+                      key={log.id}
+                      initial={{ opacity: 0, x: -10 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ duration: 0.5, ease: "easeOut" }}
+                      className={`pl-4 border-l ${
+                        log.actionType === "DEBATING" ? 'border-amber-500/50' : 
+                        log.actionType === "ARBITRATING" ? 'border-purple-500/50' :
+                        log.actionType === "RESOLUTION" || log.actionType === "CONSENSUS" ? 'border-emerald-500/50' :
+                        log.actionType === "SCANNING" ? 'border-cyan-500/50' :
+                        'border-white/[0.05]'
+                      }`}
+                    >
+                      <div className="flex items-center gap-4 mb-2 font-mono text-[9px] tracking-[0.2em] uppercase">
+                         <span className={
+                           log.actionType === "DEBATING" ? "text-amber-400" : 
+                           log.actionType === "ARBITRATING" ? "text-purple-400" :
+                           log.actionType === "RESOLUTION" || log.actionType === "CONSENSUS" ? "text-emerald-400" :
+                           log.actionType === "SCANNING" ? "text-cyan-400" :
+                           "text-white/60"
+                         }>{log.agent}</span>
+                         {log.actionType === "DEBATING" && <span className="text-amber-500/60 ml-auto">CROSS-EXAMINATION</span>}
+                         {log.actionType === "ARBITRATING" && <span className="text-purple-500/60 ml-auto">META-CONSENSUS</span>}
+                         {log.actionType === "RESOLUTION" && <span className="text-emerald-500/60 ml-auto">CONFLICT RESOLVED</span>}
+                      </div>
+                      <div className="text-[12px] text-white/80 font-sans font-light leading-relaxed">
+                        "{log.message}"
+                      </div>
+                    </motion.div>
+                 ))}
+               </AnimatePresence>
+             </div>
            </div>
            <DebateModal 
              isOpen={isDebateModalOpen} 
