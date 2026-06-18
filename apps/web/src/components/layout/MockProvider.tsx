@@ -75,7 +75,8 @@ export function MockProvider({ children }: { children: ReactNode }) {
       });
     }
 
-    const eventSource = new EventSource(`http://localhost:8000/stream/${assetId}`);
+    const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+    const eventSource = new EventSource(`${BACKEND_URL}/stream/${assetId}`);
 
     eventSource.onmessage = (event) => {
       const data = JSON.parse(event.data);

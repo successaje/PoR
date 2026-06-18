@@ -67,8 +67,9 @@ export default function VerifyPage() {
     e.preventDefault();
     if (!assetId || !address) return;
     
+    const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
     // Background fetch to trigger the real Python backend (hybrid demo mode)
-    fetch("http://localhost:8000/submit", {
+    fetch(`${BACKEND_URL}/submit`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json"
