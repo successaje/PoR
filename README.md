@@ -16,7 +16,6 @@ Judges shouldn't have to hunt for links. Everything you need is right here:
 
 - **Live Application:** [https://porprotocol.vercel.app/](https://porprotocol.vercel.app/)
 - **Video Walkthrough:** [https://youtu.be/OhFwDF2jgYA](https://youtu.be/OhFwDF2jgYA)
-- **Pitch Deck:** [Deck Link Pending]
 - **GitHub Repository:** [https://github.com/successaje/PoR](https://github.com/successaje/PoR)
 
 ### Deployed Contracts (Mantle Sepolia)
@@ -179,6 +178,13 @@ Instead, PoR uses a hybrid **Hash-and-Anchor** architecture:
 - The heavy AI debate transcripts and sensitive RWA metadata are kept off-chain.
 - The protocol hashes the final state into a `SHA-256 evidenceHash` and anchors it to the Mantle Network.
 
+### 3. DeFi Composability (The Lending Vault)
+To prove that PoR is not just a theoretical oracle, we deployed a mock Mantle DeFi protocol: **`PoRLendingVault.sol`**.
+This contract demonstrates how lending protocols seamlessly integrate with PoR:
+1. A user attempts to borrow against their RWA.
+2. The Vault queries the `TruthCertificateNFT` for the asset's `consensusScore` and verifies the `decayTimer` has not expired.
+3. If the AI consensus score is >= 85%, the loan is automatically approved. If the score decays (e.g. the asset is compromised), the loan reverts or triggers liquidation.
+
 ---
 
 ## ⛓️ Why Mantle?
@@ -278,7 +284,7 @@ Our goal is simple: **Make truth a verifiable on-chain primitive.**
 ## 🛠️ Technology Stack
 
 - **Frontend:** Next.js 16, React 19, TailwindCSS v4, Framer Motion, Wagmi, Viem.
-- **Backend (AI Engine):** Python, FastAPI, LangGraph, LangChain, OpenAI (`gpt-4o-mini`).
+- **Backend (AI Engine):** Python, FastAPI, LangGraph, LangChain, Google Gemini (`gemini-2.5-flash`).
 - **Smart Contracts:** Solidity `^0.8.24`, Foundry, OpenZeppelin AccessControl, Mantle Sepolia.
 
 ---
@@ -288,7 +294,7 @@ Our goal is simple: **Make truth a verifiable on-chain primitive.**
 ### 1. The AI Backend
 ```bash
 cd apps/api
-# Add your OPENAI_API_KEY to .env
+# Add your GOOGLE_API_KEY to .env
 python3 -m venv venv
 source venv/bin/activate
 pip install -r requirements.txt
