@@ -271,10 +271,18 @@ export default function VerifyPage() {
               <div className="space-y-4">
                 <button 
                   onClick={() => setIsDebateModalOpen(true)}
-                  className="w-full py-4 bg-white/5 hover:bg-white/10 text-white font-sans text-[11px] tracking-[0.2em] uppercase transition-colors border border-white/10"
+                  className="w-full py-4 bg-white/5 hover:bg-white/10 text-white font-sans text-[11px] tracking-[0.2em] uppercase transition-colors border border-white/10 mb-2"
                 >
                   View Debate Chamber
                 </button>
+                <a 
+                  href="https://smith.langchain.com/"
+                  target="_blank" rel="noreferrer"
+                  className="w-full py-4 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 font-sans text-[11px] tracking-[0.2em] uppercase transition-colors border border-emerald-500/20 block text-center mb-4 flex items-center justify-center gap-2"
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
+                  View Auditable Reasoning Trace ↗
+                </a>
                 {/* TODO: Add useWriteContract for VerificationManager.resolveCase here if not done off-chain */}
                 <button 
                   onClick={() => {

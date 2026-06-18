@@ -24,7 +24,8 @@ Judges shouldn't have to hunt for links. Everything you need is right here:
 
 - **VerificationManager:** [`0x34d156d6c062804771652b48f2d65d58d3794113`](https://sepolia.mantlescan.xyz/address/0x34d156d6c062804771652b48f2d65d58d3794113)
 - **TruthCertificateNFT:** [`0x86C41594e9aDeCcf8c85ba9EEe0138C7c9E70dBc`](https://sepolia.mantlescan.xyz/address/0x86C41594e9aDeCcf8c85ba9EEe0138C7c9E70dBc)
-- **AgentRegistry:** *(Available upon governance vote)*
+- **AgentRegistry:** [`0xc4d732199b7d21207a74cfe6ced4d17dd330c7ea`](https://sepolia.mantlescan.xyz/address/0xc4d732199b7d21207a74cfe6ced4d17dd330c7ea)
+- **PoRLendingVault:** [`0x64d1ae5fa2eceb908a028bbdb4a4e2223bdefa47`](https://sepolia.mantlescan.xyz/address/0x64d1ae5fa2eceb908a028bbdb4a4e2223bdefa47)
 
 ---
 
@@ -160,6 +161,16 @@ The Python backend is powered by LangChain and LangGraph. It orchestrates a recu
 | **Pulse** | Social | Analyzes neighborhood momentum and economic velocity. |
 | **Tempest**| Climate | Models environmental hazards (flood, wildfire) for the asset. |
 | **Sentinel**| Compliance | Checks OFAC sanctions and jurisdictional compliance. |
+
+#### Epistemic Independence (Live Data Sources)
+To prevent LLM hallucination and ensure genuine consensus, the agents do not just share a prompt—they ingest completely independent, real-world data streams.
+
+| Agent | External Data Source | Endpoint / Integration |
+|-------|----------------------|------------------------|
+| **Atlas** | OpenStreetMap API | Live calls to `nominatim.openstreetmap.org` for geo-fencing. |
+| **Sentinel**| US Treasury Dept | Live stream of the `OFAC SDN Sanctions.JSON` API. |
+| **Oracle** | Market APIs | Retrieves live baseline yield benchmarks. |
+| **Tempest**| Climate Models | Ingests structural weather resilience models. |
 
 ### 2. The Cryptoeconomic Layer (Mantle Network)
 Storing raw satellite images or sensitive legal documents directly on a blockchain is an architectural anti-pattern—it incurs astronomical gas costs and violates data privacy laws (GDPR). 
