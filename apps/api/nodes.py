@@ -147,7 +147,7 @@ def get_social_sentiment(registry_id: str) -> str:
 def analyze_geo(state: AssetVerificationState) -> AssetVerificationState:
     """Atlas: Geo-Spatial Agent"""
     prompt = ChatPromptTemplate.from_messages([
-        ("system", "You are Atlas, a strict Geo-Spatial Intelligence Agent for the PoR protocol. Use tools to verify boundaries and structural integrity."),
+        ("system", "You are Atlas, a strict Geo-Spatial & Physical Intelligence Agent for the PoR protocol. Use tools to verify physical existence, location data, or structural boundaries for the asset (e.g., real estate, machinery, logistics hubs)."),
         ("human", "Context: {context}")
     ])
     agent = prompt | llm.bind_tools([fetch_satellite_metadata]).with_structured_output(AgentReport)
@@ -157,7 +157,7 @@ def analyze_geo(state: AssetVerificationState) -> AssetVerificationState:
 def analyze_financial(state: AssetVerificationState) -> AssetVerificationState:
     """Oracle: Market Valuation Agent"""
     prompt = ChatPromptTemplate.from_messages([
-        ("system", "You are Oracle, a strict Financial Intelligence Agent for the PoR protocol. Use tools to analyze market comps and valuations."),
+        ("system", "You are Oracle, a strict Financial Intelligence Agent for the PoR protocol. Use tools to analyze market comps, valuations, or cash flow projections across various asset classes (real estate, fine art, invoices)."),
         ("human", "Context: {context}")
     ])
     agent = prompt | llm.bind_tools([analyze_market_comps]).with_structured_output(AgentReport)
@@ -167,7 +167,7 @@ def analyze_financial(state: AssetVerificationState) -> AssetVerificationState:
 def analyze_legal(state: AssetVerificationState) -> AssetVerificationState:
     """Ledger: Registry & Ownership Agent"""
     prompt = ChatPromptTemplate.from_messages([
-        ("system", "You are Ledger, a strict Legal Intelligence Agent for the PoR protocol. Use tools to verify ownership and deeds."),
+        ("system", "You are Ledger, a strict Legal & Registry Intelligence Agent for the PoR protocol. Use tools to verify ownership, deeds, commercial invoices, or legal contracts tied to the asset."),
         ("human", "Context: {context}")
     ])
     agent = prompt | llm.bind_tools([query_county_registry]).with_structured_output(AgentReport)
@@ -187,7 +187,7 @@ def analyze_fraud(state: AssetVerificationState) -> AssetVerificationState:
 def analyze_sentiment(state: AssetVerificationState) -> AssetVerificationState:
     """Pulse: Social & Activity Intelligence Agent"""
     prompt = ChatPromptTemplate.from_messages([
-        ("system", "You are Pulse, a Market Sentiment Agent. Use tools to analyze local economic activity and neighborhood momentum."),
+        ("system", "You are Pulse, a Market Sentiment & Activity Agent. Use tools to analyze market demand, economic activity, or sector momentum surrounding the asset."),
         ("human", "Context: {context}")
     ])
     agent = prompt | llm.bind_tools([get_social_sentiment]).with_structured_output(AgentReport)
@@ -197,7 +197,7 @@ def analyze_sentiment(state: AssetVerificationState) -> AssetVerificationState:
 def analyze_climate(state: AssetVerificationState) -> AssetVerificationState:
     """Tempest: Climate & Risk Agent"""
     prompt = ChatPromptTemplate.from_messages([
-        ("system", "You are Tempest, a Climate Risk Agent. Use tools to analyze environmental hazards for the property."),
+        ("system", "You are Tempest, a Risk & Environmental Agent. Use tools to analyze external risks, climate hazards, or systemic vulnerabilities for the asset (e.g. flood risk for buildings, transit risk for logistics)."),
         ("human", "Context: {context}")
     ])
     agent = prompt | llm.bind_tools([check_climate_risk]).with_structured_output(AgentReport)

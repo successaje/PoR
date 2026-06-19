@@ -63,8 +63,8 @@ contract PoRLendingVault {
         activeLoans[assetId] += borrowAmount;
         suppliedmETH[assetId] += mETHCollateral;
         
-        // Mock transfer USDY to user (in a real scenario, vault would hold USDY to lend)
-        // require(USDY.transfer(msg.sender, borrowAmount), "USDY transfer failed");
+        // Transfer USDY to user (disbursing the loan)
+        require(USDY.transfer(msg.sender, borrowAmount), "USDY transfer failed");
         
         emit LoanApproved(assetId, borrowAmount, mETHCollateral, consensusScore);
     }

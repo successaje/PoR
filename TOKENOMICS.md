@@ -24,9 +24,11 @@ Once consensus is reached and the `TruthCertificateNFT` is minted, the $50 fee i
 
 ---
 
-## 🔒 The $POR Utility Token
+## 🔒 The Planned $POR Utility Token
 
-The $POR token secures the network, aligning the incentives of Node Operators, Asset Owners, and the Protocol.
+*(Note: For the hackathon MVP, keeper rewards and fees are currently denominated in native Mantle `$MNT` and `USDY` to prove the cryptoeconomic mechanism works. `$POR` is the planned future utility token.)*
+
+The planned `$POR` token will secure the network, aligning the incentives of Node Operators, Asset Owners, and the Protocol.
 
 ### 1. Agent Staking & Slashing
 To become a recognized Node Operator in the `AgentRegistry`, operators must stake $POR.
