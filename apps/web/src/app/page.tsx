@@ -138,6 +138,8 @@ export default function LandingPage() {
             <p className="text-white/90">PoR verifies <span className="italic text-emerald-400">reality</span>.</p>
           </div>
         </div>
+      </section>
+
       {/* 1.8 WHY STRUCTURED DEBATE */}
       <section className="py-32 border-b border-white/[0.04] px-12 md:px-24 bg-[#020202]">
         <div className="max-w-6xl mx-auto">
