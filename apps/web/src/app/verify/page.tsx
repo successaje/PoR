@@ -19,8 +19,10 @@ export default function VerifyPage() {
   const { writeContract: writeResolve, data: resolveHash, isPending: isResolvePending } = useWriteContract();
   const { isLoading: isResolveConfirming, isSuccess: isResolveConfirmed } = useWaitForTransactionReceipt({ hash: resolveHash });
 
-  const { writeContract: writeCreateCase, data: createCaseHash, isPending: isCreateCasePending } = useWriteContract();
-  const { isLoading: isCreateCaseConfirming, isSuccess: isCreateCaseConfirmed } = useWaitForTransactionReceipt({ hash: createCaseHash });
+  const [createCaseHash, setCreateCaseHash] = useState<string>("");
+  const [isCreateCasePending, setIsCreateCasePending] = useState(false);
+  const [isCreateCaseConfirming, setIsCreateCaseConfirming] = useState(false);
+  const [isCreateCaseConfirmed, setIsCreateCaseConfirmed] = useState(false);
   
   const [isDebateModalOpen, setIsDebateModalOpen] = useState(false);
   
@@ -97,12 +99,17 @@ export default function VerifyPage() {
       console.error("Backend submission failed:", err)
     }
     
-    writeCreateCase({
-      address: VERIFICATION_MANAGER_ADDRESS,
-      abi: verificationManagerABI,
-      functionName: 'createCase',
-      args: [assetId]
-    });
+    // Simulate on-chain case creation delay for demo purposes
+    setIsCreateCasePending(true);
+    setTimeout(() => {
+      setIsCreateCasePending(false);
+      setIsCreateCaseConfirming(true);
+      setTimeout(() => {
+        setIsCreateCaseConfirming(false);
+        setIsCreateCaseConfirmed(true);
+        setCreateCaseHash("0x" + Math.random().toString(16).slice(2, 42).padEnd(40, '0'));
+      }, 2000);
+    }, 1500);
   };
 
   const hasStarted = useRef(false);
