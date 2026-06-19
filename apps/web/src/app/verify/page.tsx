@@ -312,8 +312,8 @@ export default function VerifyPage() {
                         args: [
                           assetId || "REG-8492-TX",
                           Math.floor(activeVerification.confidence),
-                          activeVerification.evidenceHash || "0x00",
-                          activeVerification.signature
+                          (activeVerification.evidenceHash || "0x0000000000000000000000000000000000000000000000000000000000000000") as `0x${string}`,
+                          (activeVerification.signature || "0x") as `0x${string}`
                         ]
                       });
                     }}
@@ -335,7 +335,7 @@ export default function VerifyPage() {
                           assetId || "REG-8492-TX",
                           Math.floor(activeVerification.confidence),
                           BigInt(60 * 60 * 24 * 30), // 30 days
-                          activeVerification.evidenceHash || "0x0000000000000000000000000000000000000000000000000000000000000000"
+                          (activeVerification.evidenceHash || "0x0000000000000000000000000000000000000000000000000000000000000000") as `0x${string}`
                         ]
                       });
                     }}
