@@ -17,6 +17,7 @@ Judges shouldn't have to hunt for links. Everything you need is right here:
 - **Live Application:** [https://porprotocol.vercel.app/](https://porprotocol.vercel.app/)
 - **Video Walkthrough:** [https://youtu.be/OhFwDF2jgYA](https://youtu.be/OhFwDF2jgYA)
 - **GitHub Repository:** [https://github.com/successaje/PoR](https://github.com/successaje/PoR)
+- **X (Twitter):** [https://x.com/porprotocol?s=11](https://x.com/porprotocol?s=11)
 
 ### Deployed Contracts (Mantle Sepolia)
 *Fully secured via Role-Based Access Control (RBAC).*
