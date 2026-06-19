@@ -15,8 +15,8 @@ The final Reality Score is hashed and minted as a `TruthCertificateNFT` on Mantl
 ## 🔗 Quick Links
 - **Live Application:** [https://porprotocol.vercel.app/](https://porprotocol.vercel.app/)
 - **Video Walkthrough:** [https://youtu.be/OhFwDF2jgYA](https://youtu.be/OhFwDF2jgYA)
-- **Pitch Deck:** [Deck Link Pending]
 - **GitHub Repository:** [https://github.com/successaje/PoR](https://github.com/successaje/PoR)
+- **X (Twitter):** [https://x.com/porprotocol?s=11](https://x.com/porprotocol?s=11)
 
 ---
 
