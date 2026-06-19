@@ -189,7 +189,7 @@ export default function VerificationRoom({ params }: { params: Promise<{ id: str
                 const agentLogs = logs.filter(l => l.agent_name === name || l.agent_name === name.toUpperCase());
                 const agentScore = agentLogs.length > 0 
                   ? agentLogs[agentLogs.length - 1].confidence 
-                  : Math.max(0, (score - 2.1 + (i * 0.65)).toFixed(1));
+                  : Number(Math.max(0, score - 2.1 + (i * 0.65)).toFixed(1));
                   
                 return (
                 <div key={name} className="p-4 bg-black border border-white/[0.05]">
