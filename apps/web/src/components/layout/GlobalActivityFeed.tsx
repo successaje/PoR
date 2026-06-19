@@ -2,16 +2,22 @@
 
 import { useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { useMock } from "./MockProvider";
-import { AGENTS } from "@/lib/mockEngine";
+import { usePathname } from "next/navigation";
+import { useVerification } from "./VerificationProvider";
+import { AGENTS } from "@/lib/verificationEngine";
 
 export function GlobalActivityFeed() {
-  const { globalLogs, activeVerification } = useMock();
+  const pathname = usePathname();
+  const { globalLogs, activeVerification } = useVerification();
   const logsEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     logsEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [globalLogs]);
+
+  if (pathname !== "/verify") {
+    return null;
+  }
 
   return (
     <div className="w-80 h-[calc(100vh-61px)] border-l border-white/[0.04] bg-[#000000]/40 backdrop-blur-md flex flex-col hidden lg:flex">

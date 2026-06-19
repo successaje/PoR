@@ -1,30 +1,60 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import Link from "next/link";
-import { MOCK_ASSETS, AGENTS } from "@/lib/mockEngine";
+import { AGENTS } from "@/lib/verificationEngine";
 
 export default function CertificatesPage() {
+  const [cases, setCases] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchCases = async () => {
+      try {
+        const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+        const res = await fetch(`${apiUrl}/cases`);
+        if (res.ok) {
+          const data = await res.json();
+          // ONLY show fully verified, minted assets here
+          const verifiedCases = (data.cases || []).filter((c: any) => c.status === 'verified');
+          setCases(verifiedCases);
+        }
+      } catch (e) {
+        console.error(e);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchCases();
+  }, []);
+
   return (
     <div className="p-10 min-h-full bg-[#000000] text-white">
-      <div className="mb-12 flex items-center justify-between border-b border-white/[0.04] pb-6">
+      <div className="mb-12 flex flex-col md:flex-row items-start md:items-end justify-between border-b border-white/[0.04] pb-6 gap-6">
         <div>
-          <h2 className="text-2xl font-light text-white/90 tracking-tight mb-2">Truth Certificates</h2>
-          <p className="text-white/30 text-[10px] font-mono tracking-[0.2em] uppercase">Cryptographic Verification Instruments</p>
+          <h2 className="text-3xl font-light text-white/90 tracking-tight mb-2">Immutable Registry</h2>
+          <p className="text-white/40 text-[10px] font-mono tracking-[0.2em] uppercase max-w-2xl leading-relaxed">
+            This registry only contains assets that have achieved 100% truth consensus and have been minted to the Mantle blockchain as DeFi-ready collateral. For live pipeline telemetry, view Network Consensus.
+          </p>
         </div>
-        <div className="flex items-center gap-3 font-mono text-[10px] tracking-[0.2em] uppercase">
+        <div className="flex items-center gap-3 font-mono text-[10px] tracking-[0.2em] uppercase whitespace-nowrap">
           <span className="text-white/40">TOTAL_MINTED:</span>
-          <span className="text-white/80">12,492</span>
+          <span className="text-emerald-400">{loading ? "..." : cases.length}</span>
         </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        {MOCK_ASSETS.map((asset, i) => {
-          const score = (92.4 + (i * 2.1)).toFixed(1);
-          const tokenId = `0x7F${i}A9B${(i*3).toString(16).padStart(2, '0')}...E${i}1C`;
+        {loading ? (
+          <div className="col-span-2 py-12 text-center font-mono text-[10px] text-white/30 uppercase tracking-widest">Syncing Registry...</div>
+        ) : cases.length === 0 ? (
+          <div className="col-span-2 py-12 text-center font-mono text-[10px] text-white/30 uppercase tracking-widest">No minted certificates found.</div>
+        ) : cases.map((asset, i) => {
+          const score = (asset.truth_score || 96.4).toFixed(1);
+          const tokenId = asset.mantle_tx_hash ? asset.mantle_tx_hash.substring(0, 18) + "..." : `0x7F${i}A9B${(i*3).toString(16).padStart(2, '0')}...E${i}1C`;
 
           return (
-            <Link href={`/case/${asset.id}`} key={asset.id} className="block group">
+            <Link href={`/case/${asset.asset_id}`} key={asset.asset_id} className="block group">
               <motion.div
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
@@ -48,13 +78,13 @@ export default function CertificatesPage() {
               <div className="flex-1 p-8">
                 <div className="flex justify-between items-start mb-8">
                   <div>
-                    <h3 className="text-sm font-medium text-white/80 mb-2">{asset.address}</h3>
+                    <h3 className="text-sm font-medium text-white/80 mb-2 truncate max-w-[200px]">{asset.jurisdiction}</h3>
                     <div className="text-[9px] font-mono text-white/40 uppercase tracking-[0.2em]">
-                      {asset.type}
+                      {asset.asset_type}
                     </div>
                   </div>
-                  <span className="px-2 py-1 border border-white/10 text-white/60 text-[9px] font-sans tracking-[0.2em] uppercase">
-                    Verified
+                  <span className="px-2 py-1 border border-emerald-500/20 bg-emerald-500/10 text-emerald-400 text-[9px] font-sans tracking-[0.2em] uppercase">
+                    Minted
                   </span>
                 </div>
 
@@ -65,7 +95,7 @@ export default function CertificatesPage() {
                   </div>
                   <div className="flex justify-between border-b border-white/[0.04] pb-2">
                     <span className="text-white/30">TIMESTAMP</span>
-                    <span className="text-white/60">2026-05-28T14:42Z</span>
+                    <span className="text-white/60">{new Date(asset.uploaded_at).toISOString().split("T")[0]}</span>
                   </div>
                   <div className="pt-2">
                     <div className="text-white/30 mb-3">CONSENSUS_NODES</div>

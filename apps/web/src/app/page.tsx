@@ -3,7 +3,7 @@
 import { motion } from "framer-motion";
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { AGENTS } from "@/lib/mockEngine";
+import { AGENTS } from "@/lib/verificationEngine";
 
 export default function LandingPage() {
   const [mounted, setMounted] = useState(false);

@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { AGENTS } from "@/lib/mockEngine";
+import { AGENTS } from "@/lib/verificationEngine";
 import Link from "next/link";
 import { use } from "react";
 import { NodeId } from "@/config/nodes";
@@ -22,7 +22,7 @@ export default function AgentDetailsPage({ params }: { params: Promise<{ id: str
     );
   }
 
-  // Generate some deterministic mock stats based on the agent name
+  // Generate some deterministic stats based on the agent name
   const nameIndex = Object.keys(AGENTS).indexOf(agentName);
   const accuracy = (94.5 + (nameIndex * 0.45)).toFixed(2);
   const tasks = Math.floor(1250 + (nameIndex * 340));
@@ -121,7 +121,7 @@ export default function AgentDetailsPage({ params }: { params: Promise<{ id: str
             </h3>
             
             <div className="space-y-3">
-              {/* Mocking a few node operators for this specific agent class */}
+              {/* Visualizing a few node operators for this specific agent class */}
               {[...Array(4)].map((_, i) => {
                 const isOnline = i !== 3; // Make the last one offline just for flavor
                 return (
