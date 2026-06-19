@@ -138,6 +138,145 @@ export default function LandingPage() {
             <p className="text-white/90">PoR verifies <span className="italic text-emerald-400">reality</span>.</p>
           </div>
         </div>
+      {/* 1.8 WHY STRUCTURED DEBATE */}
+      <section className="py-32 border-b border-white/[0.04] px-12 md:px-24 bg-[#020202]">
+        <div className="max-w-6xl mx-auto">
+          <div className="mb-16 text-center">
+            <h2 className="text-3xl font-light text-white/90 mb-4 tracking-tight">Why Structured Debate?</h2>
+            <p className="text-white/30 font-mono text-[10px] tracking-[0.2em] uppercase">Not Consensus-by-Average</p>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-px bg-white/[0.05] border border-white/[0.05]">
+            {/* Traditional Oracle */}
+            <div className="bg-black p-10">
+              <h3 className="text-lg text-white/60 mb-6 font-medium">Traditional Oracles</h3>
+              <ul className="space-y-4 text-sm text-white/40 font-light leading-relaxed">
+                <li className="flex items-start gap-3"><span className="text-red-500/80 mt-1">✕</span> Good for price feeds, fails at unstructured qualitative reality (deeds, photos).</li>
+                <li className="flex items-start gap-3"><span className="text-red-500/80 mt-1">✕</span> Cannot interpret nuanced real-world conditions.</li>
+                <li className="flex items-start gap-3"><span className="text-red-500/80 mt-1">✕</span> Relies on rigid, predetermined data sources.</li>
+              </ul>
+            </div>
+            {/* Single AI */}
+            <div className="bg-black p-10">
+              <h3 className="text-lg text-white/60 mb-6 font-medium">Single AI Oracle</h3>
+              <ul className="space-y-4 text-sm text-white/40 font-light leading-relaxed">
+                <li className="flex items-start gap-3"><span className="text-amber-500/80 mt-1">!</span> Prone to unchecked hallucinations.</li>
+                <li className="flex items-start gap-3"><span className="text-amber-500/80 mt-1">!</span> Single point of computational failure.</li>
+                <li className="flex items-start gap-3"><span className="text-amber-500/80 mt-1">!</span> A black box with no auditable reasoning trace.</li>
+              </ul>
+            </div>
+            {/* PoR */}
+            <div className="bg-[#050505] p-10 border-t-2 md:border-t-0 md:border-l-2 border-emerald-500/50 relative overflow-hidden">
+              <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-500/10 blur-[50px]"></div>
+              <h3 className="text-lg text-emerald-400 mb-6 font-medium flex items-center gap-2">
+                <div className="w-2 h-2 bg-emerald-500 animate-pulse"></div>
+                Proof-of-Reality (PoR)
+              </h3>
+              <ul className="space-y-4 text-sm text-white/80 font-light leading-relaxed relative z-10">
+                <li className="flex items-start gap-3"><span className="text-emerald-500 mt-1">✓</span> 8 distinct node personas analyzing unique data vectors.</li>
+                <li className="flex items-start gap-3"><span className="text-emerald-500 mt-1">✓</span> Adversarial cross-examination forces truth to surface.</li>
+                <li className="flex items-start gap-3"><span className="text-emerald-500 mt-1">✓</span> Mathematical confidence scoring with 100% on-chain auditability.</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* 1.85 LIVE PROOF PREVIEW */}
+      <section className="py-32 border-b border-white/[0.04] px-12 md:px-24 bg-black relative overflow-hidden">
+        <div className="absolute inset-0 bg-security-grid opacity-50"></div>
+        <div className="max-w-5xl mx-auto relative z-10">
+          <div className="flex flex-col md:flex-row justify-between items-end mb-12">
+            <div>
+              <h2 className="text-3xl font-light text-white/90 mb-4 tracking-tight">Live Proof of Reality</h2>
+              <p className="text-white/30 font-mono text-[10px] tracking-[0.2em] uppercase">Auditable Consensus Trace</p>
+            </div>
+            <Link href="/case/REG-8492-TX" className="mt-6 md:mt-0 px-6 py-3 border border-white/10 hover:bg-white/5 text-[11px] font-sans tracking-[0.2em] uppercase transition-colors text-white/80 hover:text-white flex items-center gap-2">
+              View Full Debate <span>→</span>
+            </Link>
+          </div>
+
+          <div className="p-8 border border-white/10 bg-[#020202] backdrop-blur-xl">
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-center border-b border-white/[0.05] pb-6 mb-6">
+              <div>
+                <div className="text-[10px] font-mono text-white/40 uppercase tracking-widest mb-2">TARGET ASSET</div>
+                <div className="text-xl text-white/90 font-mono tracking-tight">REG-8492-TX</div>
+              </div>
+              <div className="mt-4 md:mt-0 flex items-center gap-4">
+                <div className="px-3 py-1 bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-[10px] font-mono uppercase tracking-widest flex items-center gap-2">
+                  <div className="w-1.5 h-1.5 bg-emerald-500 rounded-full"></div>
+                  VERIFIED
+                </div>
+                <div className="px-3 py-1 bg-white/5 border border-white/10 text-white/60 text-[10px] font-mono uppercase tracking-widest">
+                  MANTLE SEPOLIA
+                </div>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mb-8">
+              <div>
+                <div className="text-[10px] font-mono text-white/40 uppercase tracking-widest mb-2">Truth Score</div>
+                <div className="text-3xl text-white/90 font-light">92.8<span className="text-white/30 text-lg">%</span></div>
+              </div>
+              <div>
+                <div className="text-[10px] font-mono text-white/40 uppercase tracking-widest mb-2">Fraud Prob</div>
+                <div className="text-xl text-white/60 mt-2 font-mono">LOW</div>
+              </div>
+              <div>
+                <div className="text-[10px] font-mono text-white/40 uppercase tracking-widest mb-2">Value Est</div>
+                <div className="text-xl text-white/60 mt-2 font-mono">$418,000</div>
+              </div>
+              <div>
+                <div className="text-[10px] font-mono text-white/40 uppercase tracking-widest mb-2">Consensus Time</div>
+                <div className="text-xl text-white/60 mt-2 font-mono">1.2s</div>
+              </div>
+            </div>
+            
+            <div className="p-4 bg-black border border-white/[0.02] text-sm text-white/50 font-light leading-relaxed border-l-2 border-emerald-500/50">
+              <span className="text-white/80 font-medium">Aletheia Synopsis:</span> Strong consensus reached. Geological surveys align with municipal records. Minor debate regarding zoning overlap resolved by temporal cross-referencing. Asset existence and ownership cryptographically confirmed.
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* 1.9 WHY MANTLE */}
+      <section className="py-32 border-b border-white/[0.04] px-12 md:px-24 bg-[#050505]">
+        <div className="max-w-6xl mx-auto">
+          <div className="mb-16 text-center">
+            <h2 className="text-3xl font-light text-white/90 mb-4 tracking-tight">Native to Mantle Ecosystem</h2>
+            <p className="text-white/30 font-mono text-[10px] tracking-[0.2em] uppercase">Why PoR Chose Mantle</p>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div className="p-8 border border-white/[0.05] bg-black hover:border-white/10 transition-colors">
+              <div className="w-10 h-10 border border-teal-500/30 bg-teal-500/10 flex items-center justify-center mb-6">
+                <span className="text-teal-400 font-mono text-lg">⚡</span>
+              </div>
+              <h3 className="text-lg text-white/80 mb-4 font-medium">Ultra-Low Cost Verification</h3>
+              <p className="text-sm text-white/40 font-light leading-relaxed">
+                The multi-agent debate process requires frequent state updates. Mantle's low fees make running 8-node consensus economically viable at scale.
+              </p>
+            </div>
+            <div className="p-8 border border-white/[0.05] bg-black hover:border-white/10 transition-colors">
+              <div className="w-10 h-10 border border-emerald-500/30 bg-emerald-500/10 flex items-center justify-center mb-6">
+                <span className="text-emerald-400 font-mono text-lg">🏛️</span>
+              </div>
+              <h3 className="text-lg text-white/80 mb-4 font-medium">RWA Ecosystem Alignment</h3>
+              <p className="text-sm text-white/40 font-light leading-relaxed">
+                Mantle is highly focused on real-world yield. PoR provides the missing trust layer to bring physical real estate and infrastructure into Mantle DeFi vaults.
+              </p>
+            </div>
+            <div className="p-8 border border-white/[0.05] bg-black hover:border-white/10 transition-colors">
+              <div className="w-10 h-10 border border-cyan-500/30 bg-cyan-500/10 flex items-center justify-center mb-6">
+                <span className="text-cyan-400 font-mono text-lg">💧</span>
+              </div>
+              <h3 className="text-lg text-white/80 mb-4 font-medium">$mETH Validator Staking</h3>
+              <p className="text-sm text-white/40 font-light leading-relaxed">
+                Phase II of PoR will require Intelligence Nodes to stake Mantle's native yield-bearing mETH to participate in consensus, aligning node incentives with ecosystem growth.
+              </p>
+            </div>
+          </div>
+        </div>
       </section>
 
       {/* 2. HOW IT WORKS (PIPELINE) */}
