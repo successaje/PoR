@@ -1,7 +1,7 @@
 "use client";
 
 import { motion, AnimatePresence } from "framer-motion";
-import { AgentLog } from "@/lib/mockEngine";
+import { AgentLog } from "@/lib/verificationEngine";
 import { useEffect, useRef } from "react";
 
 interface DebateModalProps {

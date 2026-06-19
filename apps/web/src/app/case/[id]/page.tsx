@@ -1,35 +1,56 @@
 "use client";
 
+import { useEffect, useState, use } from "react";
 import { motion } from "framer-motion";
-import { AGENTS, MOCK_ASSETS } from "@/lib/mockEngine";
+import { AGENTS } from "@/lib/verificationEngine";
 import Link from "next/link";
-import { use } from "react";
 import TextScramble from "@/components/ui/TextScramble";
 
 export default function VerificationRoom({ params }: { params: Promise<{ id: string }> }) {
   const resolvedParams = use(params);
   const { id } = resolvedParams;
 
-  const idHash = id.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
-  const isRejected = idHash % 3 === 0;
+  const [asset, setAsset] = useState<any>(null);
+  const [logs, setLogs] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const asset = MOCK_ASSETS.find(a => a.id === id) || { value: "Valuation Unknown" };
+  useEffect(() => {
+    const fetchCase = async () => {
+      try {
+        const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+        const res = await fetch(`${apiUrl}/cases/${id}`);
+        if (res.ok) {
+          const data = await res.json();
+          setAsset(data.case);
+        }
+        
+        const logsRes = await fetch(`${apiUrl}/cases/${id}/logs`);
+        if (logsRes.ok) {
+          const logsData = await logsRes.json();
+          setLogs(logsData.logs || []);
+        }
+      } catch (e) {
+        console.error(e);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchCase();
+  }, [id]);
 
-  const mockDebateLogs = isRejected ? [
-    { time: "00:00:12", agent: "Atlas", action: "SCANNING", text: "Cross-referencing global geospatial registry. Coordinates validated." },
-    { time: "00:00:14", agent: "Oracle", action: "SCANNING", text: "Querying local municipal databases for ownership records." },
-    { time: "00:00:18", agent: "Prism", action: "FLAGGED", text: "CRITICAL: Synthetic manipulation detected in structural survey metadata. EXIF data inconsistent with claimed date." },
-    { time: "00:00:21", agent: "Sentinel", action: "DEBATING", text: "Sanctions list cleared, but KYC provider flagged secondary shell company associated with title deed." },
-    { time: "00:00:25", agent: "Aegis", action: "RESOLUTION", text: "Conflict resolution failed. Prism's metadata discrepancy cannot be resolved. Risk threshold exceeded." },
-    { time: "00:00:28", agent: "Aletheia", action: "REJECTED", text: "Consensus aborted. Verification failed. Fraud risk too high to mint truth certificate." }
-  ] : [
-    { time: "00:00:12", agent: "Atlas", action: "SCANNING", text: "Cross-referencing global geospatial registry. Coordinates validated." },
-    { time: "00:00:14", agent: "Oracle", action: "SCANNING", text: "Querying local municipal databases for ownership records." },
-    { time: "00:00:18", agent: "Prism", action: "DEBATING", text: "Discrepancy found in valuation metric derived from local property registries. Flagging for cross-examination." },
-    { time: "00:00:21", agent: "Ledger", action: "DEBATING", text: "Cross-referencing Prism's claim. Historical transaction data does not support the discrepancy. Suggesting re-evaluation." },
-    { time: "00:00:25", agent: "Aegis", action: "RESOLUTION", text: "Conflict resolution initiated. Weighting Ledger's historical index higher. Discrepancy resolved." },
-    { time: "00:00:28", agent: "Aletheia", action: "CONSENSUS", text: "Synthesizing final cryptographic evidence layer. Consensus achieved." }
-  ];
+  if (loading) {
+    return <div className="min-h-full bg-[#000000] flex items-center justify-center h-screen font-mono text-[10px] text-white/30 uppercase tracking-widest">Accessing Case File...</div>;
+  }
+
+  if (!asset) {
+    return <div className="min-h-full bg-[#000000] flex items-center justify-center h-screen font-mono text-[10px] text-white/30 uppercase tracking-widest">Case Not Found</div>;
+  }
+
+  const isRejected = asset.status === 'flagged';
+  const score = asset.truth_score || (isRejected ? 41.2 : 96.8);
+  const formattedValue = asset.declared_value_usd 
+    ? new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(asset.declared_value_usd)
+    : "Valuation Unknown";
 
   return (
     <div className="min-h-full font-sans text-white bg-[#000000] p-8 md:p-16">
@@ -51,10 +72,23 @@ export default function VerificationRoom({ params }: { params: Promise<{ id: str
             {isRejected ? "Verification Failed" : "Finalized & Minted"}
           </div>
           <p className="text-[10px] font-mono text-white/30 uppercase tracking-[0.2em]">
-            {isRejected ? "Mantle Network: TX REJECTED" : "Mantle Network: 0x8f...4b9c"}
+            {isRejected ? "Mantle Network: TX FLAGGED" : "Mantle Network: Verified"} • {asset.jurisdiction}
           </p>
         </div>
       </div>
+
+      {/* Sentinel Compliance Banner */}
+      {isRejected && (
+        <div className="max-w-7xl mx-auto mb-8 bg-red-500/10 border border-red-500/50 p-6 flex flex-col items-start gap-2">
+          <div className="flex items-center gap-3">
+            <span className="w-2 h-2 bg-red-500 rounded-full animate-pulse"></span>
+            <span className="font-mono text-[12px] text-red-500 font-bold uppercase tracking-widest">SENTINEL COMPLIANCE ALERT</span>
+          </div>
+          <p className="font-sans text-sm text-red-400/90 leading-relaxed max-w-4xl">
+            {asset.flag_reason || "Critical compliance violation detected during multi-source verification."}
+          </p>
+        </div>
+      )}
 
       <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-8">
         
@@ -75,7 +109,7 @@ export default function VerificationRoom({ params }: { params: Promise<{ id: str
               <div>
                 <h3 className="text-[9px] font-mono text-white/40 uppercase tracking-[0.2em] mb-1">Fraud Risk</h3>
                 <div className={`text-xl font-light ${isRejected ? 'text-red-400' : 'text-emerald-400'}`}>
-                  <TextScramble text={isRejected ? "87.5%" : "1.2%"} duration={1000} delay={200} />
+                  <TextScramble text={isRejected ? "87.5%" : (100 - score).toFixed(1) + "%"} duration={1000} delay={200} />
                 </div>
               </div>
               <div>
@@ -87,7 +121,7 @@ export default function VerificationRoom({ params }: { params: Promise<{ id: str
               <div className="col-span-2">
                 <h3 className="text-[9px] font-mono text-white/40 uppercase tracking-[0.2em] mb-1">Market Value (Est.)</h3>
                 <div className="text-2xl text-white/80 font-light">
-                  <TextScramble text={asset.value} duration={1500} delay={300} />
+                  <TextScramble text={formattedValue} duration={1500} delay={300} />
                 </div>
               </div>
             </div>
@@ -101,7 +135,7 @@ export default function VerificationRoom({ params }: { params: Promise<{ id: str
             </h3>
             <p className="text-sm text-white/70 font-light leading-relaxed">
               {isRejected 
-                ? "Aletheia Global Network aborted consensus due to synthetic manipulation detected in structural survey metadata by the Prism node. Historical data conflicts could not be resolved, and the fraud risk exceeded acceptable protocol thresholds."
+                ? (asset.flag_reason || "Aletheia Global Network aborted consensus due to synthetic manipulation detected. Historical data conflicts could not be resolved.")
                 : "Aletheia Global Network reached consensus after successfully verifying multi-source geospatial data, clearing global sanctions lists, and validating local municipal ownership registries. No anomalies were detected in the historical transaction graph."}
             </p>
           </div>
@@ -116,7 +150,7 @@ export default function VerificationRoom({ params }: { params: Promise<{ id: str
               <div className="flex flex-col">
                 <span className="text-white/30 uppercase tracking-widest mb-1">Root Hash (SHA-256)</span>
                 <span className="break-all">
-                  <TextScramble text="0x8a92f8e134b9c7d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8" duration={2000} delay={500} />
+                  <TextScramble text={asset.evidence_hash || asset.sha256_hash || "0x8a92f8e134b9c7d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8"} duration={2000} delay={500} />
                 </span>
               </div>
               <div className="flex flex-col pt-4 border-t border-white/[0.04]">
@@ -126,10 +160,14 @@ export default function VerificationRoom({ params }: { params: Promise<{ id: str
                 <span>• Mantle Historical Transaction Graph</span>
               </div>
               <div className="flex flex-col pt-4 border-t border-white/[0.04]">
-                <span className="text-white/30 uppercase tracking-widest mb-1">Certificate NFT</span>
-                <a href="#" className="text-cyan-500 hover:text-cyan-400 flex items-center gap-2">
-                  View on OpenSea ↗
-                </a>
+                <span className="text-white/30 uppercase tracking-widest mb-1">Mantle Network</span>
+                {asset.mantle_tx_hash ? (
+                  <a href={`https://explorer.sepolia.mantle.xyz/tx/${asset.mantle_tx_hash}`} target="_blank" rel="noopener noreferrer" className="text-emerald-500 hover:text-emerald-400 flex items-center gap-2">
+                    View on Explorer ↗
+                  </a>
+                ) : (
+                  <span className="text-white/40">Pending Tx...</span>
+                )}
               </div>
             </div>
           </div>
@@ -146,7 +184,14 @@ export default function VerificationRoom({ params }: { params: Promise<{ id: str
             </h3>
             
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              {Object.entries(AGENTS).map(([name, data], i) => (
+              {Object.entries(AGENTS).slice(0, logs.length > 0 ? 8 : isRejected ? 8 : 8).map(([name, data], i) => {
+                // Find agent's last confidence from logs if available
+                const agentLogs = logs.filter(l => l.agent_name === name || l.agent_name === name.toUpperCase());
+                const agentScore = agentLogs.length > 0 
+                  ? agentLogs[agentLogs.length - 1].confidence 
+                  : Math.max(0, (score - 2.1 + (i * 0.65)).toFixed(1));
+                  
+                return (
                 <div key={name} className="p-4 bg-black border border-white/[0.05]">
                   <div className="text-[10px] font-mono text-white/50 uppercase tracking-widest mb-4 flex justify-between">
                     <span>{name}</span>
@@ -154,7 +199,7 @@ export default function VerificationRoom({ params }: { params: Promise<{ id: str
                   </div>
                   <div className="flex justify-between items-end">
                     <span className="text-2xl font-light text-white/90">
-                      <TextScramble text={(94.1 + (i * 0.65)).toFixed(1)} duration={1000} delay={i * 100} />
+                      <TextScramble text={String(agentScore)} duration={1000} delay={i * 100} />
                       <span className="text-sm text-white/30">%</span>
                     </span>
                     <span className="text-[9px] font-mono text-white/30 uppercase tracking-widest">
@@ -162,10 +207,10 @@ export default function VerificationRoom({ params }: { params: Promise<{ id: str
                     </span>
                   </div>
                   <div className="h-1 w-full bg-white/5 mt-3">
-                    <div className="h-full bg-white/20" style={{ width: `${94.1 + (i * 0.65)}%` }}></div>
+                    <div className="h-full bg-white/20" style={{ width: `${agentScore}%` }}></div>
                   </div>
                 </div>
-              ))}
+              )})}
             </div>
           </div>
 
@@ -177,44 +222,60 @@ export default function VerificationRoom({ params }: { params: Promise<{ id: str
             </h3>
             
             <div className="space-y-6">
-              {mockDebateLogs.map((log, i) => (
+              {logs.map((log, i) => {
+                const timeStr = log.timestamp ? new Date(log.timestamp).toISOString().split("T")[1].slice(0, 8) : "00:00:00";
+                return (
                 <motion.div 
                   key={i}
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: i * 0.1 }}
                   className={`pl-6 border-l-2 ${
-                    log.action === "DEBATING" ? "border-amber-500/50" : 
-                    log.action === "RESOLUTION" || log.action === "CONSENSUS" ? "border-emerald-500/50" : 
-                    log.action === "FLAGGED" || log.action === "REJECTED" ? "border-red-500/50" :
+                    log.action_type === "DEBATING" ? "border-amber-500/50" : 
+                    log.action_type === "RESOLUTION" || log.action_type === "CONSENSUS" ? "border-emerald-500/50" : 
+                    log.action_type === "FLAGGED" || log.action_type === "REJECTED" ? "border-red-500/50" :
                     "border-white/10"
                   } relative`}
                 >
                   <div className={`absolute -left-[5px] top-1 w-2 h-2 rounded-full ${
-                    log.action === "DEBATING" ? "bg-amber-500" : 
-                    log.action === "RESOLUTION" || log.action === "CONSENSUS" ? "bg-emerald-500" : 
-                    log.action === "FLAGGED" || log.action === "REJECTED" ? "bg-red-500" :
+                    log.action_type === "DEBATING" ? "bg-amber-500" : 
+                    log.action_type === "RESOLUTION" || log.action_type === "CONSENSUS" ? "bg-emerald-500" : 
+                    log.action_type === "FLAGGED" || log.action_type === "REJECTED" ? "bg-red-500" :
                     "bg-white/20"
                   }`}></div>
                   
                   <div className="flex items-center gap-4 mb-2 font-mono text-[9px] tracking-[0.2em] uppercase">
-                    <span className="text-white/30">{log.time}</span>
+                    <span className="text-white/30">{timeStr}</span>
                     <span className={
-                      log.action === "DEBATING" ? "text-amber-400" : 
-                      log.action === "RESOLUTION" || log.action === "CONSENSUS" ? "text-emerald-400" : 
-                      log.action === "FLAGGED" || log.action === "REJECTED" ? "text-red-400" :
+                      log.action_type === "DEBATING" ? "text-amber-400" : 
+                      log.action_type === "RESOLUTION" || log.action_type === "CONSENSUS" ? "text-emerald-400" : 
+                      log.action_type === "FLAGGED" || log.action_type === "REJECTED" ? "text-red-400" :
                       "text-white/60"
-                    }>{log.agent}</span>
+                    }>{log.agent_name}</span>
                     <span className="text-white/20">•</span>
-                    <span className="text-white/40">{log.action}</span>
+                    <span className="text-white/40">{log.action_type}</span>
                   </div>
                   <p className="text-sm text-white/80 font-light leading-relaxed">
-                    "{log.text}"
+                    "{log.message}"
                   </p>
                 </motion.div>
-              ))}
+              )})}
             </div>
           </div>
+
+          {/* Raw Telemetry Log */}
+          <details className="bg-[#050505] border border-white/10 p-6 group cursor-pointer transition-all duration-300 open:pb-8">
+            <summary className="text-[10px] font-mono text-white/40 uppercase tracking-[0.2em] outline-none list-none flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-1.5 h-1.5 bg-white/20 group-hover:bg-white/40 transition-colors"></div>
+                Raw Telemetry Log
+              </div>
+              <span className="text-white/20 group-open:rotate-180 transition-transform">▼</span>
+            </summary>
+            <div className="mt-6 font-mono text-[9px] text-emerald-500/80 overflow-x-auto whitespace-pre p-4 bg-black border border-white/5 custom-scrollbar max-h-96">
+              {JSON.stringify(logs, null, 2)}
+            </div>
+          </details>
 
         </div>
       </div>

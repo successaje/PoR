@@ -2,8 +2,11 @@ fastapi[standard]
 uvicorn
 langgraph
 langchain
-pydantic
+pydantic==2.10.5
 langchain-openai
 python-dotenv
 requests
 langchain-google-genai
+supabase
+python-multipart
+web3

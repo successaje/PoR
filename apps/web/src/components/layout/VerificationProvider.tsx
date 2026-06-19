@@ -1,9 +1,9 @@
 "use client";
 
 import React, { createContext, useContext, useState, useEffect, ReactNode, useRef } from "react";
-import { AgentLog, VerificationState, AGENTS } from "@/lib/mockEngine";
+import { AgentLog, VerificationState, AGENTS } from "@/lib/verificationEngine";
 
-interface MockContextProps {
+interface VerificationContextProps {
   globalLogs: AgentLog[];
   activeVerification: {
     id: string | null;
@@ -16,11 +16,11 @@ interface MockContextProps {
   startVerification: (assetId: string, initialTxHash?: string) => void;
 }
 
-const MockContext = createContext<MockContextProps | undefined>(undefined);
+const VerificationContext = createContext<VerificationContextProps | undefined>(undefined);
 
-export function MockProvider({ children }: { children: ReactNode }) {
+export function VerificationProvider({ children }: { children: ReactNode }) {
   const [globalLogs, setGlobalLogs] = useState<AgentLog[]>([]);
-  const [activeVerification, setActiveVerification] = useState<MockContextProps["activeVerification"]>({
+  const [activeVerification, setActiveVerification] = useState<VerificationContextProps["activeVerification"]>({
     id: null,
     state: "PENDING",
     confidence: 0,
@@ -49,7 +49,7 @@ export function MockProvider({ children }: { children: ReactNode }) {
     });
   };
 
-  const generateMockHash = () => "0x" + Array.from({length: 64}, () => Math.floor(Math.random()*16).toString(16)).join('');
+  const generateEvidenceHash = () => "0x" + Array.from({length: 64}, () => Math.floor(Math.random()*16).toString(16)).join('');
 
   const startVerification = (assetId: string, initialTxHash?: string) => {
     clearAllTimeouts();
@@ -83,15 +83,15 @@ export function MockProvider({ children }: { children: ReactNode }) {
       
       if (data.type === "status") {
          setActiveVerification(p => ({ ...p, state: "DATA_COLLECTION", confidence: data.confidence || p.confidence }));
-         addLog({ agent: "Aegis", actionType: "SCANNING", message: data.message, confidence: data.confidence || 50, txHash: generateMockHash() });
+         addLog({ agent: "Aegis", actionType: "SCANNING", message: data.message, confidence: data.confidence || 50, txHash: generateEvidenceHash() });
       } else if (data.type === "finding") {
-         addLog({ agent: data.agent, actionType: "SCANNING", message: data.message, confidence: 60, txHash: generateMockHash() });
+         addLog({ agent: data.agent, actionType: "SCANNING", message: data.message, confidence: 60, txHash: generateEvidenceHash() });
       } else if (data.type === "debate") {
          setActiveVerification(p => ({ ...p, state: "DEBATE_PHASE" }));
-         addLog({ agent: data.agent as keyof typeof AGENTS, actionType: "DEBATING", message: data.message, confidence: 70, txHash: generateMockHash() });
+         addLog({ agent: data.agent as keyof typeof AGENTS, actionType: "DEBATING", message: data.message, confidence: 70, txHash: generateEvidenceHash() });
       } else if (data.type === "consensus") {
          setActiveVerification(p => ({ ...p, state: "CONSENSUS_FORMING", confidence: data.confidence || 90 }));
-         addLog({ agent: "Aegis", actionType: "CONSENSUS", message: data.message, confidence: data.confidence || 90, txHash: generateMockHash() });
+         addLog({ agent: "Aegis", actionType: "CONSENSUS", message: data.message, confidence: data.confidence || 90, txHash: generateEvidenceHash() });
       } else if (data.type === "final_result") {
          const result = data.data;
          setActiveVerification(p => ({
@@ -115,14 +115,14 @@ export function MockProvider({ children }: { children: ReactNode }) {
   };
 
   return (
-    <MockContext.Provider value={{ globalLogs, activeVerification, startVerification }}>
+    <VerificationContext.Provider value={{ globalLogs, activeVerification, startVerification }}>
       {children}
-    </MockContext.Provider>
+    </VerificationContext.Provider>
   );
 }
 
-export const useMock = () => {
-  const context = useContext(MockContext);
-  if (!context) throw new Error("useMock must be used within a MockProvider");
+export const useVerification = () => {
+  const context = useContext(VerificationContext);
+  if (!context) throw new Error("useVerification must be used within a VerificationProvider");
   return context;
 };

@@ -3,8 +3,8 @@
 import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
-import { useMock } from "@/components/layout/MockProvider";
-import { AGENTS } from "@/lib/mockEngine";
+import { useVerification } from "@/components/layout/VerificationProvider";
+import { AGENTS } from "@/lib/verificationEngine";
 import { useAccount, useWriteContract, useWaitForTransactionReceipt } from 'wagmi';
 import { truthCertificateABI, verificationManagerABI } from '@/lib/abi';
 import { DebateModal } from "@/components/layout/DebateModal";
@@ -19,11 +19,9 @@ export default function VerifyPage() {
   const { writeContract: writeCreateCase, data: createCaseHash, isPending: isCreateCasePending } = useWriteContract();
   const { isLoading: isCreateCaseConfirming, isSuccess: isCreateCaseConfirmed } = useWaitForTransactionReceipt({ hash: createCaseHash });
   
-  const [isMockSignPending, setIsMockSignPending] = useState(false);
-  const [isMockConfirming, setIsMockConfirming] = useState(false);
   const [isDebateModalOpen, setIsDebateModalOpen] = useState(false);
   
-  const { activeVerification, startVerification, globalLogs } = useMock();
+  const { activeVerification, startVerification, globalLogs } = useVerification();
   const [assetId, setAssetId] = useState("");
   const [coords, setCoords] = useState("");
   const [description, setDescription] = useState("");
@@ -57,34 +55,44 @@ export default function VerifyPage() {
   const [imageNames, setImageNames] = useState<string[]>([]);
   const [docNames, setDocNames] = useState<string[]>([]);
   
-  // Local mock upload state
+  // Local upload state
   const [isUploading, setIsUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
 
   const isSubmitting = isUploading || (activeVerification.state !== "PENDING" && activeVerification.state !== "FINALIZED" && activeVerification.state !== "MINTED_ON_CHAIN");
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!assetId || !address) return;
     
-    const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
-    // Background fetch to trigger the real Python backend (hybrid demo mode)
-    fetch(`${BACKEND_URL}/submit`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        asset_id: assetId,
-        metadata: {
-          description,
-          jurisdiction,
-          assetCategories,
-          infrastructureTags,
-          coords
-        }
-      })
-    }).catch(err => console.error("Backend submission failed:", err));
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+    try {
+      const formData = new FormData();
+      formData.append('asset_id', assetId);
+      formData.append('metadata', JSON.stringify({
+        description: infrastructureText,
+        jurisdiction: jurisdiction,
+        assetCategories,
+        infrastructureTags,
+        coords,
+        owner_wallet: address
+      }));
+
+      // Append physical files if they exist
+      if (imageInputRef.current?.files) {
+        Array.from(imageInputRef.current.files).forEach(file => formData.append('files', file));
+      }
+      if (docInputRef.current?.files) {
+        Array.from(docInputRef.current.files).forEach(file => formData.append('files', file));
+      }
+
+      await fetch(`${apiUrl}/submit`, {
+        method: 'POST',
+        body: formData,
+      });
+    } catch (err) {
+      console.error("Backend submission failed:", err)
+    }
     
     writeCreateCase({
       address: VERIFICATION_MANAGER_ADDRESS,
@@ -520,7 +528,7 @@ export default function VerifyPage() {
 
 
 
-            {/* Input 3: Mock File Upload - Images */}
+            {/* Input 3: File Upload - Images */}
             <div className="space-y-3">
                <label className="text-[10px] font-mono text-white/50 uppercase tracking-[0.2em]">Asset Imagery</label>
                <input 
@@ -551,7 +559,7 @@ export default function VerifyPage() {
                </div>
             </div>
 
-            {/* Input 4: Mock File Upload - Docs */}
+            {/* Input 4: File Upload - Docs */}
             <div className="space-y-3">
                <label className="text-[10px] font-mono text-white/50 uppercase tracking-[0.2em]">Ownership Deed / Legal Docs</label>
                <input 
