@@ -75,10 +75,14 @@ async def run_debate(asset_data: dict, emit_func):
         "asset_id": asset_data.get("asset_id", "UNKNOWN"),
         "asset_context": {
             "registry_id": asset_data.get("asset_id"),
-            "property_type": "Commercial Real Estate",
+            "property_type": asset_data.get("type", "Commercial Real Estate"),
+            "jurisdiction": asset_data.get("jurisdiction", "Unknown"),
+            "description": asset_data.get("description", "No description provided."),
+            "infrastructure": asset_data.get("infrastructure", []),
+            "owner_wallet": asset_data.get("owner_wallet", "0xSYSTEM"),
             "last_valuation": "$410,000",
             "sq_ft": 4500,
-            "mock_anomaly": "Slight discrepancy in parcel boundary on western edge."
+            "mock_anomaly": "Potential discrepancy in metadata reported by Prism agent."
         },
         "debate_round": 0,
         "debate_history": []

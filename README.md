@@ -23,7 +23,7 @@ Judges shouldn't have to hunt for links. Everything you need is right here:
 *Fully secured via Role-Based Access Control (RBAC).*
 
 - **VerificationManager:** [`0x34d156d6c062804771652b48f2d65d58d3794113`](https://sepolia.mantlescan.xyz/address/0x34d156d6c062804771652b48f2d65d58d3794113)
-- **TruthCertificateNFT:** [`0x86C41594e9aDeCcf8c85ba9EEe0138C7c9E70dBc`](https://sepolia.mantlescan.xyz/address/0x86C41594e9aDeCcf8c85ba9EEe0138C7c9E70dBc)
+- **TruthCertificateNFT:** [`0x8a9b349a96b6a2799b842262bde76d42218a2c0a`](https://sepolia.mantlescan.xyz/address/0x8a9b349a96b6a2799b842262bde76d42218a2c0a)
 - **AgentRegistry:** [`0xc4d732199b7d21207a74cfe6ced4d17dd330c7ea`](https://sepolia.mantlescan.xyz/address/0xc4d732199b7d21207a74cfe6ced4d17dd330c7ea)
 - **PoRLendingVault:** [`0x64d1ae5fa2eceb908a028bbdb4a4e2223bdefa47`](https://sepolia.mantlescan.xyz/address/0x64d1ae5fa2eceb908a028bbdb4a4e2223bdefa47)
 

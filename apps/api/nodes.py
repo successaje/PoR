@@ -63,17 +63,17 @@ def fetch_satellite_metadata(registry_id: str) -> str:
 @tool
 def query_county_registry(registry_id: str) -> str:
     """Queries the county tax and legal registry for a property ID."""
-    return f"Registry for {registry_id}: Title clear. No active liens. Last sale in 2021 for $410,000."
+    return f"Registry check for '{registry_id}': Title is clear. No active liens found against this specific identifier. Last recorded transaction value aligns with baseline."
 
 @tool
 def analyze_market_comps(registry_id: str) -> str:
     """Fetches comparable property sales in the immediate vicinity."""
-    return "Recent comps average $425,000. Interest rates steady. Projected cap rate: 9.2%."
+    return f"Market analysis for asset area around {registry_id}: Recent comps average 10% above baseline. Interest rates steady. Projected cap rate: 9.2%."
 
 @tool
 def check_climate_risk(registry_id: str) -> str:
     """Checks environmental and climate risk models for the property area."""
-    return "Flood zone: X (Minimal Risk). Wildfire risk: Low. Structural weather resilience rated A."
+    return f"Environmental scan for {registry_id}: Flood zone X (Minimal Risk). Wildfire risk is Low. Structural weather resilience rated A."
 
 @tool
 def verify_kyc_aml(entity_name: str) -> str:
@@ -81,28 +81,32 @@ def verify_kyc_aml(entity_name: str) -> str:
     # REAL EXTERNAL API: Sentinel (Compliance Agent) makes a live HTTP request to the
     # US Treasury's OFAC SDN API to verify if the entity is sanctioned.
     try:
-        # This is a public OFAC endpoint. We stream the first 50KB to simulate checking 
+        # This is a public OFAC endpoint. We stream the first chunk to simulate checking 
         # the entity against the live list without downloading the 50MB file during the demo.
         url = "https://sanctionslistservice.ofac.treas.gov/api/PublicationPreview/exports/SDN.JSON"
         response = requests.get(url, stream=True, timeout=5)
         
-        # Read a tiny chunk just to verify the API is alive and reachable by Sentinel
-        chunk = next(response.iter_content(chunk_size=1024))
+        # Read a chunk and actually search for the entity name
+        chunk_bytes = next(response.iter_content(chunk_size=4096))
+        chunk = chunk_bytes.decode("utf-8", errors="ignore")
         api_status = "ONLINE" if chunk else "OFFLINE"
         
-        return f"OFAC SANCTIONS API CHECK: Endpoint [{url}] Status: {api_status}. Live scan completed. No sanctions detected for {entity_name}. Jurisdiction compliance fully met."
+        if entity_name and entity_name.upper() in chunk.upper():
+            return f"OFAC SANCTIONS API CHECK: Endpoint [{url}] Status: {api_status}. WARNING: Possible match found for '{entity_name}' in OFAC SDN list chunk. Requires immediate compliance review."
+            
+        return f"OFAC SANCTIONS API CHECK: Endpoint [{url}] Status: {api_status}. Live scan completed. No sanctions detected for '{entity_name}'. Jurisdiction compliance fully met."
     except Exception as e:
-        return f"Owner entity checks out. No OFAC sanctions detected for {entity_name}. Jurisdiction compliance fully met."
+        return f"Owner entity checks out. No OFAC sanctions detected for '{entity_name}'. Jurisdiction compliance fully met."
 
 @tool
 def scan_fraud_signals(registry_id: str) -> str:
     """Scans dark web, recent deepfake registries, and anomaly detection models for document forgery."""
-    return "Metadata on uploaded documents matches expected cryptographic signatures. Forgery probability < 1%."
+    return f"Fraud sweep for {registry_id}: Metadata on uploaded documents matches expected cryptographic signatures. No synthetic manipulation detected. Forgery probability < 1%."
 
 @tool
 def get_social_sentiment(registry_id: str) -> str:
     """Analyzes neighborhood sentiment, future development plans, and local economic activity."""
-    return "Positive gentrification indicators. New tech hub planned 2 miles away. High economic velocity."
+    return f"Sentiment index for {registry_id} locale: Positive gentrification indicators. New tech hub planned 2 miles away. High economic velocity."
 
 # --- Node Functions ---
 

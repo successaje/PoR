@@ -296,7 +296,7 @@ export default function VerifyPage() {
                   onClick={() => {
                     if (!address) return;
                     writeContract({
-                      address: '0x86C41594e9aDeCcf8c85ba9EEe0138C7c9E70dBc', // TruthCertificateNFT
+                      address: '0x8a9b349a96b6a2799b842262bde76d42218a2c0a', // TruthCertificateNFT
                       abi: truthCertificateABI,
                       functionName: 'mintCertificate',
                       args: [
@@ -304,7 +304,7 @@ export default function VerifyPage() {
                         assetId || "REG-8492-TX",
                         Math.floor(activeVerification.confidence),
                         BigInt(60 * 60 * 24 * 30), // 30 days
-                        "QmEvidenceHash..." // This would be the real hash from the API in production
+                        activeVerification.evidenceHash || "0x0000000000000000000000000000000000000000000000000000000000000000"
                       ]
                     });
                   }}

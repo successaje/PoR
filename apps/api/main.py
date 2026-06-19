@@ -25,6 +25,9 @@ class AssetSubmission(BaseModel):
     asset_id: str
     metadata: dict
 
+# In-memory store for asset metadata to bridge /submit and /stream
+asset_metadata_store = {}
+
 async def debate_event_generator(asset_data: dict, asset_id: str):
     # Queue for events
     queue = asyncio.Queue()
@@ -81,6 +84,13 @@ async def submit_asset(
 ):
     supabase = get_supabase()
     
+    # Save metadata to in-memory store to pass to LangGraph
+    try:
+        metadata_dict = json.loads(metadata)
+        asset_metadata_store[asset_id] = metadata_dict
+    except:
+        asset_metadata_store[asset_id] = {}
+        
     # Process files if Supabase is configured
     if supabase and files:
         for file in files:
@@ -118,8 +128,16 @@ async def submit_asset(
 @app.get("/stream/{asset_id}")
 async def stream_debate(asset_id: str):
     # In a real app, you'd fetch the submission from DB.
-    # Here we just start the debate stream.
-    asset_data = {"asset_id": asset_id, "type": "real_estate"}
+    # Here we bridge the gap using our in-memory store.
+    meta = asset_metadata_store.get(asset_id, {})
+    asset_data = {
+        "asset_id": asset_id, 
+        "type": meta.get("assetCategories", ["Commercial Real Estate"])[0] if meta.get("assetCategories") else "Commercial Real Estate",
+        "jurisdiction": meta.get("jurisdiction", "Unknown"),
+        "description": meta.get("description", "No description provided"),
+        "infrastructure": meta.get("infrastructureTags", []),
+        "owner_wallet": meta.get("owner_wallet", "0xSYSTEM")
+    }
     return StreamingResponse(debate_event_generator(asset_data, asset_id), media_type="text/event-stream")
 
 @app.get("/cases")

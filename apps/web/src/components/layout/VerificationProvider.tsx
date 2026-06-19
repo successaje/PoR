@@ -49,7 +49,20 @@ export function VerificationProvider({ children }: { children: ReactNode }) {
     });
   };
 
-  const generateEvidenceHash = () => "0x" + Array.from({length: 64}, () => Math.floor(Math.random()*16).toString(16)).join('');
+  const generateLogHash = (message: string, agent: string) => {
+    const payload = `${agent}:${message}`;
+    let hash = 0;
+    for (let i = 0; i < payload.length; i++) {
+      const char = payload.charCodeAt(i);
+      hash = ((hash << 5) - hash) + char;
+      hash = hash & hash;
+    }
+    const hex1 = Math.abs(hash).toString(16).padStart(8, '0');
+    const hex2 = Math.abs(~hash).toString(16).padStart(8, '0');
+    const hex3 = Math.abs(hash ^ 0x5a5a5a5a).toString(16).padStart(8, '0');
+    const hex4 = Math.abs(~hash ^ 0xa5a5a5a5).toString(16).padStart(8, '0');
+    return "0x" + hex1 + hex2 + hex3 + hex4 + hex1 + hex2 + hex3 + hex4;
+  };
 
   const startVerification = (assetId: string, initialTxHash?: string) => {
     clearAllTimeouts();
@@ -83,15 +96,15 @@ export function VerificationProvider({ children }: { children: ReactNode }) {
       
       if (data.type === "status") {
          setActiveVerification(p => ({ ...p, state: "DATA_COLLECTION", confidence: data.confidence || p.confidence }));
-         addLog({ agent: "Aegis", actionType: "SCANNING", message: data.message, confidence: data.confidence || 50, txHash: generateEvidenceHash() });
+         addLog({ agent: "Aegis", actionType: "SCANNING", message: data.message, confidence: data.confidence || 50, txHash: generateLogHash(data.message, "Aegis") });
       } else if (data.type === "finding") {
-         addLog({ agent: data.agent, actionType: "SCANNING", message: data.message, confidence: 60, txHash: generateEvidenceHash() });
+         addLog({ agent: data.agent, actionType: "SCANNING", message: data.message, confidence: 60, txHash: generateLogHash(data.message, data.agent) });
       } else if (data.type === "debate") {
          setActiveVerification(p => ({ ...p, state: "DEBATE_PHASE" }));
-         addLog({ agent: data.agent as keyof typeof AGENTS, actionType: "DEBATING", message: data.message, confidence: 70, txHash: generateEvidenceHash() });
+         addLog({ agent: data.agent as keyof typeof AGENTS, actionType: "DEBATING", message: data.message, confidence: 70, txHash: generateLogHash(data.message, data.agent) });
       } else if (data.type === "consensus") {
          setActiveVerification(p => ({ ...p, state: "CONSENSUS_FORMING", confidence: data.confidence || 90 }));
-         addLog({ agent: "Aegis", actionType: "CONSENSUS", message: data.message, confidence: data.confidence || 90, txHash: generateEvidenceHash() });
+         addLog({ agent: "Aegis", actionType: "CONSENSUS", message: data.message, confidence: data.confidence || 90, txHash: generateLogHash(data.message, "Aegis") });
       } else if (data.type === "final_result") {
          const result = data.data;
          setActiveVerification(p => ({
