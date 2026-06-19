@@ -3,66 +3,60 @@ pragma solidity ^0.8.20;
 
 import "./AgentRegistry.sol";
 import {Ownable} from "openzeppelin-contracts/contracts/access/Ownable.sol";
+import {ECDSA} from "openzeppelin-contracts/contracts/utils/cryptography/ECDSA.sol";
+import {MessageHashUtils} from "openzeppelin-contracts/contracts/utils/cryptography/MessageHashUtils.sol";
 
 contract VerificationManager is Ownable {
-    enum CaseStatus { Open, InProgress, Resolved, Closed }
+    using ECDSA for bytes32;
+    using MessageHashUtils for bytes32;
 
-    struct Case {
-        uint256 id;
-        string description;
-        CaseStatus status;
-        string result;
-        uint256[] assignedAgentIds;
-    }
+    address public backendSigner;
+    mapping(string => bool) public resolvedAssets;
+    mapping(string => uint8) public assetScores;
+    mapping(string => string) public assetEvidenceHashes;
 
-    mapping(uint256 => Case) public cases;
-    uint256 public nextCaseId = 1;
     AgentRegistry public agentRegistry;
 
-    event CaseCreated(uint256 indexed id, string description);
-    event AgentAssigned(uint256 indexed caseId, uint256 indexed agentId);
-    event CaseResolved(uint256 indexed id, string result);
+    event CaseResolved(string indexed assetId, uint8 consensusScore, string evidenceHash);
+    event BackendSignerUpdated(address indexed newSigner);
 
     constructor(address initialOwner, address _agentRegistryAddress) Ownable(initialOwner) {
         agentRegistry = AgentRegistry(_agentRegistryAddress);
+        backendSigner = initialOwner; // Default to deployer
     }
 
-    function createCase(string memory _description) external returns (uint256) {
-        uint256 id = nextCaseId++;
-        Case storage newCase = cases[id];
-        newCase.id = id;
-        newCase.description = _description;
-        newCase.status = CaseStatus.Open;
-        
-        emit CaseCreated(id, _description);
-        return id;
+    function setBackendSigner(address _signer) external onlyOwner {
+        require(_signer != address(0), "Invalid address");
+        backendSigner = _signer;
+        emit BackendSignerUpdated(_signer);
     }
 
-    function assignAgent(uint256 _caseId, uint256 _agentId) external onlyOwner {
-        require(cases[_caseId].id != 0, "Case does not exist");
-        require(cases[_caseId].status == CaseStatus.Open || cases[_caseId].status == CaseStatus.InProgress, "Case not open");
+    /**
+     * @dev Resolves a case based on AI backend consensus.
+     * The backend signs the payload to prevent unauthorized resolutions.
+     */
+    function resolveCase(
+        string memory assetId,
+        uint8 consensusScore,
+        string memory evidenceHash,
+        bytes memory signature
+    ) external {
+        require(!resolvedAssets[assetId], "Asset already resolved");
         
-        // Ensure agent is valid and active
-        (,,,,, bool isActive) = agentRegistry.agents(_agentId);
-        require(isActive, "Agent is not active");
+        // Construct the message hash
+        bytes32 messageHash = keccak256(abi.encodePacked(assetId, consensusScore, evidenceHash));
         
-        cases[_caseId].assignedAgentIds.push(_agentId);
-        cases[_caseId].status = CaseStatus.InProgress;
-
-        emit AgentAssigned(_caseId, _agentId);
-    }
-
-    function resolveCase(uint256 _caseId, string memory _result) external onlyOwner {
-        require(cases[_caseId].id != 0, "Case does not exist");
-        require(cases[_caseId].status == CaseStatus.InProgress, "Case must be in progress");
+        // Recover the signer
+        bytes32 ethSignedMessageHash = messageHash.toEthSignedMessageHash();
+        address signer = ethSignedMessageHash.recover(signature);
         
-        cases[_caseId].status = CaseStatus.Resolved;
-        cases[_caseId].result = _result;
+        require(signer == backendSigner, "Invalid backend signature");
 
-        emit CaseResolved(_caseId, _result);
-    }
+        // Mark as resolved
+        resolvedAssets[assetId] = true;
+        assetScores[assetId] = consensusScore;
+        assetEvidenceHashes[assetId] = evidenceHash;
 
-    function getAssignedAgents(uint256 _caseId) external view returns (uint256[] memory) {
-        return cases[_caseId].assignedAgentIds;
+        emit CaseResolved(assetId, consensusScore, evidenceHash);
     }
 }

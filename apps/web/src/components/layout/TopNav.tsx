@@ -30,6 +30,7 @@ export function TopNav() {
             { name: "Agents", path: "/agents" },
             { name: "Certificates", path: "/certificates" },
             { name: "Vault", path: "/vault" },
+            { name: "Pricing", path: "/pricing" },
             { name: "Developer", path: "/docs" }
           ].map((item) => (
             <Link 

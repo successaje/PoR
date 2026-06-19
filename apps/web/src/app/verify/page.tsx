@@ -9,13 +9,16 @@ import { useAccount, useWriteContract, useWaitForTransactionReceipt } from 'wagm
 import { truthCertificateABI, verificationManagerABI } from '@/lib/abi';
 import { DebateModal } from "@/components/layout/DebateModal";
 
-const VERIFICATION_MANAGER_ADDRESS = "0x34d156d6c062804771652b48f2d65d58d3794113";
+const VERIFICATION_MANAGER_ADDRESS = "0x38509275f1da637c17790d50f6ad8b6f729759ff";
 
 export default function VerifyPage() {
   const { address } = useAccount();
   const { writeContract, data: hash, isPending: isWritePending } = useWriteContract();
   const { isLoading: isConfirming, isSuccess: isConfirmed } = useWaitForTransactionReceipt({ hash });
   
+  const { writeContract: writeResolve, data: resolveHash, isPending: isResolvePending } = useWriteContract();
+  const { isLoading: isResolveConfirming, isSuccess: isResolveConfirmed } = useWaitForTransactionReceipt({ hash: resolveHash });
+
   const { writeContract: writeCreateCase, data: createCaseHash, isPending: isCreateCasePending } = useWriteContract();
   const { isLoading: isCreateCaseConfirming, isSuccess: isCreateCaseConfirmed } = useWaitForTransactionReceipt({ hash: createCaseHash });
   
@@ -291,28 +294,50 @@ export default function VerifyPage() {
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
                   View Auditable Reasoning Trace ↗
                 </a>
-                {/* TODO: Add useWriteContract for VerificationManager.resolveCase here if not done off-chain */}
-                <button 
-                  onClick={() => {
-                    if (!address) return;
-                    writeContract({
-                      address: '0x8a9b349a96b6a2799b842262bde76d42218a2c0a', // TruthCertificateNFT
-                      abi: truthCertificateABI,
-                      functionName: 'mintCertificate',
-                      args: [
-                        address,
-                        assetId || "REG-8492-TX",
-                        Math.floor(activeVerification.confidence),
-                        BigInt(60 * 60 * 24 * 30), // 30 days
-                        activeVerification.evidenceHash || "0x0000000000000000000000000000000000000000000000000000000000000000"
-                      ]
-                    });
-                  }}
-                  disabled={isWritePending || isConfirming || !address}
-                  className="w-full py-4 bg-white hover:bg-white/90 text-black font-sans text-[11px] tracking-[0.2em] uppercase transition-colors disabled:opacity-50"
-                >
-                  {!address ? 'CONNECT IDENTITY TO MINT' : isWritePending ? 'AWAITING SIGNATURE...' : isConfirming ? 'MINTING ON MANTLE...' : 'Issue Truth Certificate'}
-                </button>
+                {!isResolveConfirmed ? (
+                  <button 
+                    onClick={() => {
+                      if (!address || !activeVerification.signature) return;
+                      writeResolve({
+                        address: VERIFICATION_MANAGER_ADDRESS,
+                        abi: verificationManagerABI,
+                        functionName: 'resolveCase',
+                        args: [
+                          assetId || "REG-8492-TX",
+                          Math.floor(activeVerification.confidence),
+                          activeVerification.evidenceHash || "0x00",
+                          activeVerification.signature
+                        ]
+                      });
+                    }}
+                    disabled={isResolvePending || isResolveConfirming || !address || !activeVerification.signature}
+                    className="w-full py-4 bg-white/20 hover:bg-white/30 text-white font-sans text-[11px] tracking-[0.2em] uppercase transition-colors disabled:opacity-50"
+                  >
+                    {!address ? 'CONNECT IDENTITY' : isResolvePending ? 'AWAITING WALLET...' : isResolveConfirming ? 'FINALIZING ON MANTLE...' : 'Finalize AI Verification On-Chain'}
+                  </button>
+                ) : (
+                  <button 
+                    onClick={() => {
+                      if (!address) return;
+                      writeContract({
+                        address: '0xfc527b71ebd1854a32967f44d314faf99b2ac333', // TruthCertificateNFT
+                        abi: truthCertificateABI,
+                        functionName: 'mintCertificate',
+                        args: [
+                          address,
+                          assetId || "REG-8492-TX",
+                          Math.floor(activeVerification.confidence),
+                          BigInt(60 * 60 * 24 * 30), // 30 days
+                          activeVerification.evidenceHash || "0x0000000000000000000000000000000000000000000000000000000000000000"
+                        ]
+                      });
+                    }}
+                    disabled={isWritePending || isConfirming || !address}
+                    className="w-full py-4 bg-white hover:bg-white/90 text-black font-sans text-[11px] tracking-[0.2em] uppercase transition-colors disabled:opacity-50"
+                  >
+                    {isWritePending ? 'AWAITING SIGNATURE...' : isConfirming ? 'MINTING ON MANTLE...' : 'Issue Truth Certificate'}
+                  </button>
+                )}
               </div>
             )}
           </motion.div>

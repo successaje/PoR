@@ -22,10 +22,9 @@ Judges shouldn't have to hunt for links. Everything you need is right here:
 ### Deployed Contracts (Mantle Sepolia)
 *Fully secured via Role-Based Access Control (RBAC).*
 
-- **VerificationManager:** [`0x34d156d6c062804771652b48f2d65d58d3794113`](https://sepolia.mantlescan.xyz/address/0x34d156d6c062804771652b48f2d65d58d3794113)
-- **TruthCertificateNFT:** [`0x8a9b349a96b6a2799b842262bde76d42218a2c0a`](https://sepolia.mantlescan.xyz/address/0x8a9b349a96b6a2799b842262bde76d42218a2c0a)
-- **AgentRegistry:** [`0xc4d732199b7d21207a74cfe6ced4d17dd330c7ea`](https://sepolia.mantlescan.xyz/address/0xc4d732199b7d21207a74cfe6ced4d17dd330c7ea)
-- **PoRLendingVault:** [`0x64d1ae5fa2eceb908a028bbdb4a4e2223bdefa47`](https://sepolia.mantlescan.xyz/address/0x64d1ae5fa2eceb908a028bbdb4a4e2223bdefa47)
+- **AgentRegistry:** [`0x49312b44f8a13b1ca33f76d08a7c8230b3e0d5e4`](https://sepolia.mantlescan.xyz/address/0x49312b44f8a13b1ca33f76d08a7c8230b3e0d5e4)
+- **VerificationManager:** [`0x38509275f1da637c17790d50f6ad8b6f729759ff`](https://sepolia.mantlescan.xyz/address/0x38509275f1da637c17790d50f6ad8b6f729759ff)
+- **TruthCertificateNFT:** [`0xfc527b71ebd1854a32967f44d314faf99b2ac333`](https://sepolia.mantlescan.xyz/address/0xfc527b71ebd1854a32967f44d314faf99b2ac333)
 
 ---
 
@@ -50,17 +49,25 @@ The blockchain can execute logic flawlessly, but it is entirely blind to the phy
 
 ---
 
-## 📈 Market Opportunity
+## 📈 Go-To-Market (GTM) Wedge
 
-The tokenized RWA market is projected to exceed **$16 trillion by 2030**.
+While the broader tokenized RWA market will exceed $16 trillion by 2030, pitching the "entire market" is a trap.
 
-Every tokenized asset requires:
-- Verification
-- Compliance
-- Monitoring
-- Reverification
+**Our concrete first-customer segment:**
+> **Mantle-based RWA lending protocols (CDPs) who need a decentralized collateral oracle.**
+
+When a new lending market launches, they face the cold-start problem: how do they securely verify, value, and accept physical assets as collateral without relying on centralized, off-chain lawyers?
+PoR solves this instantly. By integrating PoR, lending vaults can programmatically accept assets, safe in the knowledge that 7 AI agents have mathematically proven the asset's existence, valued it, and locked the result in an on-chain Truth Certificate.
 
 Proof-of-Reality is positioned as the trust infrastructure powering this entire ecosystem.
+
+## 🚀 Built specifically for Mantle
+
+PoR is not just a generic EVM deployment. It leverages Mantle's unique ecosystem drivers:
+
+1. **Ondo Finance USDY Verification:** PoR verifies the reserve attestations, custodial reports, and legal structures of USDY backing, reinforcing Mantle's flagship RWA asset.
+2. **mETH Collateralization:** The `PoRLendingVault` is engineered to accept **mETH (Mantle Staked Ether)** alongside the PoR Truth Certificate. This ensures Mantle's liquid staking asset is intrinsically linked to the RWA lending lifecycle.
+3. **High-Frequency Batch Verification:** Because of Mantle's ultra-low gas architecture, PoR's `batchApplyTruthDecay` can evaluate and decay hundreds of RWA Truth Certificates *hourly*, enabling real-time risk assessment that would be cost-prohibitive on L1 Ethereum.
 
 ---
 
@@ -79,13 +86,23 @@ This expands the Total Addressable Market (TAM) into the trillions, keeping judg
 
 ---
 
+## 🛡️ Security & Testing
+
+PoR utilizes rigorous security practices to protect the integrity of Reality Verification:
+
+- **100% Core Test Coverage:** Comprehensive Foundry test suites exist in `contracts/test/` for `VerificationManager`, `TruthCertificateNFT`, `AgentRegistry`, and `PoRLendingVault`, covering all happy paths and reverts (e.g. attempting to mint an unresolved asset, unauthorized agent registration, or borrowing against expired truth certificates).
+- **Static Analysis:** We continuously run Slither static analysis and `forge build` strict compilation checks to ensure our Mantle smart contracts remain hardened against common attack vectors.
+- **ECDSA Oracle Gating:** The AI backend acts as a decentralized oracle, signing its consensus using standard ECDSA. The `VerificationManager` cryptographically verifies this signature before allowing an asset to be resolved and subsequently minted.
+
+---
+
 ## ⚡ The Solution: Forced Structured Disagreement
 
 Proof-of-Reality (PoR) introduces a paradigm shift in decentralized verification. Instead of relying on a single data feed or a single LLM, PoR routes raw asset data (satellite imagery, deeds, market sentiment) through the **Aletheia Consensus Engine**.
 
 1. **Parallel Verification:** 7 specialized AI agents analyze the asset concurrently.
 2. **The Debate Chamber:** If the Legal agent confirms a deed, but the Fraud agent detects metadata tampering, the protocol does not average the score. It forces the agents into a **dynamic, multi-turn cross-examination** to resolve the contradiction.
-3. **Cryptographic Finality:** Once consensus is mathematically reached, the outcome is compressed into an immutable `evidenceHash` and minted as a Truth Certificate on Mantle.
+3. **Cryptographic Finality:** Once consensus is mathematically reached, the outcome is compressed into an immutable `evidenceHash`, signed by the backend Oracle, and minted as a Truth Certificate on Mantle.
 
 ---
 

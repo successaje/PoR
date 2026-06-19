@@ -211,25 +211,35 @@ Truth Certificate NFT is minted.
 
 ---
 
-# Mantle Ecosystem Contribution
+# Strategic Ecosystem Integration: Mantle & Ondo Finance
 
-PoR is designed specifically to strengthen Mantle's RWA ecosystem.
+PoR is designed specifically to strengthen Mantle's RWA ecosystem, leveraging its ultra-low gas architecture and strategic partnerships.
 
-Mantle already provides:
+### 1. High-Frequency Batch Verification
+Because of Mantle's gas efficiency, PoR can run `batchApplyTruthDecay()` across hundreds of Reality Assets hourly rather than monthly. This enables real-time dynamic pricing of physical assets, a feature that is economically prohibitive on L1 Ethereum.
 
-* USDY
-* mETH
-* tokenized yield products
-* institutional liquidity infrastructure
+### 2. Ondo Finance USDY (Highest Strategic Value)
+Mantle has positioned **Ondo Finance USDY** as a flagship RWA asset in its ecosystem. USDY is backed by US Treasuries and bank deposits, where trust, transparency, and continuous verification are paramount.
 
-PoR provides:
+**How PoR Enhances USDY on Mantle:**
+Instead of relying solely on centralized issuer attestations, PoR's multi-agent system continuously verifies:
+* Reserve attestations and custodial reports
+* Treasury backing reports matching minted token supply
+* Legal trust structures and SEC disclosures
 
-* verification infrastructure
-* trust infrastructure
-* compliance infrastructure
-* risk intelligence infrastructure
+### 3. mETH as Liquid Collateral
+In the `PoRLendingVault`, users must supply **mETH (Mantle Staked Ether)** alongside their PoR Truth Certificate to unlock institutional liquidity (borrowing USDY). This embeds Mantle's native yield-bearing asset directly into the RWA lending lifecycle.
 
-Together they form a complete RWA stack.
+By combining **mETH**, **USDY**, and **PoR Verification**, Mantle achieves a complete, trust-minimized RWA stack.
+
+### 4. Our Go-To-Market (GTM) Wedge
+While the broader tokenized RWA market will exceed $16 trillion by 2030, pitching the "entire market" is a trap.
+
+**Our concrete first-customer segment:**
+> **Mantle-based RWA lending protocols (CDPs) who need a decentralized collateral oracle.**
+
+When a new lending market launches, they face the cold-start problem: how do they securely verify, value, and accept physical assets as collateral without relying on centralized, off-chain lawyers?
+By integrating PoR, Mantle CDP vaults can programmatically accept assets, safe in the knowledge that 7 AI agents have mathematically proven the asset's existence, valued it, and locked the result in an on-chain Truth Certificate.
 
 ---
 

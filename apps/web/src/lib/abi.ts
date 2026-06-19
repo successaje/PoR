@@ -659,6 +659,11 @@ export const verificationManagerABI = [
     "type": "constructor",
     "inputs": [
       {
+        "name": "initialOwner",
+        "type": "address",
+        "internalType": "address"
+      },
+      {
         "name": "_agentRegistryAddress",
         "type": "address",
         "internalType": "address"
@@ -681,120 +686,143 @@ export const verificationManagerABI = [
   },
   {
     "type": "function",
-    "name": "assignAgent",
-    "inputs": [
-      {
-        "name": "_caseId",
-        "type": "uint256",
-        "internalType": "uint256"
-      },
-      {
-        "name": "_agentId",
-        "type": "uint256",
-        "internalType": "uint256"
-      }
-    ],
-    "outputs": [],
-    "stateMutability": "nonpayable"
-  },
-  {
-    "type": "function",
-    "name": "cases",
+    "name": "assetEvidenceHashes",
     "inputs": [
       {
         "name": "",
-        "type": "uint256",
-        "internalType": "uint256"
+        "type": "string",
+        "internalType": "string"
       }
     ],
     "outputs": [
       {
-        "name": "id",
-        "type": "uint256",
-        "internalType": "uint256"
-      },
-      {
-        "name": "description",
+        "name": "",
         "type": "string",
         "internalType": "string"
-      },
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "assetScores",
+    "inputs": [
       {
-        "name": "status",
+        "name": "",
+        "type": "string",
+        "internalType": "string"
+      }
+    ],
+    "outputs": [
+      {
+        "name": "",
         "type": "uint8",
-        "internalType": "enum VerificationManager.CaseStatus"
-      },
-      {
-        "name": "result",
-        "type": "string",
-        "internalType": "string"
+        "internalType": "uint8"
       }
     ],
     "stateMutability": "view"
   },
   {
     "type": "function",
-    "name": "createCase",
-    "inputs": [
-      {
-        "name": "_description",
-        "type": "string",
-        "internalType": "string"
-      }
-    ],
-    "outputs": [
-      {
-        "name": "",
-        "type": "uint256",
-        "internalType": "uint256"
-      }
-    ],
-    "stateMutability": "nonpayable"
-  },
-  {
-    "type": "function",
-    "name": "getAssignedAgents",
-    "inputs": [
-      {
-        "name": "_caseId",
-        "type": "uint256",
-        "internalType": "uint256"
-      }
-    ],
-    "outputs": [
-      {
-        "name": "",
-        "type": "uint256[]",
-        "internalType": "uint256[]"
-      }
-    ],
-    "stateMutability": "view"
-  },
-  {
-    "type": "function",
-    "name": "nextCaseId",
+    "name": "backendSigner",
     "inputs": [],
     "outputs": [
       {
         "name": "",
-        "type": "uint256",
-        "internalType": "uint256"
+        "type": "address",
+        "internalType": "address"
       }
     ],
     "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "owner",
+    "inputs": [],
+    "outputs": [
+      {
+        "name": "",
+        "type": "address",
+        "internalType": "address"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "renounceOwnership",
+    "inputs": [],
+    "outputs": [],
+    "stateMutability": "nonpayable"
   },
   {
     "type": "function",
     "name": "resolveCase",
     "inputs": [
       {
-        "name": "_caseId",
-        "type": "uint256",
-        "internalType": "uint256"
-      },
-      {
-        "name": "_result",
+        "name": "assetId",
         "type": "string",
         "internalType": "string"
+      },
+      {
+        "name": "consensusScore",
+        "type": "uint8",
+        "internalType": "uint8"
+      },
+      {
+        "name": "evidenceHash",
+        "type": "string",
+        "internalType": "string"
+      },
+      {
+        "name": "signature",
+        "type": "bytes",
+        "internalType": "bytes"
+      }
+    ],
+    "outputs": [],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
+    "name": "resolvedAssets",
+    "inputs": [
+      {
+        "name": "",
+        "type": "string",
+        "internalType": "string"
+      }
+    ],
+    "outputs": [
+      {
+        "name": "",
+        "type": "bool",
+        "internalType": "bool"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "setBackendSigner",
+    "inputs": [
+      {
+        "name": "_signer",
+        "type": "address",
+        "internalType": "address"
+      }
+    ],
+    "outputs": [],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
+    "name": "transferOwnership",
+    "inputs": [
+      {
+        "name": "newOwner",
+        "type": "address",
+        "internalType": "address"
       }
     ],
     "outputs": [],
@@ -802,38 +830,13 @@ export const verificationManagerABI = [
   },
   {
     "type": "event",
-    "name": "AgentAssigned",
+    "name": "BackendSignerUpdated",
     "inputs": [
       {
-        "name": "caseId",
-        "type": "uint256",
+        "name": "newSigner",
+        "type": "address",
         "indexed": true,
-        "internalType": "uint256"
-      },
-      {
-        "name": "agentId",
-        "type": "uint256",
-        "indexed": true,
-        "internalType": "uint256"
-      }
-    ],
-    "anonymous": false
-  },
-  {
-    "type": "event",
-    "name": "CaseCreated",
-    "inputs": [
-      {
-        "name": "id",
-        "type": "uint256",
-        "indexed": true,
-        "internalType": "uint256"
-      },
-      {
-        "name": "description",
-        "type": "string",
-        "indexed": false,
-        "internalType": "string"
+        "internalType": "address"
       }
     ],
     "anonymous": false
@@ -843,19 +846,92 @@ export const verificationManagerABI = [
     "name": "CaseResolved",
     "inputs": [
       {
-        "name": "id",
-        "type": "uint256",
+        "name": "assetId",
+        "type": "string",
         "indexed": true,
-        "internalType": "uint256"
+        "internalType": "string"
       },
       {
-        "name": "result",
+        "name": "consensusScore",
+        "type": "uint8",
+        "indexed": false,
+        "internalType": "uint8"
+      },
+      {
+        "name": "evidenceHash",
         "type": "string",
         "indexed": false,
         "internalType": "string"
       }
     ],
     "anonymous": false
+  },
+  {
+    "type": "event",
+    "name": "OwnershipTransferred",
+    "inputs": [
+      {
+        "name": "previousOwner",
+        "type": "address",
+        "indexed": true,
+        "internalType": "address"
+      },
+      {
+        "name": "newOwner",
+        "type": "address",
+        "indexed": true,
+        "internalType": "address"
+      }
+    ],
+    "anonymous": false
+  },
+  {
+    "type": "error",
+    "name": "ECDSAInvalidSignature",
+    "inputs": []
+  },
+  {
+    "type": "error",
+    "name": "ECDSAInvalidSignatureLength",
+    "inputs": [
+      {
+        "name": "length",
+        "type": "uint256",
+        "internalType": "uint256"
+      }
+    ]
+  },
+  {
+    "type": "error",
+    "name": "ECDSAInvalidSignatureS",
+    "inputs": [
+      {
+        "name": "s",
+        "type": "bytes32",
+        "internalType": "bytes32"
+      }
+    ]
+  },
+  {
+    "type": "error",
+    "name": "OwnableInvalidOwner",
+    "inputs": [
+      {
+        "name": "owner",
+        "type": "address",
+        "internalType": "address"
+      }
+    ]
+  },
+  {
+    "type": "error",
+    "name": "OwnableUnauthorizedAccount",
+    "inputs": [
+      {
+        "name": "account",
+        "type": "address",
+        "internalType": "address"
+      }
+    ]
   }
 ] as const;
-

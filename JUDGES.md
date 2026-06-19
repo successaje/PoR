@@ -40,10 +40,9 @@ All core protocol architecture is live on Mantle Sepolia and secured via OpenZep
 
 | Contract | Address | Purpose |
 |----------|---------|---------|
-| **VerificationManager** | [`0x34d156d6c062804771652b48f2d65d58d3794113`](https://sepolia.mantlescan.xyz/address/0x34d156d6c062804771652b48f2d65d58d3794113) | Entry point. Creates on-chain cases triggering the AI agents. |
-| **TruthCertificateNFT** | [`0x8a9b349a96b6a2799b842262bde76d42218a2c0a`](https://sepolia.mantlescan.xyz/address/0x8a9b349a96b6a2799b842262bde76d42218a2c0a) | Stores the `evidenceHash`, `consensusScore`, and `decayTimer`. |
-| **AgentRegistry** | [`0xc4d732199b7d21207a74cfe6ced4d17dd330c7ea`](https://sepolia.mantlescan.xyz/address/0xc4d732199b7d21207a74cfe6ced4d17dd330c7ea) | Tracks active Node Operators and AI Agent reputation. |
-| **PoRLendingVault** | [`0x64d1ae5fa2eceb908a028bbdb4a4e2223bdefa47`](https://sepolia.mantlescan.xyz/address/0x64d1ae5fa2eceb908a028bbdb4a4e2223bdefa47) | Mock Mantle DeFi protocol demonstrating automatic loan gating via PoR scores. |
+| **AgentRegistry** | [`0x49312b44f8a13b1ca33f76d08a7c8230b3e0d5e4`](https://sepolia.mantlescan.xyz/address/0x49312b44f8a13b1ca33f76d08a7c8230b3e0d5e4) | Tracks active Node Operators and AI Agent reputation. |
+| **VerificationManager** | [`0x38509275f1da637c17790d50f6ad8b6f729759ff`](https://sepolia.mantlescan.xyz/address/0x38509275f1da637c17790d50f6ad8b6f729759ff) | Entry point. Creates on-chain cases triggering the AI agents. |
+| **TruthCertificateNFT** | [`0xfc527b71ebd1854a32967f44d314faf99b2ac333`](https://sepolia.mantlescan.xyz/address/0xfc527b71ebd1854a32967f44d314faf99b2ac333) | Stores the `evidenceHash`, `consensusScore`, and `decayTimer`. |
 
 ---
 

@@ -141,14 +141,38 @@ async def run_debate(asset_data: dict, emit_func):
             # Generate cryptographic evidence hash
             state_str = json.dumps(final_state, sort_keys=True, default=str)
             evidence_hash = "0x" + hashlib.sha256(state_str.encode('utf-8')).hexdigest()
+            
+            asset_id = final_state.get("asset_id", "UNKNOWN")
+            consensus_score = int(final_state.get("consensus_score", 95))
+            
+            # Sign the payload for the smart contract VerificationManager
+            signature = "0x"
+            try:
+                from web3 import Web3
+                from eth_account.messages import encode_defunct
+                import os
+                
+                private_key = os.getenv("PRIVATE_KEY", "0xc3de37db2d21484a2862164bf34fd72a0a64bc2709446b571b2a4b7f9dddc496")
+                
+                message_hash = Web3.solidity_keccak(
+                    ['string', 'uint8', 'string'], 
+                    [asset_id, consensus_score, evidence_hash]
+                )
+                message = encode_defunct(message_hash)
+                w3 = Web3()
+                signed_message = w3.eth.account.sign_message(message, private_key=private_key)
+                signature = signed_message.signature.hex()
+            except Exception as e:
+                print(f"Failed to sign message: {e}")
 
             return {
                 "status": final_state.get("status", "VERIFIED"),
-                "confidence": final_state.get("consensus_score", 95.0),
+                "confidence": consensus_score,
                 "fraud_probability": final_state.get("fraud_probability", "LOW"),
                 "market_value_estimate": final_state.get("market_value_estimate", "$0"),
                 "yield_band": final_state.get("yield_band", "0%"),
-                "evidence_hash": evidence_hash
+                "evidence_hash": evidence_hash,
+                "signature": signature
             }
         
     except Exception as e:

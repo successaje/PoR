@@ -5,10 +5,15 @@ import {ERC721} from "openzeppelin-contracts/contracts/token/ERC721/ERC721.sol";
 import {Ownable} from "openzeppelin-contracts/contracts/access/Ownable.sol";
 import {Strings} from "openzeppelin-contracts/contracts/utils/Strings.sol";
 
+interface IVerificationManager {
+    function resolvedAssets(string memory assetId) external view returns (bool);
+}
+
 contract TruthCertificateNFT is ERC721, Ownable {
     using Strings for uint256;
 
     uint256 private _nextTokenId;
+    IVerificationManager public verificationManager;
 
     // Mapping from token ID to Consensus Data
     mapping(uint256 => TruthData) public truthRecords;
@@ -24,7 +29,9 @@ contract TruthCertificateNFT is ERC721, Ownable {
     event TruthCertificateMinted(uint256 indexed tokenId, string assetId, uint8 consensusScore);
     event TruthDecayed(uint256 indexed tokenId, uint8 newScore);
 
-    constructor(address initialOwner) ERC721("Truth Certificate", "TRUTH") Ownable(initialOwner) {}
+    constructor(address initialOwner, address _verificationManager) ERC721("Truth Certificate", "TRUTH") Ownable(initialOwner) {
+        verificationManager = IVerificationManager(_verificationManager);
+    }
 
     function mintCertificate(
         address to,
@@ -33,6 +40,8 @@ contract TruthCertificateNFT is ERC721, Ownable {
         uint256 decayTimer,
         string memory evidenceHash
     ) external returns (uint256) {
+        require(verificationManager.resolvedAssets(assetId), "Asset verification not resolved");
+
         uint256 tokenId = _nextTokenId++;
         _safeMint(to, tokenId);
 
@@ -49,7 +58,7 @@ contract TruthCertificateNFT is ERC721, Ownable {
     }
 
     // Simulated ERC-8004 concept (Dynamic Truth Decay)
-    function applyTruthDecay(uint256 tokenId) external onlyOwner {
+    function applyTruthDecay(uint256 tokenId) public onlyOwner {
         require(_ownerOf(tokenId) != address(0), "Token does not exist");
         TruthData storage data = truthRecords[tokenId];
         
@@ -68,5 +77,17 @@ contract TruthCertificateNFT is ERC721, Ownable {
         data.verificationTimestamp = block.timestamp;
         
         emit TruthDecayed(tokenId, data.consensusScore);
+    }
+
+    /**
+     * @dev Batch truth decay processing. 
+     * Enabled by Mantle's ultra-low gas fees, the PoR oracle can afford to decay 
+     * and re-verify hundreds of assets hourly rather than monthly.
+     * This high-frequency batch processing is economically prohibitive on L1 Ethereum.
+     */
+    function batchApplyTruthDecay(uint256[] calldata tokenIds) external onlyOwner {
+        for(uint i = 0; i < tokenIds.length; i++) {
+            applyTruthDecay(tokenIds[i]);
+        }
     }
 }

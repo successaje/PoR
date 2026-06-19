@@ -3,6 +3,7 @@ pragma solidity ^0.8.20;
 
 import {Script, console2} from "forge-std/Script.sol";
 import {PoRLendingVault} from "../src/PoRLendingVault.sol";
+import {MockERC20} from "../src/MockERC20.sol";
 
 contract DeployLendingVault is Script {
     function run() public {
@@ -11,7 +12,10 @@ contract DeployLendingVault is Script {
 
         vm.startBroadcast(deployerPrivateKey);
 
-        PoRLendingVault vault = new PoRLendingVault(truthOracleAddress);
+        MockERC20 mETH = new MockERC20("Mantle Staked Ether", "mETH");
+        MockERC20 USDY = new MockERC20("Ondo US Dollar Yield", "USDY");
+
+        PoRLendingVault vault = new PoRLendingVault(truthOracleAddress, address(mETH), address(USDY));
         console2.log("PoRLendingVault deployed at:", address(vault));
 
         vm.stopBroadcast();

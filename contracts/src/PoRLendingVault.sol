@@ -12,24 +12,31 @@ import {IERC20} from "openzeppelin-contracts/contracts/token/ERC20/IERC20.sol";
  */
 contract PoRLendingVault {
     TruthCertificateNFT public truthOracle;
+    IERC20 public mETH;
+    IERC20 public USDY;
     
     // Mapping of assetId (string) to borrow amount
     mapping(string => uint256) public activeLoans;
+    // Mapping of assetId (string) to supplied mETH collateral
+    mapping(string => uint256) public suppliedmETH;
 
-    event LoanApproved(string assetId, uint256 amount, uint8 consensusScore);
+    event LoanApproved(string assetId, uint256 borrowAmount, uint256 mETHCollateral, uint8 consensusScore);
     event LoanRejected(string assetId, string reason);
     event AssetLiquidated(string assetId, string reason);
 
-    constructor(address _truthOracle) {
+    constructor(address _truthOracle, address _mETH, address _USDY) {
         truthOracle = TruthCertificateNFT(_truthOracle);
+        mETH = IERC20(_mETH);
+        USDY = IERC20(_USDY);
     }
 
     /**
      * @dev Attempt to borrow funds against a Reality Asset verified by PoR.
      * @param tokenId The PoR Truth Certificate NFT token ID
-     * @param borrowAmount The amount of stablecoins/ETH requested
+     * @param borrowAmount The amount of USDY requested
+     * @param mETHCollateral The amount of mETH supplied as additional liquid collateral
      */
-    function borrowAgainstRealityAsset(uint256 tokenId, uint256 borrowAmount) external {
+    function borrowAgainstRealityAsset(uint256 tokenId, uint256 borrowAmount, uint256 mETHCollateral) external {
         // 1. Query the AI Consensus layer (PoR)
         (
             string memory assetId,
@@ -49,10 +56,17 @@ contract PoRLendingVault {
         // If the certificate is stale, reality might have changed (e.g. building burned down).
         require(block.timestamp <= verificationTimestamp + decayTimer, "PoR Certificate expired. Must re-verify.");
 
-        // 5. Approve Loan
+        // 5. Transfer mETH from user to vault as liquid collateral
+        require(mETH.transferFrom(msg.sender, address(this), mETHCollateral), "mETH transfer failed");
+
+        // 6. Approve Loan and record collateral
         activeLoans[assetId] += borrowAmount;
+        suppliedmETH[assetId] += mETHCollateral;
         
-        emit LoanApproved(assetId, borrowAmount, consensusScore);
+        // Mock transfer USDY to user (in a real scenario, vault would hold USDY to lend)
+        // require(USDY.transfer(msg.sender, borrowAmount), "USDY transfer failed");
+        
+        emit LoanApproved(assetId, borrowAmount, mETHCollateral, consensusScore);
     }
 
     /**

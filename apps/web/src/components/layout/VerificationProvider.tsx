@@ -12,6 +12,7 @@ interface VerificationContextProps {
     fraudRisk: number;
     valueEstimate: string;
     evidenceHash: string;
+    signature?: string;
   };
   startVerification: (assetId: string, initialTxHash?: string) => void;
 }
@@ -27,6 +28,7 @@ export function VerificationProvider({ children }: { children: ReactNode }) {
     fraudRisk: 0,
     valueEstimate: "",
     evidenceHash: "",
+    signature: "",
   });
 
   const timeoutsRef = useRef<NodeJS.Timeout[]>([]);
@@ -113,6 +115,7 @@ export function VerificationProvider({ children }: { children: ReactNode }) {
             confidence: result.confidence,
             valueEstimate: result.market_value_estimate,
             evidenceHash: result.evidence_hash,
+            signature: result.signature,
             fraudRisk: result.fraud_probability === "LOW" ? 1.2 : 85.0
          }));
       } else if (data.type === "done") {
