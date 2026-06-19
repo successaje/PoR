@@ -7,8 +7,6 @@ import { TopNav } from "@/components/layout/TopNav";
 export default function PricingPage() {
   return (
     <div className="min-h-screen bg-black text-white font-sans selection:bg-white selection:text-black">
-      <TopNav />
-
       <main className="pt-32 pb-24 px-6 relative z-10">
         <div className="max-w-6xl mx-auto">
           

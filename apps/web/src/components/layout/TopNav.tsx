@@ -23,15 +23,11 @@ export function TopNav() {
         </Link>
 
         <nav className="hidden md:flex items-center gap-6">
+          {/* Primary Links */}
           {[
             { name: "Overview", path: "/" },
             { name: "Verify", path: "/verify" },
             { name: "Network", path: "/consensus" },
-            { name: "Agents", path: "/agents" },
-            { name: "Certificates", path: "/certificates" },
-            { name: "Vault", path: "/vault" },
-            { name: "Pricing", path: "/pricing" },
-            { name: "Developer", path: "/docs" }
           ].map((item) => (
             <Link 
               key={item.name} 
@@ -45,6 +41,37 @@ export function TopNav() {
               {item.name}
             </Link>
           ))}
+
+          {/* Ecosystem Dropdown */}
+          <div className="relative group">
+            <button className="text-[11px] font-sans tracking-widest uppercase text-white/40 hover:text-white/80 transition-colors duration-300 flex items-center gap-1 py-2">
+              Ecosystem
+              <svg className="w-3 h-3 opacity-50 group-hover:rotate-180 transition-transform duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+              </svg>
+            </button>
+            <div className="absolute top-full left-0 mt-0 w-40 bg-black/95 border border-white/10 backdrop-blur-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 flex flex-col py-2 z-50">
+              {[
+                { name: "Agents", path: "/agents" },
+                { name: "Certificates", path: "/certificates" },
+                { name: "Vault", path: "/vault" },
+                { name: "Pricing", path: "/pricing" },
+                { name: "Developer", path: "/docs" }
+              ].map((item) => (
+                <Link 
+                  key={item.name} 
+                  href={item.path}
+                  className={`px-4 py-2.5 text-[10px] font-sans tracking-widest uppercase transition-colors duration-300 hover:bg-white/5 ${
+                    isActive(item.path) 
+                      ? "text-white" 
+                      : "text-white/40 hover:text-white/80"
+                  }`}
+                >
+                  {item.name}
+                </Link>
+              ))}
+            </div>
+          </div>
         </nav>
       </div>
 
