@@ -24,7 +24,7 @@ contract PoRLendingVault {
     event LoanRejected(string assetId, string reason);
     event AssetLiquidated(string assetId, string reason);
 
-    constructor(address _truthOracle, address _mETH, address _USDY) {
+    constructor(address payable _truthOracle, address _mETH, address _USDY) {
         truthOracle = TruthCertificateNFT(_truthOracle);
         mETH = IERC20(_mETH);
         USDY = IERC20(_USDY);

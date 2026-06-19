@@ -11,12 +11,19 @@ class AssetVerificationState(TypedDict):
     
     # Reports from individual agents
     geo_report: str
+    geo_confidence: float
     financial_report: str
+    financial_confidence: float
     legal_report: str
+    legal_confidence: float
     fraud_report: str
+    fraud_confidence: float
     sentiment_report: str
+    sentiment_confidence: float
     climate_report: str
+    climate_confidence: float
     compliance_report: str
+    compliance_confidence: float
     
     # Debate variables
     debate_history: Annotated[List[BaseMessage], add_messages]

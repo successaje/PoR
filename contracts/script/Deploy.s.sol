@@ -32,7 +32,7 @@ contract DeployScript is Script {
         MockERC20 USDY = new MockERC20("Ondo US Dollar Yield", "USDY");
         console.log("Mock USDY deployed at:", address(USDY));
 
-        PoRLendingVault vault = new PoRLendingVault(address(nft), address(mETH), address(USDY));
+        PoRLendingVault vault = new PoRLendingVault(payable(address(nft)), address(mETH), address(USDY));
         console.log("PoRLendingVault deployed at:", address(vault));
 
         vm.stopBroadcast();

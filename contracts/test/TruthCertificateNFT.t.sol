@@ -67,15 +67,30 @@ contract TruthCertificateNFTTest is Test {
         nftContract.mintCertificate(user, "REG-UNRESOLVED", 95, 30 days, "0xDEF");
     }
 
-    function test_ApplyTruthDecay_Revert_NonOwner() public {
+    function test_ApplyTruthDecay_KeeperReward() public {
         string memory assetId = "REG-123";
         resolveCaseHelper(assetId, 95, "0xABC");
         
         vm.prank(user);
         uint256 tokenId = nftContract.mintCertificate(user, assetId, 95, 30 days, "0xABC");
         
-        vm.prank(user);
-        vm.expectRevert(); // OwnableUnauthorizedAccount
+        // Fund the contract so it can pay keeper rewards
+        vm.deal(address(nftContract), 1 ether);
+        
+        address keeper = address(0x999);
+        uint256 initialKeeperBalance = keeper.balance;
+        
+        // Fast forward time past decay timer
+        vm.warp(block.timestamp + 31 days);
+        
+        vm.prank(keeper);
         nftContract.applyTruthDecay(tokenId);
+        
+        // Score should drop from 95 to 90
+        (, uint8 fetchedScore, , , ) = nftContract.truthRecords(tokenId);
+        assertEq(fetchedScore, 90);
+        
+        // Keeper should have received 0.001 ETH
+        assertEq(keeper.balance, initialKeeperBalance + 0.001 ether);
     }
 }

@@ -101,8 +101,9 @@ PoR utilizes rigorous security practices to protect the integrity of Reality Ver
 Proof-of-Reality (PoR) introduces a paradigm shift in decentralized verification. Instead of relying on a single data feed or a single LLM, PoR routes raw asset data (satellite imagery, deeds, market sentiment) through the **Aletheia Consensus Engine**.
 
 1. **Parallel Verification:** 7 specialized AI agents analyze the asset concurrently.
-2. **The Debate Chamber:** If the Legal agent confirms a deed, but the Fraud agent detects metadata tampering, the protocol does not average the score. It forces the agents into a **dynamic, multi-turn cross-examination** to resolve the contradiction.
+2. **The Debate Chamber:** If the Legal agent confirms a deed, but the Fraud agent detects metadata tampering, the protocol does not average the score. It forces the agents into a **dynamic, multi-turn cross-examination** to resolve the contradiction. (A deterministic trigger enforces this if agents' confidence scores diverge).
 3. **Cryptographic Finality:** Once consensus is mathematically reached, the outcome is compressed into an immutable `evidenceHash`, signed by the backend Oracle, and minted as a Truth Certificate on Mantle.
+4. **Decentralized Truth Maintenance (Keepers):** The protocol doesn't rely on centralized backend cron jobs. Stale certificates are decayed permissionlessly by a network of economically incentivized Keepers, who earn Mantle/ETH rewards for maintaining Truth consensus on-chain.
 
 ---
 

@@ -57,8 +57,8 @@ contract TruthCertificateNFT is ERC721, Ownable {
         return tokenId;
     }
 
-    // Simulated ERC-8004 concept (Dynamic Truth Decay)
-    function applyTruthDecay(uint256 tokenId) public onlyOwner {
+    // Decentralized Truth Maintenance: Any 'Keeper' can trigger decay and earn a reward
+    function applyTruthDecay(uint256 tokenId) public {
         require(_ownerOf(tokenId) != address(0), "Token does not exist");
         TruthData storage data = truthRecords[tokenId];
         
@@ -76,6 +76,13 @@ contract TruthCertificateNFT is ERC721, Ownable {
         // Reset timer for next decay
         data.verificationTimestamp = block.timestamp;
         
+        // Keeper Reward: Pays the caller for maintaining truth consensus
+        uint256 reward = 0.001 ether; // e.g., 0.001 MNT
+        if (address(this).balance >= reward) {
+            (bool success, ) = msg.sender.call{value: reward}("");
+            // We ignore success to ensure decay doesn't revert if a smart contract caller rejects ETH
+        }
+        
         emit TruthDecayed(tokenId, data.consensusScore);
     }
 
@@ -85,9 +92,12 @@ contract TruthCertificateNFT is ERC721, Ownable {
      * and re-verify hundreds of assets hourly rather than monthly.
      * This high-frequency batch processing is economically prohibitive on L1 Ethereum.
      */
-    function batchApplyTruthDecay(uint256[] calldata tokenIds) external onlyOwner {
+    function batchApplyTruthDecay(uint256[] calldata tokenIds) external {
         for(uint i = 0; i < tokenIds.length; i++) {
             applyTruthDecay(tokenIds[i]);
         }
     }
+    
+    // Accept native tokens (MNT) to fund Keeper rewards
+    receive() external payable {}
 }

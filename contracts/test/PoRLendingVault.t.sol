@@ -39,7 +39,7 @@ contract PoRLendingVaultTest is Test {
         mETH = new MockERC20("Mantle Staked Ether", "mETH");
         USDY = new MockERC20("Ondo US Dollar Yield", "USDY");
         
-        vault = new PoRLendingVault(address(nftContract), address(mETH), address(USDY));
+        vault = new PoRLendingVault(payable(address(nftContract)), address(mETH), address(USDY));
         
         // Fund vault with USDY to lend
         USDY.mint(address(vault), 1000000 ether);

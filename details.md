@@ -215,8 +215,9 @@ Truth Certificate NFT is minted.
 
 PoR is designed specifically to strengthen Mantle's RWA ecosystem, leveraging its ultra-low gas architecture and strategic partnerships.
 
-### 1. High-Frequency Batch Verification
-Because of Mantle's gas efficiency, PoR can run `batchApplyTruthDecay()` across hundreds of Reality Assets hourly rather than monthly. This enables real-time dynamic pricing of physical assets, a feature that is economically prohibitive on L1 Ethereum.
+### 1. Decentralized Truth Maintenance (Keepers) & Batch Verification
+Because of Mantle's gas efficiency, PoR can run `batchApplyTruthDecay()` across hundreds of Reality Assets hourly rather than monthly. 
+Crucially, this is a permissionless **first-class on-chain primitive**. The protocol doesn't rely on centralized backend cron jobs. Instead, any "Keeper" node can call the decay function and earn a small native token (MNT/ETH) reward for keeping the system honest. This enables real-time dynamic pricing of physical assets powered by an economically incentivized decentralized network—a feature that is economically prohibitive on L1 Ethereum.
 
 ### 2. Ondo Finance USDY (Highest Strategic Value)
 Mantle has positioned **Ondo Finance USDY** as a flagship RWA asset in its ecosystem. USDY is backed by US Treasuries and bank deposits, where trust, transparency, and continuous verification are paramount.

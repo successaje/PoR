@@ -15,7 +15,7 @@ contract DeployLendingVault is Script {
         MockERC20 mETH = new MockERC20("Mantle Staked Ether", "mETH");
         MockERC20 USDY = new MockERC20("Ondo US Dollar Yield", "USDY");
 
-        PoRLendingVault vault = new PoRLendingVault(truthOracleAddress, address(mETH), address(USDY));
+        PoRLendingVault vault = new PoRLendingVault(payable(truthOracleAddress), address(mETH), address(USDY));
         console2.log("PoRLendingVault deployed at:", address(vault));
 
         vm.stopBroadcast();
