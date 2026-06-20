@@ -5,6 +5,7 @@ import { VerificationProvider } from "@/components/layout/VerificationProvider";
 import { Web3Provider } from "@/components/layout/Web3Provider";
 import { TopNav } from "@/components/layout/TopNav";
 import { GlobalActivityFeed } from "@/components/layout/GlobalActivityFeed";
+import { Analytics } from "@vercel/analytics/next";
 
 const inter = Inter({ subsets: ["latin"], weight: ["300", "400", "500", "600"] });
 
@@ -34,6 +35,7 @@ export default function RootLayout({
             </div>
           </VerificationProvider>
         </Web3Provider>
+        <Analytics />
       </body>
     </html>
   );
