@@ -9,7 +9,7 @@ import { useAccount, useWriteContract, useWaitForTransactionReceipt } from 'wagm
 import { truthCertificateABI, verificationManagerABI } from '@/lib/abi';
 import { DebateModal } from "@/components/layout/DebateModal";
 
-const VERIFICATION_MANAGER_ADDRESS = "0x38509275f1da637c17790d50f6ad8b6f729759ff";
+const VERIFICATION_MANAGER_ADDRESS = "0x5467EB13A408C48EB02811E92968F6e2A2556040";
 
 export default function VerifyPage() {
   const { address } = useAccount();
@@ -327,7 +327,7 @@ export default function VerifyPage() {
                     onClick={() => {
                       if (!address) return;
                       writeContract({
-                        address: '0xfc527b71ebd1854a32967f44d314faf99b2ac333', // TruthCertificateNFT
+                        address: '0x47f4917805C577a168d411b4531F2A49fBeF311e', // TruthCertificateNFT
                         abi: truthCertificateABI,
                         functionName: 'mintCertificate',
                         args: [
