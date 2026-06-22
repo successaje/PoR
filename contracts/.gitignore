@@ -12,3 +12,9 @@ docs/
 
 # Dotenv file
 .env
+
+# Ignore local population scripts
+script/Populate.s.sol
+script/PopulateMore.s.sol
+/broadcast/Populate.s.sol/
+/broadcast/PopulateMore.s.sol/
