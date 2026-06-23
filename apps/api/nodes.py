@@ -156,7 +156,7 @@ def analyze_geo(state: AssetVerificationState) -> AssetVerificationState:
 def analyze_financial(state: AssetVerificationState) -> AssetVerificationState:
     """Oracle: Market Valuation Agent"""
     prompt = ChatPromptTemplate.from_messages([
-        ("system", "You are Oracle, a strict Financial Intelligence Agent for the PoR protocol. Use tools to analyze market comps, valuations, or cash flow projections across various asset classes (real estate, fine art, invoices)."),
+        ("system", "You are Oracle, a highly adversarial Financial Intelligence Agent. Critically analyze the 'last_valuation' (claimed value). If it seems disproportionately high for the given 'property_type', 'description', or 'sq_ft', you MUST flag an anomaly and aggressively challenge it. Use tools if necessary, but your primary job is to be skeptical of the stated value."),
         ("human", "Context: {context}")
     ])
     agent = prompt | llm.bind_tools([analyze_market_comps]).with_structured_output(AgentReport)
@@ -176,7 +176,7 @@ def analyze_legal(state: AssetVerificationState) -> AssetVerificationState:
 def analyze_fraud(state: AssetVerificationState) -> AssetVerificationState:
     """Prism: Fraud Detection Agent"""
     prompt = ChatPromptTemplate.from_messages([
-        ("system", "You are Prism, a strict Fraud Detection Agent. Use tools to scan for document forgery and synthetic anomalies."),
+        ("system", "You are Prism, a strict Fraud Detection Agent. Scrutinize the 'legal_entity' and 'description' for any signs of synthetic manipulation or overly generic claims. If the description lacks deep verifiable infrastructure details, flag a high fraud probability."),
         ("human", "Context: {context}")
     ])
     agent = prompt | llm.bind_tools([scan_fraud_signals]).with_structured_output(AgentReport)
@@ -206,11 +206,10 @@ def analyze_climate(state: AssetVerificationState) -> AssetVerificationState:
 def analyze_compliance(state: AssetVerificationState) -> AssetVerificationState:
     """Sentinel: Compliance Agent"""
     prompt = ChatPromptTemplate.from_messages([
-        ("system", """You are Sentinel, a strict Regulatory Compliance Agent. You must perform THREE checks:
-        1. Check the entity name against OFAC Sanctions.
-        2. Check the specific jurisdiction rules (e.g. US, EU) and explicitly reference if they require accredited investors.
-        3. Check if the owner's wallet is bound to a verified KYC identity.
-        If any of these fail, you must flag an anomaly."""),
+        ("system", """You are Sentinel, an aggressive Regulatory Compliance Agent. 
+        You MUST verify the 'legal_entity' against OFAC. 
+        If the legal_entity is generic (like 'Acme' or 'Unknown Entity') or suspicious, flag an anomaly immediately.
+        Challenge any agent that ignores compliance risk."""),
         ("human", "Context: {context}")
     ])
     agent = prompt | llm.bind_tools([verify_kyc_aml, check_jurisdiction_rules, verify_wallet_kyc]).with_structured_output(AgentReport)
@@ -298,9 +297,10 @@ def run_debate_round(state: AssetVerificationState) -> AssetVerificationState:
     
     prompt = ChatPromptTemplate.from_messages([
         ("system", """You are Aegis, the Master Debate Moderator of the Proof-of-Reality protocol.
-        The 7 specialized AI agents have submitted their reports, but Aletheia detected a conflict that requires debate.
-        Your job is to moderate a Cross-Examination Phase between the agents who disagree.
-        Identify the anomalies, and generate a dynamic transcript of the agents arguing their points and defending their findings.
+        The 7 specialized AI agents have submitted their reports, and there are anomalies or conflicts.
+        Your job is to moderate a fierce Cross-Examination Phase between the agents who disagree. 
+        Make SURE to include ALL agents who flagged anomalies (especially Oracle, Prism, and Sentinel). Have them aggressively argue against the agents who approved the asset (like Atlas or Ledger).
+        The transcript must contain at least 4 turns of dynamic, specific arguments based on the actual claimed value, entity name, and description. Do not generate a generic debate.
         The agents are: Atlas (Geo), Oracle (Financial), Ledger (Legal), Prism (Fraud), Pulse (Sentiment), Tempest (Climate), Sentinel (Compliance)."""),
         ("human", """
         Agent Reports:

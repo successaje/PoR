@@ -80,9 +80,9 @@ async def run_debate(asset_data: dict, emit_func):
             "description": asset_data.get("description", "No description provided."),
             "infrastructure": asset_data.get("infrastructure", []),
             "owner_wallet": asset_data.get("owner_wallet", "0xSYSTEM"),
-            "last_valuation": "$410,000",
-            "sq_ft": 4500,
-            "mock_anomaly": "Potential discrepancy in metadata reported by Prism agent."
+            "last_valuation": asset_data.get("claimed_value", "$410,000"),
+            "legal_entity": asset_data.get("legal_entity", "Unknown Entity"),
+            "sq_ft": 4500
         },
         "debate_round": 0,
         "debate_history": []

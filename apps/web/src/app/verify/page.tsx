@@ -9,7 +9,7 @@ import { useAccount, useWriteContract, useWaitForTransactionReceipt } from 'wagm
 import { truthCertificateABI, verificationManagerABI } from '@/lib/abi';
 import { DebateModal } from "@/components/layout/DebateModal";
 
-const VERIFICATION_MANAGER_ADDRESS = "0x5467EB13A408C48EB02811E92968F6e2A2556040";
+const VERIFICATION_MANAGER_ADDRESS = "0x38509275F1da637C17790D50f6AD8B6F729759ff";
 
 export default function VerifyPage() {
   const { address } = useAccount();
@@ -19,10 +19,7 @@ export default function VerifyPage() {
   const { writeContract: writeResolve, data: resolveHash, isPending: isResolvePending } = useWriteContract();
   const { isLoading: isResolveConfirming, isSuccess: isResolveConfirmed } = useWaitForTransactionReceipt({ hash: resolveHash });
 
-  const [createCaseHash, setCreateCaseHash] = useState<string>("");
-  const [isCreateCasePending, setIsCreateCasePending] = useState(false);
-  const [isCreateCaseConfirming, setIsCreateCaseConfirming] = useState(false);
-  const [isCreateCaseConfirmed, setIsCreateCaseConfirmed] = useState(false);
+  const [isInitializing, setIsInitializing] = useState(false);
   
   const [isDebateModalOpen, setIsDebateModalOpen] = useState(false);
   
@@ -31,6 +28,8 @@ export default function VerifyPage() {
   const [coords, setCoords] = useState("");
   const [description, setDescription] = useState("");
   const [jurisdiction, setJurisdiction] = useState("");
+  const [claimedValue, setClaimedValue] = useState("");
+  const [entityName, setEntityName] = useState("");
   const [assetCategories, setAssetCategories] = useState<string[]>(["Residential District", "High-value Real Estate Zone", "RWA (Real World Asset)"]);
   const [infrastructureText, setInfrastructureText] = useState("");
   const [infrastructureTags, setInfrastructureTags] = useState<string[]>([]);
@@ -66,21 +65,30 @@ export default function VerifyPage() {
 
   const isSubmitting = isUploading || (activeVerification.state !== "PENDING" && activeVerification.state !== "FINALIZED" && activeVerification.state !== "MINTED_ON_CHAIN");
 
+  const hasStarted = useRef(false);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!assetId || !address) return;
     
+    // Reset the hasStarted ref so the useEffect can fire again on resubmission
+    hasStarted.current = false;
+    
     const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
     try {
+      setIsInitializing(true);
       const formData = new FormData();
       formData.append('asset_id', assetId);
       formData.append('metadata', JSON.stringify({
-        description: infrastructureText,
+        description: description,
+        infrastructure: infrastructureText,
         jurisdiction: jurisdiction,
         assetCategories,
         infrastructureTags,
         coords,
-        owner_wallet: address
+        owner_wallet: address,
+        claimedValue: claimedValue,
+        entityName: entityName
       }));
 
       // Append physical files if they exist
@@ -91,32 +99,15 @@ export default function VerifyPage() {
         Array.from(docInputRef.current.files).forEach(file => formData.append('files', file));
       }
 
-      await fetch(`${apiUrl}/submit`, {
+      const res = await fetch(`${apiUrl}/submit`, {
         method: 'POST',
         body: formData,
       });
-    } catch (err) {
-      console.error("Backend submission failed:", err)
-    }
-    
-    // Simulate on-chain case creation delay for demo purposes
-    setIsCreateCasePending(true);
-    setTimeout(() => {
-      setIsCreateCasePending(false);
-      setIsCreateCaseConfirming(true);
-      setTimeout(() => {
-        setIsCreateCaseConfirming(false);
-        setIsCreateCaseConfirmed(true);
-        setCreateCaseHash("0x" + Math.random().toString(16).slice(2, 42).padEnd(40, '0'));
-      }, 2000);
-    }, 1500);
-  };
 
-  const hasStarted = useRef(false);
+      if (!res.ok) {
+        throw new Error(`API returned ${res.status}`);
+      }
 
-  useEffect(() => {
-    if (isCreateCaseConfirmed && createCaseHash && !hasStarted.current) {
-      hasStarted.current = true;
       // Simulate fast upload progress before starting the verification
       setIsUploading(true);
       setUploadProgress(0);
@@ -127,11 +118,18 @@ export default function VerifyPage() {
         if (progress >= 100) {
           clearInterval(interval);
           setIsUploading(false);
-          startVerification(assetId, createCaseHash);
+          setIsInitializing(false);
+          hasStarted.current = true;
+          // In PoR, case initialization is off-chain. We just generate a deterministic hash for the UI.
+          startVerification(assetId, `0x${assetId.replace(/[^a-f0-9]/gi, '').padEnd(40, '0')}`);
         }
       }, 200);
+
+    } catch (err) {
+      console.error("Backend submission failed:", err);
+      setIsInitializing(false);
     }
-  }, [isCreateCaseConfirmed, createCaseHash, assetId, startVerification]);
+  };
 
   // Determine current UI State for the right panel
   const renderRightPanel = () => {
@@ -490,7 +488,7 @@ export default function VerifyPage() {
                 />
               </div>
 
-              {/* Input 2: Coordinates */}
+              {/* Input: Coordinates */}
               <div className="space-y-3">
                 <label className="text-[10px] font-mono text-white/50 uppercase tracking-[0.2em] flex justify-between">
                   <span>Geo-Coordinates</span>
@@ -501,6 +499,34 @@ export default function VerifyPage() {
                   value={coords}
                   onChange={(e) => setCoords(e.target.value)}
                   placeholder="30.2672° N, 97.7431° W"
+                  className="w-full bg-white/[0.02] border border-white/10 focus:border-white/40 rounded-none px-4 py-3 focus:outline-none font-mono text-[11px] text-white placeholder:text-white/20 transition-colors"
+                  disabled={isSubmitting}
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              {/* Input: Legal Entity Name */}
+              <div className="space-y-3">
+                <label className="text-[10px] font-mono text-white/50 uppercase tracking-[0.2em]">Legal Entity Name</label>
+                <input
+                  type="text"
+                  value={entityName}
+                  onChange={(e) => setEntityName(e.target.value)}
+                  placeholder="e.g. Acme Holdings LLC"
+                  className="w-full bg-white/[0.02] border border-white/10 focus:border-white/40 rounded-none px-4 py-3 focus:outline-none font-mono text-[11px] text-white placeholder:text-white/20 transition-colors"
+                  disabled={isSubmitting}
+                />
+              </div>
+
+              {/* Input: Claimed Value */}
+              <div className="space-y-3">
+                <label className="text-[10px] font-mono text-white/50 uppercase tracking-[0.2em]">Claimed Value (USD)</label>
+                <input
+                  type="text"
+                  value={claimedValue}
+                  onChange={(e) => setClaimedValue(e.target.value)}
+                  placeholder="e.g. $4,500,000"
                   className="w-full bg-white/[0.02] border border-white/10 focus:border-white/40 rounded-none px-4 py-3 focus:outline-none font-mono text-[11px] text-white placeholder:text-white/20 transition-colors"
                   disabled={isSubmitting}
                 />
@@ -624,7 +650,7 @@ export default function VerifyPage() {
             
               <button
                 type="submit"
-                disabled={isCreateCasePending || isCreateCaseConfirming || isSubmitting || !assetId || !address}
+                disabled={isInitializing || isSubmitting || !assetId || !address}
                 className="w-full bg-white/10 hover:bg-white/20 text-white font-sans text-[11px] tracking-[0.2em] uppercase py-4 transition-colors disabled:opacity-30 flex items-center justify-center gap-3 relative overflow-hidden"
               >
                 {/* Upload Progress Bar Layer */}
@@ -640,15 +666,15 @@ export default function VerifyPage() {
                 <span className="relative z-10 flex items-center gap-3">
                   {!address ? (
                     "CONNECT WALLET TO INITIATE"
-                  ) : isCreateCasePending ? (
+                  ) : isInitializing ? (
                     <>
-                      <div className="w-2 h-2 bg-white/50 animate-[pulse_1.5s_ease-in-out_infinite]"></div>
-                      AWAITING SIGNATURE...
+                      <div className="w-4 h-4 border-2 border-white/20 border-t-white rounded-full animate-spin" />
+                      INITIALIZING ALETHEIA ENGINE...
                     </>
-                  ) : isCreateCaseConfirming || isUploading ? (
+                  ) : isUploading ? (
                     <>
                       <div className="w-2 h-2 bg-white/50 animate-[pulse_1.5s_ease-in-out_infinite]"></div>
-                      CREATING ON MANTLE... {uploadProgress}%
+                      UPLOADING METADATA... {uploadProgress}%
                     </>
                   ) : activeVerification.state !== "PENDING" && activeVerification.state !== "FINALIZED" ? (
                     <>
