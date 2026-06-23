@@ -40,9 +40,9 @@ All core protocol architecture is live on Mantle Sepolia and secured via OpenZep
 
 | Contract | Address | Purpose |
 |----------|---------|---------|
-| **AgentRegistry** | [`0xfF026fC25E1c2E7A70F3A6a0Bc14993Df3DA1d8B`](https://sepolia.mantlescan.xyz/address/0xfF026fC25E1c2E7A70F3A6a0Bc14993Df3DA1d8B) | Tracks active Node Operators and AI Agent reputation. |
-| **VerificationManager** | [`0x5467EB13A408C48EB02811E92968F6e2A2556040`](https://sepolia.mantlescan.xyz/address/0x5467EB13A408C48EB02811E92968F6e2A2556040) | Entry point. Creates on-chain cases triggering the AI agents. |
-| **TruthCertificateNFT** | [`0x47f4917805C577a168d411b4531F2A49fBeF311e`](https://sepolia.mantlescan.xyz/address/0x47f4917805C577a168d411b4531F2A49fBeF311e) | Stores the `evidenceHash`, `consensusScore`, and `decayTimer`. |
+| **AgentRegistry** | [`0x49312b44f8a13b1ca33f76d08a7c8230b3e0d5e4`](https://sepolia.mantlescan.xyz/address/0x49312b44f8a13b1ca33f76d08a7c8230b3e0d5e4) | Tracks active Node Operators and AI Agent reputation. |
+| **VerificationManager** | [`0x38509275f1da637c17790d50f6ad8b6f729759ff`](https://sepolia.mantlescan.xyz/address/0x38509275f1da637c17790d50f6ad8b6f729759ff) | Entry point. Creates on-chain cases triggering the AI agents. |
+| **TruthCertificateNFT** | [`0xfc527b71ebd1854a32967f44d314faf99b2ac333`](https://sepolia.mantlescan.xyz/address/0xfc527b71ebd1854a32967f44d314faf99b2ac333) | Stores the `evidenceHash`, `consensusScore`, and `decayTimer`. |
 
 ---
 
