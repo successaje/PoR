@@ -134,6 +134,29 @@ export default function VerifyPage() {
   // Determine current UI State for the right panel
   const renderRightPanel = () => {
     if (activeVerification.state === "PENDING") {
+      if (isInitializing || isUploading) {
+        return (
+          <div className="m-auto flex flex-col items-center justify-center">
+            <motion.div 
+              animate={{ rotate: 360 }}
+              transition={{ repeat: Infinity, duration: 2, ease: "linear" }}
+              className="w-32 h-32 border border-dashed border-emerald-500/30 rounded-full flex items-center justify-center mb-8 relative"
+            >
+              <div className="absolute inset-0 bg-emerald-500/5 rounded-full animate-pulse" />
+              <div className="w-16 h-16 border border-emerald-500/50 rounded-full flex items-center justify-center">
+                 <div className="w-2 h-2 bg-emerald-400 rounded-full animate-ping"></div>
+              </div>
+            </motion.div>
+            <div className="font-mono tracking-[0.2em] uppercase text-[10px] text-emerald-400/80 mb-3 animate-pulse">
+              {isUploading ? `UPLOADING METADATA: ${uploadProgress}%` : 'INITIALIZING ALETHEIA ENGINE...'}
+            </div>
+            <div className="w-48 h-[2px] bg-white/10 overflow-hidden relative">
+               <div className="absolute h-full bg-emerald-500/80 transition-all duration-200" style={{ width: `${isUploading ? uploadProgress : 25}%` }}></div>
+            </div>
+          </div>
+        );
+      }
+
       return (
         <div className="m-auto flex flex-col items-center justify-center text-white/20">
            <div className="w-16 h-16 border border-white/10 flex items-center justify-center mb-6">
