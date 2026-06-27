@@ -19,6 +19,10 @@ export default function VerifyPage() {
   const { writeContract: writeResolve, data: resolveHash, isPending: isResolvePending } = useWriteContract();
   const { isLoading: isResolveConfirming, isSuccess: isResolveConfirmed } = useWaitForTransactionReceipt({ hash: resolveHash });
 
+  // Create Case
+  const { writeContract: writeCreateCase, data: createCaseHash, isPending: isCreateCasePending } = useWriteContract();
+  const { isLoading: isCreateCaseConfirming, isSuccess: isCreateCaseConfirmed } = useWaitForTransactionReceipt({ hash: createCaseHash });
+
   const [isInitializing, setIsInitializing] = useState(false);
   
   const [isDebateModalOpen, setIsDebateModalOpen] = useState(false);
@@ -74,62 +78,78 @@ export default function VerifyPage() {
     // Reset the hasStarted ref so the useEffect can fire again on resubmission
     hasStarted.current = false;
     
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
     try {
-      setIsInitializing(true);
-      const formData = new FormData();
-      formData.append('asset_id', assetId);
-      formData.append('metadata', JSON.stringify({
-        description: description,
-        infrastructure: infrastructureText,
-        jurisdiction: jurisdiction,
-        assetCategories,
-        infrastructureTags,
-        coords,
-        owner_wallet: address,
-        claimedValue: claimedValue,
-        entityName: entityName
-      }));
-
-      // Append physical files if they exist
-      if (imageInputRef.current?.files) {
-        Array.from(imageInputRef.current.files).forEach(file => formData.append('files', file));
-      }
-      if (docInputRef.current?.files) {
-        Array.from(docInputRef.current.files).forEach(file => formData.append('files', file));
-      }
-
-      const res = await fetch(`${apiUrl}/submit`, {
-        method: 'POST',
-        body: formData,
+      writeCreateCase({
+        address: VERIFICATION_MANAGER_ADDRESS,
+        abi: verificationManagerABI,
+        functionName: 'createCase',
+        args: [assetId],
       });
-
-      if (!res.ok) {
-        throw new Error(`API returned ${res.status}`);
-      }
-
-      // Simulate fast upload progress before starting the verification
-      setIsUploading(true);
-      setUploadProgress(0);
-      let progress = 0;
-      const interval = setInterval(() => {
-        progress += 20;
-        setUploadProgress(progress);
-        if (progress >= 100) {
-          clearInterval(interval);
-          setIsUploading(false);
-          setIsInitializing(false);
-          hasStarted.current = true;
-          // In PoR, case initialization is off-chain. We just generate a deterministic hash for the UI.
-          startVerification(assetId, `0x${assetId.replace(/[^a-f0-9]/gi, '').padEnd(40, '0')}`);
-        }
-      }, 200);
-
     } catch (err) {
-      console.error("Backend submission failed:", err);
-      setIsInitializing(false);
+      console.error("Failed to trigger createCase:", err);
     }
   };
+
+  useEffect(() => {
+    if (isCreateCaseConfirmed && createCaseHash && !hasStarted.current) {
+      hasStarted.current = true;
+      const startVerificationProcess = async () => {
+        const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+        try {
+          setIsInitializing(true);
+          const formData = new FormData();
+          formData.append('asset_id', assetId);
+          formData.append('metadata', JSON.stringify({
+            description: description,
+            infrastructure: infrastructureText,
+            jurisdiction: jurisdiction,
+            assetCategories,
+            infrastructureTags,
+            coords,
+            owner_wallet: address,
+            claimedValue: claimedValue,
+            entityName: entityName
+          }));
+
+          if (imageInputRef.current?.files) {
+            Array.from(imageInputRef.current.files).forEach(file => formData.append('files', file));
+          }
+          if (docInputRef.current?.files) {
+            Array.from(docInputRef.current.files).forEach(file => formData.append('files', file));
+          }
+
+          const res = await fetch(`${apiUrl}/submit`, {
+            method: 'POST',
+            body: formData,
+          });
+
+          if (!res.ok) {
+            throw new Error(`API returned ${res.status}`);
+          }
+
+          setIsUploading(true);
+          setUploadProgress(0);
+          let progress = 0;
+          const interval = setInterval(() => {
+            progress += 20;
+            setUploadProgress(progress);
+            if (progress >= 100) {
+              clearInterval(interval);
+              setIsUploading(false);
+              setIsInitializing(false);
+              // Use the actual createCase transaction hash from Mantle as the evidence root seed
+              startVerification(assetId, createCaseHash);
+            }
+          }, 200);
+
+        } catch (err) {
+          console.error("Backend submission failed:", err);
+          setIsInitializing(false);
+        }
+      };
+      startVerificationProcess();
+    }
+  }, [isCreateCaseConfirmed, createCaseHash, assetId, address, description, infrastructureText, jurisdiction, assetCategories, infrastructureTags, coords, claimedValue, entityName]);
 
   // Determine current UI State for the right panel
   const renderRightPanel = () => {
@@ -673,7 +693,7 @@ export default function VerifyPage() {
             
               <button
                 type="submit"
-                disabled={isInitializing || isSubmitting || !assetId || !address}
+                disabled={isCreateCasePending || isCreateCaseConfirming || isInitializing || isSubmitting || !assetId || !address}
                 className="w-full bg-white/10 hover:bg-white/20 text-white font-sans text-[11px] tracking-[0.2em] uppercase py-4 transition-colors disabled:opacity-30 flex items-center justify-center gap-3 relative overflow-hidden"
               >
                 {/* Upload Progress Bar Layer */}
@@ -689,6 +709,16 @@ export default function VerifyPage() {
                 <span className="relative z-10 flex items-center gap-3">
                   {!address ? (
                     "CONNECT WALLET TO INITIATE"
+                  ) : isCreateCasePending ? (
+                    <>
+                      <div className="w-4 h-4 border-2 border-white/20 border-t-white rounded-full animate-spin" />
+                      AWAITING WALLET SIGNATURE...
+                    </>
+                  ) : isCreateCaseConfirming ? (
+                    <>
+                      <div className="w-2 h-2 bg-emerald-500 animate-[pulse_1s_ease-in-out_infinite]" />
+                      CREATING CASE ON MANTLE...
+                    </>
                   ) : isInitializing ? (
                     <>
                       <div className="w-4 h-4 border-2 border-white/20 border-t-white rounded-full animate-spin" />

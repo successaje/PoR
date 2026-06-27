@@ -17,6 +17,7 @@ contract VerificationManager is Ownable {
 
     AgentRegistry public agentRegistry;
 
+    event CaseCreated(string indexed assetId, address indexed creator);
     event CaseResolved(string indexed assetId, uint8 consensusScore, string evidenceHash);
     event BackendSignerUpdated(address indexed newSigner);
 
@@ -29,6 +30,14 @@ contract VerificationManager is Ownable {
         require(_signer != address(0), "Invalid address");
         backendSigner = _signer;
         emit BackendSignerUpdated(_signer);
+    }
+
+    /**
+     * @dev Initiates a new proof-of-reality verification case for an asset.
+     */
+    function createCase(string memory assetId) external {
+        require(!resolvedAssets[assetId], "Asset already resolved");
+        emit CaseCreated(assetId, msg.sender);
     }
 
     /**

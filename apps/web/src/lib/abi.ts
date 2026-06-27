@@ -737,6 +737,19 @@ export const verificationManagerABI = [
   },
   {
     "type": "function",
+    "name": "createCase",
+    "inputs": [
+      {
+        "name": "assetId",
+        "type": "string",
+        "internalType": "string"
+      }
+    ],
+    "outputs": [],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
     "name": "owner",
     "inputs": [],
     "outputs": [
@@ -843,6 +856,25 @@ export const verificationManagerABI = [
   },
   {
     "type": "event",
+    "name": "CaseCreated",
+    "inputs": [
+      {
+        "name": "assetId",
+        "type": "string",
+        "indexed": true,
+        "internalType": "string"
+      },
+      {
+        "name": "creator",
+        "type": "address",
+        "indexed": true,
+        "internalType": "address"
+      }
+    ],
+    "anonymous": false
+  },
+  {
+    "type": "event",
     "name": "CaseResolved",
     "inputs": [
       {
@@ -934,4 +966,4 @@ export const verificationManagerABI = [
       }
     ]
   }
-] as const;
+];
