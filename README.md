@@ -15,7 +15,9 @@ First Come First Served Prize (20 spots, no judge scoring).
 |---|---|---|
 | Smart contract deployed on Mantle Testnet | ✅ Complete | Mantle Sepolia |
 | Contract verified on Mantle Explorer | ✅ Complete | All 4 contracts verified |
-| AI-powered function callable on-chain | ✅ Complete | `resolveCase()` writes AI consensus score on-chain after LangGraph pipeline completes |
+| AI-powered function: Agent Trigger | ✅ Complete | `createCase()` automatically triggers the off-chain LangGraph AI pipeline |
+| AI-powered function: Inference Result | ✅ Complete | `resolveCase()` permanently writes the AI consensus score & debate hash on-chain |
+| AI-powered function: Automated Execution | ✅ Complete | NFT minting is autonomously executed based on the deterministic AI truth score |
 
 ### ✅ Product Completeness
 
