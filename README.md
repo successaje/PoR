@@ -1,12 +1,67 @@
--# The Trust Layer for Real-World Assets
+# The Trust Layer for Real-World Assets
 
 ## TL;DR
 
-PoR is an AI-powered Reality Oracle built on Mantle.
+PoR is a decentralized AI oracle network that uses multi-agent debate to cryptographically verify real-world assets (RWAs) before they are minted on-chain.
 
-It uses multiple specialized AI agents to verify real-world assets, detect fraud, resolve conflicting evidence through structured debate, and mint verifiable Truth Certificates on-chain.
+### 🏆 First Come First Served Prize — Qualification
 
-PoR transforms trust into a programmable primitive for RWAs.
+Proof of Reality meets all criteria for the Mantle Turing Test Hackathon 
+First Come First Served Prize (20 spots, no judge scoring).
+
+### ✅ Technical Deployment
+
+| Requirement | Status | Detail |
+|---|---|---|
+| Smart contract deployed on Mantle Testnet | ✅ Complete | Mantle Sepolia |
+| Contract verified on Mantle Explorer | ✅ Complete | All 4 contracts verified |
+| AI-powered function callable on-chain | ✅ Complete | `resolveCase()` writes AI consensus score on-chain after LangGraph pipeline completes |
+
+### ✅ Product Completeness
+
+| Requirement | Status | Detail |
+|---|---|---|
+| Frontend publicly accessible | ✅ Complete | [porprotocol.vercel.app](https://porprotocol.vercel.app) |
+| Deployment address in DoraHacks submission | ✅ Complete | All 4 contract addresses listed |
+| Demo video ≥ 2 minutes | ✅ Complete | [Full walkthrough](https://youtu.be/OhFwDF2jgYA) |
+
+### ✅ Documentation
+
+| Requirement | Status | Detail |
+|---|---|---|
+| Open-source GitHub repo | ✅ Complete | [github.com/successaje/PoR](https://github.com/successaje/PoR) |
+| README with setup instructions | ✅ Complete | See Running Locally section below |
+| Architecture overview | ✅ Complete | See System Architecture section below |
+| Deployed contract addresses | ✅ Complete | See contracts table below |
+
+### 🧠 AI-Powered Functions Breakdown
+
+PoR strictly adheres to the decentralized AI oracle requirements:
+1. **Agent Trigger (Callable on-chain trigger)**: The frontend calls `createCase()` on Mantle Sepolia. The confirmed transaction emits an on-chain event which serves as the direct trigger to boot up the Aletheia Consensus Engine (our 7-agent AI pipeline).
+2. **Inference Result Written On-Chain**: Once the agents reach consensus, the backend autonomously calls `resolveCase()`. This securely writes the AI's inference result (the `Truth Score` and cryptographic debate log hash) directly to the Mantle blockchain.
+3. **Automated Execution**: The AI's on-chain inference executes deterministic protocol logic. If the Truth Score is ≥ 70%, the contract autonomously mints a `TruthCertificateNFT`. If below, it permanently fails the asset.
+
+---
+
+## 🔗 Deployed Contracts (Mantle Sepolia)
+
+### Prototype (V1 - Old)
+*The original simple verification schema used before the multi-agent upgrade.*
+| Contract | Address | Explorer |
+|---|---|---|
+| VerificationManager | 0x34d156d6c062804771652b48f2d65d58d3794113 | [View](https://sepolia.mantlescan.xyz/address/0x34d156d6c062804771652b48f2d65d58d3794113) |
+| TruthCertificateNFT | 0x86C41594e9aDeCcf8c85ba9EEe0138C7c9E70dBc | [View](https://sepolia.mantlescan.xyz/address/0x86C41594e9aDeCcf8c85ba9EEe0138C7c9E70dBc) |
+| AgentRegistry | 0xc4d732199b7d21207a74cfe6ced4d17dd330c7ea | [View](https://sepolia.mantlescan.xyz/address/0xc4d732199b7d21207a74cfe6ced4d17dd330c7ea) |
+| PoRLendingVault | 0x64d1ae5fa2eceb908a028bbdb4a4e2223bdefa47 | [View](https://sepolia.mantlescan.xyz/address/0x64d1ae5fa2eceb908a028bbdb4a4e2223bdefa47) |
+
+### Aletheia Engine (V2 - Active)
+*The fully integrated, multi-agent AI event-driven architecture.*
+| Contract | Address | Explorer |
+|---|---|---|
+| VerificationManager | 0x9FeD51A532992A95Ee02a681673Ff8990b5421E8 | [View](https://sepolia.mantlescan.xyz/address/0x9FeD51A532992A95Ee02a681673Ff8990b5421E8) |
+| TruthCertificateNFT | 0x74B926A729E2902a167Fd410d875cf116Db51c59 | [View](https://sepolia.mantlescan.xyz/address/0x74B926A729E2902a167Fd410d875cf116Db51c59) |
+| PoRLendingVault | 0xde3c3733d4f6144FFCC5da40664d0cD968CB4A56 | [View](https://sepolia.mantlescan.xyz/address/0xde3c3733d4f6144FFCC5da40664d0cD968CB4A56) |
+| AgentRegistry | 0xc4d732199b7d21207a74cfe6ced4d17dd330c7ea | [View](https://sepolia.mantlescan.xyz/address/0xc4d732199b7d21207a74cfe6ced4d17dd330c7ea) |
 
 ---
 
@@ -18,14 +73,6 @@ Judges shouldn't have to hunt for links. Everything you need is right here:
 - **Video Walkthrough:** [https://youtu.be/OhFwDF2jgYA](https://youtu.be/OhFwDF2jgYA)
 - **GitHub Repository:** [https://github.com/successaje/PoR](https://github.com/successaje/PoR)
 - **X (Twitter):** [https://x.com/porprotocol?s=11](https://x.com/porprotocol?s=11)
-
-### Deployed Contracts (Mantle Sepolia)
-*Fully secured via Role-Based Access Control (RBAC).*
-
-- **AgentRegistry:** [`0x49312b44f8a13b1ca33f76d08a7c8230b3e0d5e4`](https://sepolia.mantlescan.xyz/address/0x49312b44f8a13b1ca33f76d08a7c8230b3e0d5e4)
-- **VerificationManager:** [`0x38509275f1da637c17790d50f6ad8b6f729759ff`](https://sepolia.mantlescan.xyz/address/0x38509275f1da637c17790d50f6ad8b6f729759ff)
-- **TruthCertificateNFT:** [`0xfc527b71ebd1854a32967f44d314faf99b2ac333`](https://sepolia.mantlescan.xyz/address/0xfc527b71ebd1854a32967f44d314faf99b2ac333)
-- **PoRLendingVault:** [`0xDc3E972df436D0c9F9dAc41066DFfCcC60913e8E`](https://sepolia.mantlescan.xyz/address/0xDc3E972df436D0c9F9dAc41066DFfCcC60913e8E)
 
 <details>
 <summary><b>🔄 Security Iteration Log (Development History)</b></summary>
